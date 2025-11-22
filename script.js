@@ -1,4 +1,4 @@
-const API_BASE = "https://script.google.com/macros/s/AKfycbytrcInmait2RgH9F0Xpkt3GZFMC1jt8OV7_knL2vx4qCQzvvFZEmwi_jY84wm7k8aZ/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbyRIBH_Jmtzgvd-e77Hjn53QtnLO52XwZCiVVz79rno7z5oTRgpQkCcfeoS72_PzVPB/exec";
 
 let classesData = [];
 let registrationsData = [];
