@@ -19,27 +19,34 @@
   <!-- Class cards injected here -->
 </main>
 
-<!-- Bottom CTA -->
-<a id="cta" href="https://tinyurl.com/ReikiReg" target="_blank">✨ Registration is now OPEN ✨</a>
+<!-- Bottom Register Button -->
+<div style="text-align:center; margin:40px 0;">
+  <button id="registerBtn">Register Now</button>
+</div>
 
-<!-- Modal (optional) -->
+<!-- Modal for registration -->
 <div id="modal" class="modal">
   <div class="modal-content">
     <span class="close">&times;</span>
-    <h2>Register for Classes</h2>
+    <h2>Register for Selected Classes</h2>
     <form id="registration-form">
       <input type="email" id="email" placeholder="Email" required><br>
       <input type="text" id="fullName" placeholder="Full Name"><br>
       <input type="text" id="whatsapp" placeholder="WhatsApp Number"><br>
-      <label><input type="checkbox" id="ack" required> I acknowledge terms</label><br>
-      <button type="submit">Register</button>
+      <label>
+        <input type="checkbox" id="ack" required>
+        I understand that by registering, I am fully committing to attend the classes I have selected and to hold this commitment with integrity and presence.
+      </label><br>
+      <button type="submit">Submit Registration</button>
     </form>
   </div>
 </div>
 
-<script src="script.js"></script>
+<!-- Optional CTA link below modal if desired -->
+<a id="cta" href="https://tinyurl.com/ReikiReg" target="_blank" style="display:none;">✨ Registration is now OPEN ✨</a>
+
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
-
 
