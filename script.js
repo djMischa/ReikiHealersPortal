@@ -3,30 +3,32 @@ const API_BASE = "https://script.google.com/macros/s/AKfycbzeCSPatbn6VmWm_ps-0js
 let classesData = [];
 let registrationsData = [];
 
-// Fetch classes and registrations
+// Initialize: fetch classes and registrations
 async function init() {
   classesData = await fetch(`${API_BASE}?type=classes`).then(r => r.json());
   registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
   renderClasses();
 }
 
+// Format date and time from plain text
+function formatClassTime(dateStr, timeStr){
+  if(!dateStr) dateStr = '';
+  if(!timeStr) timeStr = '';
+  return `${dateStr} @ ${timeStr}`;
+}
+
 function renderClasses() {
   const container = document.getElementById("classes");
-  container.style.display = "grid";
+  container.style.display = "block";
   container.innerHTML = "";
 
-  // Sort classes by date+time
-  classesData.sort((a,b)=>{
-    const aTime = parseClassTime(a.date, a.time);
-    const bTime = parseClassTime(b.date, b.time);
-    return aTime - bTime;
-  });
-
-  classesData.forEach((cls,i)=>{
+  // Sort classes alphabetically if needed; we avoid parsing Date objects since your columns are plain text
+  classesData.forEach((cls,i) => {
     if(cls.status === "hidden") return;
 
     const div = document.createElement("div");
     div.className = "class-container";
+    div.style.position = "relative"; // for checkbox positioning
 
     // Checkbox for selecting class
     const checkbox = document.createElement("input");
@@ -39,34 +41,59 @@ function renderClasses() {
     const participants = registrationsData
       .filter(r => r.classId === cls.id)
       .map(r => r.fullName)
-      .sort((a,b)=>a.localeCompare(b));
+      .sort((a,b) => a.localeCompare(b));
 
     // Location + headcount
     const locElem = document.createElement("div");
     locElem.className = "class-location";
-    locElem.textContent = `${cls.location} - ${participants.length} healer${participants.length !== 1 ? 's' : ''}`;
-    
-    // Date + time properly formatted
+    const locText = document.createTextNode(cls.location + " ");
+    locElem.appendChild(locText);
+
+    const countSpan = document.createElement("span");
+    countSpan.textContent = `- ${participants.length} healer${participants.length !== 1 ? 's' : ''}`;
+    countSpan.style.color = "white";
+    countSpan.style.textShadow = "0 0 5px rgba(197,155,90,0.6)";
+    countSpan.style.fontSize = "26px";
+    locElem.appendChild(countSpan);
+
+    // Date + time
     const dateElem = document.createElement("div");
     dateElem.className = "class-date";
-    const formatted = formatClassTime(cls.date, cls.time);
-    dateElem.textContent = formatted;
+    dateElem.textContent = formatClassTime(cls.date, cls.time);
 
     // Participant list
     const ul = document.createElement("ul");
-    participants.forEach(p=>{
+    participants.forEach(p => {
       const li = document.createElement("li");
       li.textContent = p;
       ul.appendChild(li);
     });
 
-    // Remaining spaces link
+    // Remaining spaces link at bottom
     const remaining = cls.capacity - participants.length;
     const remainLink = document.createElement("a");
     remainLink.href = "https://tinyurl.com/ReikiReg";
     remainLink.target = "_blank";
-    remainLink.textContent = remaining > 0 ? `${remaining} spaces remain` : "Class full – standby available";
+    remainLink.style.fontSize = "18px";
+    remainLink.style.color = "#c59b5a";
+    remainLink.style.textDecoration = "none";
+    remainLink.style.marginTop = "12px";
+    remainLink.style.display = "block";
 
+    remainLink.addEventListener("mouseenter", () => {
+      remainLink.style.textShadow = "0 0 8px rgba(255,215,140,0.9)";
+    });
+    remainLink.addEventListener("mouseleave", () => {
+      remainLink.style.textShadow = "none";
+    });
+
+    if(remaining > 0){
+      remainLink.innerHTML = `${remaining} spaces remain`;
+    } else {
+      remainLink.innerHTML = "Class full – standby available";
+    }
+
+    // Append elements in order
     div.appendChild(locElem);
     div.appendChild(dateElem);
     div.appendChild(ul);
@@ -74,33 +101,16 @@ function renderClasses() {
 
     container.appendChild(div);
 
-    // Card entrance animation
-    setTimeout(()=>{
+    // Card entrance animation (staggered)
+    setTimeout(() => {
       div.style.opacity = "1";
       div.style.transform = "translateY(0)";
-    }, i*150);
+    }, i * 150);
   });
-}
-
-// Converts weird spreadsheet time into JS Date
-function parseClassTime(dateStr, timeStr){
-  const time = new Date(timeStr);
-  if(!isNaN(time.getTime())) return time;
-  // fallback for ISO string
-  return new Date('1970-01-01T' + timeStr);
-}
-
-// Formats the time nicely
-function formatClassTime(dateStr, timeStr){
-  const time = parseClassTime(dateStr, timeStr);
-  const hours = time.getHours();
-  const minutes = time.getMinutes().toString().padStart(2,'0');
-  const ampm = hours >= 12 ? 'PM' : 'AM';
-  const hour12 = hours % 12 || 12;
-  return `${dateStr} @ ${hour12}:${minutes} ${ampm}`;
 }
 
 init();
 
 
-https://script.google.com/macros/s/AKfycbzeCSPatbn6VmWm_ps-0js8tSmW2W33nD68RVroy7L1UpH8umtXsGTqs8CaFBoCSJct/exec
+
+// https://script.google.com/macros/s/AKfycbzeCSPatbn6VmWm_ps-0js8tSmW2W33nD68RVroy7L1UpH8umtXsGTqs8CaFBoCSJct/exec
