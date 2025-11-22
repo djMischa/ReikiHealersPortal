@@ -8,12 +8,28 @@ body {
 
 header h1 {
   text-align: center;
-  font-size: 3rem;        /* increase if desired */
+  font-size: 3rem;
   color: #c59b5a;
-  text-shadow: 0 0 6px gold;  /* soft glow */
   margin: 20px 0;
-  letter-spacing: 2px;    /* luxury spacing */
+  letter-spacing: 2px;
+  position: relative;
+  display: inline-block;
+  animation: glow 2.5s infinite alternate;
 }
+
+/* Glow keyframes */
+@keyframes glow {
+  0% {
+    text-shadow: 0 0 5px #c59b5a, 0 0 10px #c59b5a, 0 0 15px #fff, 0 0 20px #c59b5a;
+  }
+  50% {
+    text-shadow: 0 0 10px #c59b5a, 0 0 20px #c59b5a, 0 0 25px #fff, 0 0 30px #c59b5a;
+  }
+  100% {
+    text-shadow: 0 0 5px #c59b5a, 0 0 10px #c59b5a, 0 0 15px #fff, 0 0 20px #c59b5a;
+  }
+}
+
 
 
 /* Class card layout */
