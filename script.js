@@ -3,7 +3,7 @@ const API_BASE = "https://script.google.com/macros/s/AKfycbxIau2Ma0wdrAhTsdPdfJT
 let classesData = [];
 let registrationsData = [];
 
-// Fetch classes and registrations
+// Initialize: fetch classes and registrations
 async function init() {
   classesData = await fetch(`${API_BASE}?type=classes`).then(r => r.json());
   registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
@@ -12,70 +12,103 @@ async function init() {
 
 function renderClasses() {
   const container = document.getElementById("classes");
+  container.style.display = "block";
   container.innerHTML = "";
 
   // Sort classes by date
-  classesData.sort((a, b) => new Date(a.date) - new Date(b.date));
+  classesData.sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
 
-  classesData.forEach(cls => {
+  classesData.forEach((cls,i) => {
+    if(cls.status === "hidden") return;
+
     const div = document.createElement("div");
-    div.classList.add("class-container");
+    div.className = "class-container";
 
-    // Add checkbox in top-right corner
-    const checkboxDiv = document.createElement("div");
-    checkboxDiv.className = "checkbox";
-    checkboxDiv.innerHTML = `<input type="checkbox" data-id="${cls.id}">`;
-    div.appendChild(checkboxDiv);
+    // Participants for this class
+    const participants = registrationsData
+      .filter(r => r.classId === cls.id)
+      .map(r => r.fullName)
+      .sort((a,b) => a.localeCompare(b));
 
-    // Class title / location
+    // Location + headcount
     const locElem = document.createElement("div");
     locElem.className = "class-location";
-    locElem.textContent = cls.location;
-    div.appendChild(locElem);
+    const locText = document.createTextNode(cls.location + " ");
+    locElem.appendChild(locText);
 
-    // Class date / time
+    const countSpan = document.createElement("span");
+    countSpan.textContent = `- ${participants.length} healer${participants.length !== 1 ? 's' : ''}`;
+    countSpan.style.color = "white";
+    countSpan.style.textShadow = "0 0 5px rgba(197,155,90,0.6)";
+    countSpan.style.fontSize = "26px";
+    locElem.appendChild(countSpan);
+
+    // Date
     const dateElem = document.createElement("div");
     dateElem.className = "class-date";
-    dateElem.textContent = `${cls.date} ${cls.time}`;
-    div.appendChild(dateElem);
+    dateElem.textContent = `${cls.date} • ${cls.time}`;
 
     // Participant list
     const ul = document.createElement("ul");
-    const participants = registrationsData
-      .filter(r => r.classId === cls.id)
-      .map(r => r.fullName);
-
-    participants.sort((a, b) => a.localeCompare(b)).forEach(p => {
+    participants.forEach(p => {
       const li = document.createElement("li");
       li.textContent = p;
       ul.appendChild(li);
     });
 
-    div.appendChild(ul);
-
-    // Remaining spaces at bottom
+    // Remaining spaces link at bottom
     const remaining = cls.capacity - participants.length;
     const remainLink = document.createElement("a");
     remainLink.href = "https://tinyurl.com/ReikiReg";
     remainLink.target = "_blank";
-    remainLink.style.display = "block";
-    remainLink.style.marginTop = "10px";
     remainLink.style.fontSize = "18px";
     remainLink.style.color = "#c59b5a";
     remainLink.style.textDecoration = "none";
+    remainLink.style.marginTop = "12px";
+    remainLink.style.display = "block";
 
-    if (remaining > 0) {
-      remainLink.textContent = `${remaining} spaces remaining`;
+    remainLink.addEventListener("mouseenter", () => {
+      remainLink.style.textShadow = "0 0 8px rgba(255,215,140,0.9)";
+    });
+    remainLink.addEventListener("mouseleave", () => {
+      remainLink.style.textShadow = "none";
+    });
+
+    if(remaining > 0){
+      remainLink.innerHTML = `
+        <span style="display:inline-flex; align-items:center; gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#c59b5a" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 4px #c59b5a);">
+            <path d="M8 5l8 7-8 7V5z"/>
+          </svg>
+          ${remaining} spaces remain
+        </span>
+      `;
     } else {
-      remainLink.textContent = "Class full – standby available";
+      remainLink.innerHTML = `
+        <span style="display:inline-flex; align-items:center; gap:8px;">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="#c59b5a" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 4px #c59b5a);">
+            <path d="M8 5l8 7-8 7V5z"/>
+          </svg>
+          Class full – standby available
+        </span>
+      `;
     }
 
+    // Append elements in order
+    div.appendChild(locElem);
+    div.appendChild(dateElem);
+    div.appendChild(ul);
     div.appendChild(remainLink);
 
     container.appendChild(div);
+
+    // Card entrance animation (staggered)
+    setTimeout(() => {
+      div.style.opacity = "1";
+      div.style.transform = "translateY(0)";
+    }, i * 150);
   });
 }
 
-// Initialize on page load
 init();
 
