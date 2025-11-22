@@ -8,29 +8,31 @@ body {
 
 /* Header container */
 /* Header container */
+/* Header container */
 header {
   width: 100%;
-  text-align: center;       /* centers the text */
+  text-align: center;       /* centers text on all screens */
   margin: 40px 0;
 }
 
-/* Main title styling */
+/* Main title */
 header h1 {
   display: inline-block;
-  font-family: 'Bebas Neue', sans-serif; /* your font */
-  font-size: 3.5rem;                     /* bigger for impact */
+  font-family: 'Bebas Neue', sans-serif; /* luxury font */
+  font-size: 3.5rem;                     /* bold, impactful */
   font-weight: 900;                      /* very bold */
-  color: #c59b5a;                        /* luxury gold */
+  color: #c59b5a;                        /* pure gold */
   letter-spacing: 2px;
   margin: 0;
-  transition: all 0.3s ease-in-out;      /* for smooth hover effect */
+  transition: all 0.3s ease-in-out;      /* smooth hover */
 }
 
-/* Hover effect: subtle pop and brighter gold */
+/* Hover effect: subtle pop */
 header h1:hover {
-  color: #fff;
-  transform: scale(1.05);                /* small growth */
+  color: #fff;           /* small brightening on hover */
+  transform: scale(1.05);/* slight enlargement */
 }
+
 
 
 
