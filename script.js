@@ -2,33 +2,50 @@ const API_BASE = "https://script.google.com/macros/s/AKfycbzeCSPatbn6VmWm_ps-0js
 
 let classesData = [];
 let registrationsData = [];
+let usersData = [];
 
-// Initialize: fetch classes and registrations
+// Initialize: fetch classes, registrations, and users
 async function init() {
-  classesData = await fetch(`${API_BASE}?type=classes`).then(r => r.json());
-  registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
+  [classesData, registrationsData, usersData] = await Promise.all([
+    fetch(`${API_BASE}?type=classes`).then(r => r.json()),
+    fetch(`${API_BASE}?type=registrations`).then(r => r.json()),
+    fetch(`${API_BASE}?type=users`).then(r => r.json())
+  ]);
+
   renderClasses();
 }
 
 function renderClasses() {
   const container = document.getElementById("classes");
-  container.style.display = "block";
   container.innerHTML = "";
 
-  // Sort classes by date
+  // Sort classes by date/time
   classesData.sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
 
-  classesData.forEach((cls,i) => {
+  classesData.forEach((cls, i) => {
     if(cls.status === "hidden") return;
 
-    const div = document.createElement("div");
-    div.className = "class-container";
-
-    // Participants for this class
     const participants = registrationsData
       .filter(r => r.classId === cls.id)
       .map(r => r.fullName)
       .sort((a,b) => a.localeCompare(b));
+
+    const div = document.createElement("div");
+    div.className = "class-container";
+
+    // Checkbox top-right
+    const checkboxWrapper = document.createElement("div");
+    checkboxWrapper.style.position = "absolute";
+    checkboxWrapper.style.top = "10px";
+    checkboxWrapper.style.right = "10px";
+
+    const checkbox = document.createElement("input");
+    checkbox.type = "checkbox";
+    checkbox.dataset.id = cls.id;
+    checkboxWrapper.appendChild(checkbox);
+
+    div.style.position = "relative"; // ensure checkbox positions correctly
+    div.appendChild(checkboxWrapper);
 
     // Location + headcount
     const locElem = document.createElement("div");
@@ -56,45 +73,18 @@ function renderClasses() {
       ul.appendChild(li);
     });
 
-    // Remaining spaces link at bottom
+    // Remaining spaces
     const remaining = cls.capacity - participants.length;
     const remainLink = document.createElement("a");
-    remainLink.href = "https://tinyurl.com/ReikiReg";
-    remainLink.target = "_blank";
+    remainLink.href = "#";
     remainLink.style.fontSize = "18px";
     remainLink.style.color = "#c59b5a";
     remainLink.style.textDecoration = "none";
-    remainLink.style.marginTop = "12px";
     remainLink.style.display = "block";
+    remainLink.style.marginTop = "12px";
 
-    remainLink.addEventListener("mouseenter", () => {
-      remainLink.style.textShadow = "0 0 8px rgba(255,215,140,0.9)";
-    });
-    remainLink.addEventListener("mouseleave", () => {
-      remainLink.style.textShadow = "none";
-    });
+    remainLink.textContent = remaining > 0 ? `${remaining} spaces remain` : "Class full – standby available";
 
-    if(remaining > 0){
-      remainLink.innerHTML = `
-        <span style="display:inline-flex; align-items:center; gap:8px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="#c59b5a" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 4px #c59b5a);">
-            <path d="M8 5l8 7-8 7V5z"/>
-          </svg>
-          ${remaining} spaces remain
-        </span>
-      `;
-    } else {
-      remainLink.innerHTML = `
-        <span style="display:inline-flex; align-items:center; gap:8px;">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="#c59b5a" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 0 4px #c59b5a);">
-            <path d="M8 5l8 7-8 7V5z"/>
-          </svg>
-          Class full – standby available
-        </span>
-      `;
-    }
-
-    // Append elements in order
     div.appendChild(locElem);
     div.appendChild(dateElem);
     div.appendChild(ul);
@@ -102,13 +92,83 @@ function renderClasses() {
 
     container.appendChild(div);
 
-    // Card entrance animation (staggered)
+    // Entrance animation
     setTimeout(() => {
       div.style.opacity = "1";
       div.style.transform = "translateY(0)";
-    }, i * 150);
+    }, i * 100);
   });
 }
 
+// --------------------
+// Modal & registration
+// --------------------
+const modal = document.getElementById("modal");
+const closeBtn = modal.querySelector(".close");
+closeBtn.onclick = () => modal.style.display = "none";
+
+document.getElementById("registerBtn").addEventListener("click", () => {
+  // Only proceed if at least one checkbox selected
+  const selectedCheckboxes = Array.from(document.querySelectorAll(".class-container input[type=checkbox]:checked"));
+  if(!selectedCheckboxes.length){
+    alert("Please select at least one class to register.");
+    return;
+  }
+  modal.style.display = "block";
+});
+
+// Prefill fullName and whatsapp on email blur
+document.getElementById("email").addEventListener("blur", e => {
+  const email = e.target.value.trim().toLowerCase();
+  const user = usersData.find(u => u.email.toLowerCase() === email);
+  if(user){
+    document.getElementById("fullName").value = user.fullname;
+    document.getElementById("whatsapp").value = user.whatsapp;
+  } else {
+    document.getElementById("fullName").value = "";
+    document.getElementById("whatsapp").value = "";
+  }
+});
+
+// Handle form submission
+document.getElementById("registration-form").addEventListener("submit", async e => {
+  e.preventDefault();
+
+  const email = document.getElementById("email").value.trim().toLowerCase();
+  const fullName = document.getElementById("fullName").value.trim();
+  const whatsapp = document.getElementById("whatsapp").value.trim();
+  const ack = document.getElementById("ack").checked;
+
+  if(!ack){ alert("You must acknowledge the terms."); return; }
+
+  // Gather selected classes
+  const selectedClasses = Array.from(document.querySelectorAll(".class-container input[type=checkbox]:checked"))
+    .map(cb => cb.dataset.id);
+
+  if(!selectedClasses.length){ alert("Please select at least one class."); return; }
+
+  const payload = { email, fullName, whatsapp, ack, selectedClasses };
+
+  try {
+    const res = await fetch(API_BASE, {
+      method: "POST",
+      body: JSON.stringify(payload)
+    }).then(r => r.json());
+
+    if(res.success){
+      alert("Registration successful!");
+      modal.style.display = "none";
+      // Clear checkboxes
+      document.querySelectorAll(".class-container input[type=checkbox]").forEach(cb => cb.checked = false);
+      init(); // refresh classes
+    } else {
+      alert("Error: " + res.message);
+    }
+  } catch(err){
+    alert("Error submitting registration: " + err.message);
+  }
+});
+
 init();
+
 
