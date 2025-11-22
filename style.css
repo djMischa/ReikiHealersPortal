@@ -1,89 +1,118 @@
+:root {
+  --bg-black: #000000;
+  --white: #ffffff;
+  --gold-light: #ffd78c;
+  --gold-dark: #c59b5a;
+}
+
 body {
-  background-color: black;
-  color: white;
+  margin:0;
+  padding:0;
   font-family: 'Bebas Neue', sans-serif;
-  margin: 0;
-  padding: 0;
+  background: var(--bg-black);
+  color: var(--white);
+  overflow-x: hidden;
 }
 
-/* Header container */
-/* Header container */
-/* Header container */
 header {
-  width: 100%;
-  text-align: center;       /* centers text on all screens */
-  margin: 40px 0;
+  text-align:center;
+  margin:40px 0;
 }
 
-/* Main title */
-header h1 {
-  display: inline-block;
-  font-family: 'Bebas Neue', sans-serif; /* luxury font */
-  font-size: 3.5rem;                     /* bold, impactful */
-  font-weight: 900;                      /* very bold */
-  color: #c59b5a;                        /* pure gold */
-  letter-spacing: 2px;
-  margin: 0;
-  transition: all 0.3s ease-in-out;      /* smooth hover */
+#pageTitle {
+  font-size:4rem;
+  font-weight:900;
+  letter-spacing:4px;
+  color: var(--gold-dark);
+  text-shadow:0 0 8px var(--gold-dark);
 }
 
-/* Hover effect: subtle pop */
-header h1:hover {
-  color: #fff;           /* small brightening on hover */
-  transform: scale(1.05);/* slight enlargement */
-}
-
-
-
-
-
-
-
-
-/* Class card layout */
-#classes-container {
-  display: flex;
-  flex-wrap: wrap;
+#classes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 30px;
   justify-content: center;
-  gap: 20px;
-  padding: 20px;
+  padding:0 20px;
 }
 
-.class-card {
-  background-color: #111;
-  border: 2px solid #c59b5a;
-  padding: 15px;
-  width: 300px;
-  position: relative;
+.class-container {
+  background: rgba(0,0,0,0.85);
+  border: 2px solid var(--gold-dark);
+  border-radius: 15px;
+  padding: 25px;
+  text-align:left;
+  transition:0.5s;
+  opacity:0;
+  transform: translateY(50px);
 }
 
-/* Gold checkbox top right */
-.checkbox {
-  position: absolute;
-  top: 10px;
-  right: 10px;
+.class-container:hover {
+  box-shadow:0 0 25px rgba(197,155,90,0.7);
+  transform: translateY(-5px);
 }
 
-/* Modal styling */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 999;
-  left: 0; top: 0;
-  width: 100%; height: 100%;
-  background: rgba(0,0,0,0.8);
+.class-location {
+  font-size:26px;
+  color: var(--gold-dark);
+  margin-bottom:6px;
 }
-.modal-content {
-  background: #111;
-  margin: 10% auto;
-  padding: 20px;
-  border: 2px solid #c59b5a;
-  width: 90%;
-  max-width: 400px;
+
+.class-date {
+  font-size:18px;
+  margin-bottom:12px;
 }
-.close {
-  float: right;
-  font-size: 1.5rem;
-  cursor: pointer;
-  color: #c59b5a;
+
+ul {
+  padding-left:20px;
+  font-size:18px;
+  list-style-type:disc;
+  list-style-position:inside;
+  color: var(--white);
 }
+
+ul li::marker {
+  color: var(--gold-dark);
+}
+
+.class-container a {
+  color: var(--gold-dark);
+  text-decoration:none;
+  font-size:18px;
+  display:block;
+  margin-top:12px;
+}
+
+.class-container a:hover {
+  text-shadow:0 0 8px var(--gold-light);
+}
+
+#cta {
+  display:block;
+  text-align:center;
+  font-size:22px;
+  color: var(--gold-light);
+  text-decoration:none;
+  font-weight:bold;
+  margin:50px 0;
+}
+
+#cta:hover {
+  text-shadow:0 0 8px var(--gold-light);
+}
+
+/* Sparkle Canvas */
+#sparkleCanvas {
+  position:fixed;
+  top:0; left:0;
+  width:100%;
+  height:100%;
+  pointer-events:none;
+  z-index:0;
+}
+
+/* Responsive */
+@media (max-width:768px){
+  #pageTitle { font-size:3rem; }
+  #classes { grid-template-columns:1fr; }
+}
+
