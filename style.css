@@ -19,12 +19,16 @@ header {
   margin:40px 0;
 }
 
+/* Page title - crisp, clean, no glow */
 #pageTitle {
-  font-size:4rem;
-  font-weight:900;
-  letter-spacing:4px;
-  color: var(--gold-dark);
-  text-shadow:0 0 8px var(--gold-dark);
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 4rem;       /* Adjust as needed for mobile/desktop */
+  font-weight: 900;      /* Bold */
+  letter-spacing: 4px;
+  color: #c59b5a;        /* Gold color */
+  text-shadow: none;     /* Remove glow */
+  margin: 40px 0;
+  text-align: center;
 }
 
 #classes {
