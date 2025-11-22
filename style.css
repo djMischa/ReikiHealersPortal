@@ -6,30 +6,35 @@ body {
   padding: 0;
 }
 
-header h1 {
-  text-align: center;        /* centers the text within header */
-  font-size: 3rem;
-  color: #c59b5a;
-  margin: 20px 0;
-  font-weight: bold;
-  letter-spacing: 2px;
-  text-shadow: 0 0 3px #c59b5a, 0 0 6px #fff;  /* subtle glow, no blur */
-  display: block;            /* ensures it’s treated as a block element */
-  animation: glow 2.5s infinite alternate;
+/* Header container */
+header {
+  width: 100%;
+  text-align: center;       /* centers contents on desktop & mobile */
+  margin: 40px 0;
 }
 
-/* Soft glow keyframes */
-@keyframes glow {
-  0% {
-    text-shadow: 0 0 2px #c59b5a, 0 0 4px #fff;
-  }
-  50% {
-    text-shadow: 0 0 3px #c59b5a, 0 0 6px #fff;
-  }
-  100% {
-    text-shadow: 0 0 2px #c59b5a, 0 0 4px #fff;
-  }
+/* Main title */
+header h1 {
+  display: inline-block;      /* keeps text width natural */
+  font-size: 3rem;
+  color: #c59b5a;
+  font-family: 'Bebas Neue', sans-serif;
+  font-weight: 900;
+  letter-spacing: 2px;
+  margin: 0;
+  /* subtle outline instead of glow to avoid blur */
+  -webkit-text-stroke: 0.5px #fff;
+  text-stroke: 0.5px #fff;   /* optional fallback */
+  transition: all 0.6s ease-in-out;
 }
+
+/* Hover luxury effect */
+header h1:hover {
+  color: #fff;
+  text-shadow: 0 0 4px #c59b5a;
+  transform: scale(1.03);
+}
+
 
 
 
