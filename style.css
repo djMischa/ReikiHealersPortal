@@ -9,31 +9,26 @@ body {
 /* Header container */
 header {
   width: 100%;
-  text-align: center;       /* centers contents on desktop & mobile */
+  text-align: center;       /* centers text on all screens */
   margin: 40px 0;
 }
 
-/* Main title */
 header h1 {
-  display: inline-block;      /* keeps text width natural */
+  display: inline-block;
+  font-family: 'Bebas Neue', sans-serif;  /* your preferred font */
   font-size: 3rem;
-  color: #c59b5a;
-  font-family: 'Bebas Neue', sans-serif;
-  font-weight: 900;
+  font-weight: 900;                        /* bold and elegant */
+  color: #c59b5a;                          /* gold */
   letter-spacing: 2px;
   margin: 0;
-  /* subtle outline instead of glow to avoid blur */
-  -webkit-text-stroke: 0.5px #fff;
-  text-stroke: 0.5px #fff;   /* optional fallback */
-  transition: all 0.6s ease-in-out;
+  transition: all 0.3s ease-in-out;
 }
 
-/* Hover luxury effect */
 header h1:hover {
-  color: #fff;
-  text-shadow: 0 0 4px #c59b5a;
+  color: #fff;           /* subtle hover pop */
   transform: scale(1.03);
 }
+
 
 
 
