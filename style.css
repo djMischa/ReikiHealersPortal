@@ -57,6 +57,45 @@ header {
   transform: translateY(-5px);
 }
 
+/* Make checkboxes bigger, white background, gold border, gold checkmark */
+.class-container input[type="checkbox"] {
+  width: 24px;              /* bigger size */
+  height: 24px;
+  -webkit-appearance: none; /* remove default styling */
+  appearance: none;
+  border: 2px solid #c59b5a; /* gold border */
+  border-radius: 4px;
+  background-color: #ffffff;  /* white background */
+  cursor: pointer;
+  position: relative;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+/* Checked state: gold checkmark */
+.class-container input[type="checkbox"]:checked::after {
+  content: '';
+  position: absolute;
+  left: 6px;
+  top: 2px;
+  width: 6px;
+  height: 12px;
+  border: solid #c59b5a; /* gold check */
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Optional hover effect */
+.class-container input[type="checkbox"]:hover {
+  box-shadow: 0 0 5px rgba(197,155,90,0.6);
+}
+
+
+
+
+
+
+
 .class-location {
   font-size:26px;
   color: var(--gold-dark);
