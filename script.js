@@ -19,10 +19,9 @@ function renderClasses() {
   const container = document.getElementById("classes");
   container.innerHTML = "";
 
-  // Sort classes by date/time
   classesData.sort((a,b) => new Date(a.date + ' ' + a.time) - new Date(b.date + ' ' + b.time));
 
-  classesData.forEach((cls, i) => {
+  classesData.forEach((cls,i) => {
     if(cls.status === "hidden") return;
 
     const participants = registrationsData
@@ -32,38 +31,34 @@ function renderClasses() {
 
     const div = document.createElement("div");
     div.className = "class-container";
+    div.style.position = "relative"; // for checkbox
 
-    // Checkbox top-right
+    // ✅ Checkbox
     const checkboxWrapper = document.createElement("div");
     checkboxWrapper.style.position = "absolute";
     checkboxWrapper.style.top = "10px";
     checkboxWrapper.style.right = "10px";
-
     const checkbox = document.createElement("input");
     checkbox.type = "checkbox";
     checkbox.dataset.id = cls.id;
     checkboxWrapper.appendChild(checkbox);
-
-    div.style.position = "relative"; // ensure checkbox positions correctly
     div.appendChild(checkboxWrapper);
 
     // Location + headcount
     const locElem = document.createElement("div");
     locElem.className = "class-location";
-    const locText = document.createTextNode(cls.location + " ");
-    locElem.appendChild(locText);
+    locElem.textContent = `${cls.location} - ${participants.length} healer${participants.length !== 1 ? 's' : ''}`;
+    div.appendChild(locElem);
 
-    const countSpan = document.createElement("span");
-    countSpan.textContent = `- ${participants.length} healer${participants.length !== 1 ? 's' : ''}`;
-    countSpan.style.color = "white";
-    countSpan.style.textShadow = "0 0 5px rgba(197,155,90,0.6)";
-    countSpan.style.fontSize = "26px";
-    locElem.appendChild(countSpan);
-
-    // Date
+    // ✅ Date/time formatting
     const dateElem = document.createElement("div");
     dateElem.className = "class-date";
-    dateElem.textContent = `${cls.date} • ${cls.time}`;
+    const dateObj = new Date(cls.date + ' ' + cls.time);
+    const options = { weekday: 'long', month: 'long', day: 'numeric' };
+    const formattedDate = dateObj.toLocaleDateString('en-US', options);
+    const formattedTime = dateObj.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+    dateElem.textContent = `${formattedDate} @ ${formattedTime}`;
+    div.appendChild(dateElem);
 
     // Participant list
     const ul = document.createElement("ul");
@@ -72,6 +67,7 @@ function renderClasses() {
       li.textContent = p;
       ul.appendChild(li);
     });
+    div.appendChild(ul);
 
     // Remaining spaces
     const remaining = cls.capacity - participants.length;
@@ -82,12 +78,7 @@ function renderClasses() {
     remainLink.style.textDecoration = "none";
     remainLink.style.display = "block";
     remainLink.style.marginTop = "12px";
-
     remainLink.textContent = remaining > 0 ? `${remaining} spaces remain` : "Class full – standby available";
-
-    div.appendChild(locElem);
-    div.appendChild(dateElem);
-    div.appendChild(ul);
     div.appendChild(remainLink);
 
     container.appendChild(div);
@@ -99,6 +90,7 @@ function renderClasses() {
     }, i * 100);
   });
 }
+
 
 // --------------------
 // Modal & registration
