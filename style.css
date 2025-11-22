@@ -7,28 +7,30 @@ body {
 }
 
 header h1 {
-  text-align: center;
+  text-align: center;        /* centers the text within header */
   font-size: 3rem;
   color: #c59b5a;
   margin: 20px 0;
+  font-weight: bold;
   letter-spacing: 2px;
-  position: relative;
-  display: inline-block;
+  text-shadow: 0 0 3px #c59b5a, 0 0 6px #fff;  /* subtle glow, no blur */
+  display: block;            /* ensures it’s treated as a block element */
   animation: glow 2.5s infinite alternate;
 }
 
-/* Glow keyframes */
+/* Soft glow keyframes */
 @keyframes glow {
   0% {
-    text-shadow: 0 0 5px #c59b5a, 0 0 10px #c59b5a, 0 0 15px #fff, 0 0 20px #c59b5a;
+    text-shadow: 0 0 2px #c59b5a, 0 0 4px #fff;
   }
   50% {
-    text-shadow: 0 0 10px #c59b5a, 0 0 20px #c59b5a, 0 0 25px #fff, 0 0 30px #c59b5a;
+    text-shadow: 0 0 3px #c59b5a, 0 0 6px #fff;
   }
   100% {
-    text-shadow: 0 0 5px #c59b5a, 0 0 10px #c59b5a, 0 0 15px #fff, 0 0 20px #c59b5a;
+    text-shadow: 0 0 2px #c59b5a, 0 0 4px #fff;
   }
 }
+
 
 
 
