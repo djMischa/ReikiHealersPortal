@@ -111,7 +111,7 @@ function renderClasses() {
     remainText.textContent =
       remaining > 0
         ? `→ ${remaining} spaces remaining`
-        : "CLASS FULL – STANDBY AVAILABLE";
+        : "CLASS FULL – JOIN STANDBY";
 
     // ---------------------------
     // Luxury Toggle
