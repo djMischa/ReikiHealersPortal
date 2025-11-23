@@ -20,6 +20,19 @@ function formatClassTime(dateStr, timeStr) {
 function renderClasses() {
   const container = document.getElementById("classes");
   container.innerHTML = "";
+
+// --- Instruction banner ---
+  const instructions = document.createElement("div");
+  instructions.textContent = "Select the classes you would like to participate in and register at the bottom of the page.";
+  instructions.style.color = "#ffffff";       // White text
+  instructions.style.fontSize = "18px";
+  instructions.style.fontWeight = "bold";
+  instructions.style.marginBottom = "20px";
+  instructions.style.textAlign = "center";
+  container.appendChild(instructions);
+
+
+  
   container.style.display = "block";
 
   classesData.sort((a, b) => parseInt(a.displayOrder || 999) - parseInt(b.displayOrder || 999));
