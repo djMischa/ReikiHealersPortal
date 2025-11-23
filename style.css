@@ -5,6 +5,7 @@
   --gold-dark: #c59b5a;
 }
 
+/* ---------- Body & Header ---------- */
 body {
   margin: 0;
   padding: 0;
@@ -31,7 +32,7 @@ header {
   text-align: center;
 }
 
-/* Class cards */
+/* ---------- Class Cards ---------- */
 #classes {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -92,16 +93,21 @@ ul li::marker {
   margin-bottom: 0;
 }
 
-/* Inline join class toggle (Ferrari-style) */
+/* ---------- Inline Join Class / Standby Toggle (Ferrari) ---------- */
+.spaces-toggle-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+}
+
 .class-toggle {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  float: right; /* right-align on same line as spaces remaining */
+  gap: 6px;
   cursor: pointer;
   font-weight: bold;
-  color: var(--gold-dark);
-  font-size: 18px;
+  font-size: 16px;
 }
 
 .class-toggle input[type="checkbox"] {
@@ -114,6 +120,11 @@ ul li::marker {
   background-color: white;
   position: relative;
   cursor: pointer;
+}
+
+/* Checked toggle neon glow (override dynamically via JS) */
+.class-toggle input[type="checkbox"]:checked {
+  accent-color: #00ffff; /* JS overrides for standby #00ff00 */
 }
 
 .class-toggle input[type="checkbox"]:checked::after {
@@ -133,7 +144,7 @@ ul li::marker {
   box-shadow: 0 0 6px rgba(197,155,90,0.8);
 }
 
-/* Registration section */
+/* ---------- Registration Form ---------- */
 #registration-section {
   width: 100%;
   max-width: 360px;
@@ -143,14 +154,12 @@ ul li::marker {
   box-sizing: border-box;
 }
 
-/* Make sure all children inherit box-sizing */
 #registration-section *,
 #registration-section *:before,
 #registration-section *:after {
   box-sizing: border-box;
 }
 
-/* Form fields and submit button */
 #registration-section form input,
 #registration-section form button {
   width: 100%;
@@ -180,14 +189,15 @@ ul li::marker {
 /* Sparkle Canvas */
 #sparkleCanvas {
   position: fixed;
-  top: 0; left: 0;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
   pointer-events: none;
   z-index: 0;
 }
 
-/* Responsive */
+/* ---------- Responsive ---------- */
 @media (max-width: 768px) {
   #pageTitle {
     font-size: 3rem;
