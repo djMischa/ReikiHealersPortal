@@ -20,13 +20,11 @@ header {
   margin: 40px 0;
 }
 
-/* Page title */
 #pageTitle {
   font-size: 4rem;
   font-weight: 900;
   letter-spacing: 4px;
   color: var(--gold-dark);
-  text-shadow: none;
   margin: 40px 0;
   text-align: center;
 }
@@ -49,8 +47,6 @@ header {
   transition: all 0.5s ease;
   opacity: 0;
   transform: translateY(50px);
-  position: relative;
-  overflow: visible;
   margin-bottom: 24px;
 }
 
@@ -59,7 +55,6 @@ header {
   transform: translateY(-5px);
 }
 
-/* Class text */
 .class-location {
   font-size: 26px;
   color: var(--gold-dark);
@@ -83,70 +78,6 @@ ul li::marker {
   color: var(--gold-dark);
 }
 
-/* Remaining spaces line */
-.spaces-toggle-wrapper span {
-  font-size: 18px;
-  font-weight: bold;
-  color: var(--gold-dark);
-  white-space: nowrap;
-}
-
-/* ---------- Luxury Animated Toggle ---------- */
-.lux-toggle {
-  display: inline-block;
-  position: relative;
-  background: var(--gold-dark);
-  color: var(--bg-black);
-  padding: 8px 24px;
-  border-radius: 25px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  text-align: center;
-  min-width: 140px;
-  font-size: 16px;
-  box-shadow: 0 4px 12px rgba(197,155,90,0.4);
-  user-select: none;
-}
-
-.lux-toggle::after {
-  content: "";
-  position: absolute;
-  top: 50%;
-  right: 12px;
-  transform: translateY(-50%);
-  width: 20px;
-  height: 20px;
-  background: var(--bg-black);
-  border-radius: 50%;
-  border: 2px solid var(--gold-dark);
-  transition: all 0.3s ease;
-}
-
-.lux-toggle.active {
-  background: var(--gold-light);
-  color: var(--bg-black);
-}
-
-.lux-toggle.active::after {
-  right: calc(100% - 32px); /* slides toggle indicator to left */
-  background: var(--bg-black);
-  border-color: var(--gold-dark);
-}
-
-/* Hover/active effects */
-.lux-toggle:hover {
-  background: var(--gold-light);
-  box-shadow: 0 6px 18px rgba(197,155,90,0.6);
-  transform: translateY(-2px);
-}
-
-.lux-toggle:active {
-  transform: translateY(1px);
-  box-shadow: 0 2px 6px rgba(197,155,90,0.4);
-}
-
-/* Wrapper for remaining spaces + toggle */
 .spaces-toggle-wrapper {
   display: flex;
   justify-content: space-between;
@@ -154,6 +85,51 @@ ul li::marker {
   margin-top: 12px;
   flex-wrap: wrap;
   gap: 8px;
+}
+
+.spaces-toggle-wrapper span {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--gold-dark);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* ---------- Luxury Animated Toggle ---------- */
+.lux-toggle {
+  position: relative;
+  width: 60px;
+  height: 28px;
+  border-radius: 14px;
+  background: var(--gold-dark);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.3s ease;
+}
+
+.lux-toggle::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  background: var(--white);
+  border-radius: 50%;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.lux-toggle.active {
+  background: var(--gold-light);
+}
+
+.lux-toggle.active::after {
+  transform: translateX(32px);
+}
+
+.lux-toggle:hover {
+  box-shadow: 0 0 6px rgba(255, 215, 140, 0.6);
 }
 
 /* ---------- Registration Form ---------- */
@@ -175,17 +151,14 @@ ul li::marker {
 #registration-section form input,
 #registration-section form button {
   width: 100%;
-  max-width: 100%;
   padding: 12px;
   margin-top: 12px;
   border-radius: 8px;
   border: 2px solid var(--gold-dark);
   font-size: 18px;
   display: block;
-  box-sizing: border-box;
 }
 
-/* Submit button */
 #registration-section form button {
   background: var(--gold-dark);
   color: var(--bg-black);
@@ -220,8 +193,7 @@ ul li::marker {
     grid-template-columns: 1fr;
   }
   .spaces-toggle-wrapper {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
+    flex-direction: row;
+    justify-content: space-between;
   }
 }
