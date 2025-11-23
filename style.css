@@ -138,15 +138,17 @@ ul li::marker { color: var(--gold-dark); }
 
 /* Submit button */
 #registration-section form button {
-  background: var(--gold-dark);
+  background: #c59b5a;   /* exact gold */
   color: var(--bg-black);
   font-weight: bold;
   cursor: pointer;
+  border: 2px solid #c59b5a;  /* optional for consistency */
 }
 
 #registration-section form button:hover {
-  background: var(--gold-light);
+  background: #ffd78c;  /* lighter gold on hover */
 }
+
 
 /* Sparkle Canvas */
 #sparkleCanvas {
