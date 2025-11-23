@@ -87,7 +87,13 @@ function renderClasses() {
     wrapper.className = "spaces-toggle-wrapper";
 
     const remainText = document.createElement("span");
-    remainText.textContent = remaining > 0 ? `→ ${remaining} spaces remaining` : "CLASS FULL";
+    if (remaining > 0) {
+      remainText.textContent = `→ ${remaining} spaces remaining`;
+    } else if (standbyParticipants.length < cls.capacity) {
+      remainText.textContent = "CLASS FULL – STANDBY AVAILABLE";
+    } else {
+      remainText.textContent = "CLASS FULL";
+    }
     remainText.style.fontWeight = "bold";
     remainText.style.fontSize = "18px";
     remainText.style.color = "#c59b5a";
@@ -100,9 +106,14 @@ function renderClasses() {
     toggleWrapper.textContent = remaining > 0 ? "Join Class" : "Join Standby";
 
     toggleWrapper.addEventListener("click", async () => {
-      // Disable toggle while submitting
+      // If already active, ignore clicks
+      if (toggleWrapper.classList.contains("active")) return;
+
+      toggleWrapper.classList.add("active");
       toggleWrapper.style.pointerEvents = "none";
+
       await submitSingleClass(cls.id, remaining > 0 ? "confirmed" : "standby");
+
       toggleWrapper.style.pointerEvents = "auto";
     });
 
@@ -218,7 +229,6 @@ async function submitRegistration() {
   msgBox.innerHTML = "Submitting...";
   msgBox.style.color = "#ffd78c";
 
-  // No pre-selection, must select via toggles after entering info
   registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
 
   msgBox.innerHTML = "Email registered! Now join classes below.";
