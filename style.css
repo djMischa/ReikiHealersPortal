@@ -167,48 +167,52 @@ ul li::marker {
   z-index:0;
 }
 
-/* Registration form cleanup */
+/* Registration section container */
 #registration-section {
-  width: 100%;              /* always fill available width */
-  max-width: 360px;         /* smaller max width for small screens */
-  margin: 50px auto;        /* center */
-  padding: 0 15px;          /* inner padding for very small screens */
+  width: 100%;
+  max-width: 360px;      /* restrict to small width for mobiles */
+  margin: 50px auto;     /* center horizontally */
+  padding: 0 10px;       /* inner padding */
   text-align: center;
-  box-sizing: border-box;   /* include padding in width */
+  box-sizing: border-box; /* include padding in width */
 }
 
+/* Ensure all children use box-sizing properly */
+#registration-section *, 
+#registration-section *:before, 
+#registration-section *:after {
+  box-sizing: border-box;
+}
+
+/* Input fields and submit button */
 #registration-section form input,
-#registration-section form textarea,
-#registration-section form select,
-#registration-section button {
-  width: 100%;              /* fill container width */
+#registration-section form button {
+  width: 100%;           /* fill parent container */
+  max-width: 100%;       /* never exceed container width */
   padding: 12px;
   margin-top: 12px;
-  border: 2px solid var(--gold-dark);
   border-radius: 8px;
-  background: rgba(255,255,255,0.05);
-  color: var(--white);
+  border: 2px solid var(--gold-dark);
   font-size: 18px;
-  box-sizing: border-box;   /* includes padding & border in width */
 }
 
-#registration-section button {
-  margin-top: 20px;         /* spacing from last input */
+/* Submit button styling */
+#registration-section form button {
   background: var(--gold-dark);
-  border: none;
   color: var(--bg-black);
   font-weight: bold;
   cursor: pointer;
 }
 
-#registration-section button:hover {
+#registration-section form button:hover {
   background: var(--gold-light);
 }
 
-/* Prevent horizontal scroll on all screens */
+/* Remove horizontal scroll */
 body, html {
   overflow-x: hidden;
 }
+
 
 
 
