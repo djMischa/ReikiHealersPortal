@@ -127,6 +127,15 @@ ul li::marker {
   transform: translateX(32px);
 }
 
+/* Make sure the row spacing stays clean */
+.spaces-toggle-wrapper {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-top: 12px;
+flex-wrap: nowrap;
+gap: 12px;
+}
 
 .lux-toggle:hover {
   box-shadow: 0 0 6px rgba(255, 215, 140, 0.6);
