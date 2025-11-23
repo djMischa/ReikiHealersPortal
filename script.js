@@ -60,7 +60,7 @@ async function handleWhatsAppSubmit() {
     userRegistered = true;
     // added font size
     msgBox.style.fontSize = "26px"
-    msgBox.textContent = `Welcome ${currentUser.firstName}! Please toggle the classes you would like to join.`;
+    msgBox.textContent = `Welcome ${currentUser.firstName}! Please toggle classes you would like to join.`;
     msgBox.style.color = "#ffffff";
   } else {
     // New user -> show extra fields
@@ -109,7 +109,7 @@ async function handleFullRegistration() {
   if (result.success) {
     currentUser = { firstName, lastName, email, whatsapp };
     userRegistered = true;
-    msgBox.textContent = `Welcome to the Reiki Collective, ${firstName}! Please toggle the classes you would like to join.`;
+    msgBox.textContent = `Welcome to the Reiki Collective, ${firstName}! Please toggle classes you would like to join.`;
     msgBox.style.color = "#ffffff";
 
     // Hide extra fields
