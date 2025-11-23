@@ -30,12 +30,17 @@ function renderClasses() {
     div.className = "class-container";
     div.style.position = "relative"; // for checkbox positioning
 
-    // Checkbox for selecting class
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.className = "class-checkbox";
-    checkbox.dataset.id = cls.id;
-    div.appendChild(checkbox);
+   // Checkbox container (top-right)
+   const checkDiv = document.createElement("div");
+   checkDiv.className = "class-checkbox";
+
+   const checkbox = document.createElement("input");
+   checkbox.type = "checkbox";
+   checkbox.dataset.classId = cls.id;
+
+   checkDiv.appendChild(checkbox);
+   div.appendChild(checkDiv);
+
 
     // Participants for this class
     const participants = registrationsData
