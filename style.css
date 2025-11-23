@@ -56,7 +56,7 @@ header {
 }
 
 .class-container:hover {
-  box-shadow: 0 0 25px rgba(197,155,90,0.7);
+  box-shadow: 0 0 20px rgba(197,155,90,0.5);
   transform: translateY(-5px);
 }
 
@@ -91,15 +91,16 @@ ul li::marker {
   display: block;
   margin-top: 6px;
   margin-bottom: 0;
+  font-weight: bold;
 }
 
-/* ---------- Inline Join Class / Standby Toggle (Ferrari) ---------- */
+/* ---------- Inline Join Class / Standby Toggle (Ferrari Luxury) ---------- */
 .spaces-toggle-wrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 12px;
-  flex-wrap: wrap; /* ensures proper wrapping on small screens */
+  flex-wrap: wrap;
   gap: 8px;
 }
 
@@ -110,23 +111,20 @@ ul li::marker {
   cursor: pointer;
   font-weight: bold;
   font-size: 16px;
+  color: var(--gold-dark);
 }
 
 .class-toggle input[type="checkbox"] {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   -webkit-appearance: none;
   appearance: none;
   border: 2px solid var(--gold-dark);
   border-radius: 4px;
-  background-color: white;
+  background-color: var(--white);
   position: relative;
   cursor: pointer;
-}
-
-/* Checked toggle neon glow (overridden dynamically via JS for confirmed vs standby) */
-.class-toggle input[type="checkbox"]:checked {
-  accent-color: #00ffff; /* JS dynamically changes to #00ff00 for standby */
+  transition: all 0.3s ease;
 }
 
 .class-toggle input[type="checkbox"]:checked::after {
@@ -143,10 +141,10 @@ ul li::marker {
 
 /* Hover glow for toggle */
 .class-toggle input[type="checkbox"]:hover {
-  box-shadow: 0 0 6px rgba(197,155,90,0.8);
+  box-shadow: 0 0 6px rgba(197,155,90,0.5);
 }
 
-/* Prevent remaining text from shrinking too small */
+/* Prevent remaining text from shrinking */
 .spaces-toggle-wrapper span {
   white-space: nowrap;
   font-weight: bold;
@@ -185,15 +183,17 @@ ul li::marker {
 
 /* Submit button */
 #registration-section form button {
-  background: #c59b5a;
+  background: var(--gold-dark);
   color: var(--bg-black);
   font-weight: bold;
   cursor: pointer;
-  border: 2px solid #c59b5a;
+  border: 2px solid var(--gold-dark);
+  transition: all 0.3s ease;
 }
 
 #registration-section form button:hover {
-  background: #ffd78c;
+  background: var(--gold-light);
+  border-color: var(--gold-light);
 }
 
 /* Sparkle Canvas */
@@ -214,5 +214,10 @@ ul li::marker {
   }
   #classes {
     grid-template-columns: 1fr;
+  }
+  .spaces-toggle-wrapper {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
   }
 }
