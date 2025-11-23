@@ -30,7 +30,7 @@ function renderClasses() {
     const div = document.createElement("div");
     div.className = "class-container";
 
-    // ===== Participants =====
+    // --- Get Participants ---
     const participants = registrationsData
       .filter(r => r.classId === cls.id && r.status === "confirmed")
       .map(r => r.fullName)
@@ -41,10 +41,10 @@ function renderClasses() {
       .map(r => r.fullName)
       .sort((a, b) => a.localeCompare(b));
 
-    // ===== Location & Date =====
+    // --- Location & date ---
     const locElem = document.createElement("div");
     locElem.className = "class-location";
-    locElem.textContent = `${cls.location} - ${participants.length} healer${participants.length !== 1 ? 's' : ''}`;
+    locElem.textContent = `${cls.location} – ${participants.length} healer${participants.length !== 1 ? "s" : ""}`;
 
     const dateElem = document.createElement("div");
     dateElem.className = "class-date";
@@ -53,7 +53,7 @@ function renderClasses() {
     div.appendChild(locElem);
     div.appendChild(dateElem);
 
-    // ===== Participant List =====
+    // --- Participant list ---
     const ul = document.createElement("ul");
     participants.forEach(p => {
       const li = document.createElement("li");
@@ -62,7 +62,7 @@ function renderClasses() {
     });
     div.appendChild(ul);
 
-    // ===== Standby List =====
+    // --- Standby list ---
     if (standbyParticipants.length) {
       const standbyTitle = document.createElement("div");
       standbyTitle.textContent = "ON STANDBY";
@@ -81,43 +81,64 @@ function renderClasses() {
       div.appendChild(standbyUl);
     }
 
-    // ===== Remaining / Toggle =====
+    // --- Remaining spaces ---
     const remaining = cls.capacity - participants.length;
+
     const wrapper = document.createElement("div");
     wrapper.className = "spaces-toggle-wrapper";
 
     const remainText = document.createElement("span");
-    remainText.textContent = remaining > 0 ? `→ ${remaining} spaces remaining` : "CLASS FULL – STANDBY AVAILABLE";
+    remainText.textContent =
+      remaining > 0
+        ? `→ ${remaining} spaces remaining`
+        : "CLASS FULL – STANDBY AVAILABLE";
 
-    // Luxury toggle
-    const toggleWrapper = document.createElement("div");
-    toggleWrapper.className = "lux-toggle";
-    toggleWrapper.dataset.classId = cls.id;
-    toggleWrapper.dataset.status = remaining > 0 ? "confirmed" : "standby";
+    // --- Luxury toggle switch ---
+    const toggle = document.createElement("div");
+    toggle.className = "lux-toggle";
+    toggle.dataset.classId = cls.id;
 
-    // Slide toggle animation & submit
-    toggleWrapper.addEventListener("click", async () => {
-      if (toggleWrapper.classList.contains("active")) return;
-      toggleWrapper.classList.add("active");
-      toggleWrapper.style.pointerEvents = "none";
+    // Set default UI state (OFF if user not registered)
+    toggle.classList.toggle("active", false);
 
-      await submitSingleClass(cls.id, remaining > 0 ? "confirmed" : "standby");
+    toggle.addEventListener("click", async () => {
+      const currentlyActive = toggle.classList.contains("active");
 
-      toggleWrapper.style.pointerEvents = "auto";
+      // Toggle state visually
+      toggle.classList.toggle("active");
+
+      // Disable while sending
+      toggle.style.pointerEvents = "none";
+
+      // If turning ON
+      if (!currentlyActive) {
+        await submitSingleClass(
+          cls.id,
+          remaining > 0 ? "confirmed" : "standby"
+        );
+      } else {
+        // Turning OFF = remove registration
+        await submitSingleClass(cls.id, "remove");
+      }
+
+      // Re-enable
+      toggle.style.pointerEvents = "auto";
     });
 
     wrapper.appendChild(remainText);
-    wrapper.appendChild(toggleWrapper);
+    wrapper.appendChild(toggle);
     div.appendChild(wrapper);
 
     container.appendChild(div);
 
+    // Fade-in animation
     setTimeout(() => {
       div.style.opacity = "1";
       div.style.transform = "translateY(0)";
     }, i * 150);
   });
 }
+
 
 // --------------------
 // Submit single class
