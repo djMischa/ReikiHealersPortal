@@ -169,49 +169,47 @@ ul li::marker {
 
 /* Registration form cleanup */
 #registration-section {
-max-width: 380px;
-margin: 50px auto;
-padding: 0 15px;
-text-align: center;
+  width: 100%;              /* always fill available width */
+  max-width: 360px;         /* smaller max width for small screens */
+  margin: 50px auto;        /* center */
+  padding: 0 15px;          /* inner padding for very small screens */
+  text-align: center;
+  box-sizing: border-box;   /* include padding in width */
 }
 
 #registration-section form input,
 #registration-section form textarea,
-#registration-section form select {
-width: 100%;
-max-width: 100%;
-padding: 12px;
-margin-top: 12px;
-border: 2px solid var(--gold-dark);
-border-radius: 8px;
-background: rgba(255,255,255,0.05);
-color: var(--white);
-font-size: 18px;
-box-sizing: border-box;
+#registration-section form select,
+#registration-section button {
+  width: 100%;              /* fill container width */
+  padding: 12px;
+  margin-top: 12px;
+  border: 2px solid var(--gold-dark);
+  border-radius: 8px;
+  background: rgba(255,255,255,0.05);
+  color: var(--white);
+  font-size: 18px;
+  box-sizing: border-box;   /* includes padding & border in width */
 }
 
 #registration-section button {
-width: 100%;
-max-width: 100%;
-margin-top: 25px;
-padding: 14px;
-background: var(--gold-dark);
-border: none;
-border-radius: 8px;
-color: var(--bg-black);
-font-size: 20px;
-font-weight: bold;
-cursor: pointer;
+  margin-top: 20px;         /* spacing from last input */
+  background: var(--gold-dark);
+  border: none;
+  color: var(--bg-black);
+  font-weight: bold;
+  cursor: pointer;
 }
 
 #registration-section button:hover {
-background: var(--gold-light);
+  background: var(--gold-light);
 }
 
-/* Ensure no horizontal scrolling on mobile */
+/* Prevent horizontal scroll on all screens */
 body, html {
-overflow-x: hidden;
+  overflow-x: hidden;
 }
+
 
 
 
