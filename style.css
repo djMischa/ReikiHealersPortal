@@ -51,7 +51,7 @@ header {
   transform: translateY(50px);
   position: relative;
   overflow: visible;
-  margin-bottom: 30px; /* adds blank space between class cards */
+  margin-bottom: 20px; /* adds blank space between class cards */
 }
 
 .class-container:hover {
