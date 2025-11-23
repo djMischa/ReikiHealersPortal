@@ -2,72 +2,49 @@ const API_BASE = "https://script.google.com/macros/s/AKfycbxIh2pNznerXY9k6hDS912
 
 let classesData = [];
 let registrationsData = [];
-let currentUser = null; // Stores the recognized or newly registered user
-let selectedClasses = {}; // Stores toggled classes { classId: status }
+let currentUser = null; // Stores the logged-in user's data
+let userRegistered = false; // Tracks if user submitted WhatsApp or registered
 
 async function init() {
   classesData = await fetch(`${API_BASE}?type=classes`).then(r => r.json());
   registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
-  renderRegistrationSection();
-  renderClasses();
+
+  renderRegistrationForm(); // WhatsApp / registration fields at top
+  renderClasses(); // Class cards below
 }
 
-// Utility to format class date/time
-function formatClassTime(dateStr, timeStr) {
-  return `${dateStr || ''} @ ${timeStr || ''}`;
-}
-
-// --- Render Registration / Login Section ---
-function renderRegistrationSection() {
+// --------------------
+// Registration Form
+// --------------------
+function renderRegistrationForm() {
   const wrapper = document.getElementById("registration-section");
+  if (!wrapper) return;
+
   wrapper.innerHTML = `
-    <div style="max-width:400px; margin:20px auto; text-align:center;">
-      <input id="inputWhatsApp" type="text" placeholder="Enter your WhatsApp Number" style="
-        width: 90%;
-        padding: 12px;
-        font-size: 18px;
-        border-radius: 8px;
-        border: 2px solid #c59b5a;
-        margin-bottom: 12px;
-        box-sizing: border-box;
-      ">
-      <button id="btnWhatsAppSubmit" style="
-        width: 90%;
-        padding: 12px;
-        background: #c59b5a;
-        color: #ffffff;
-        font-weight: bold;
-        border: 2px solid #c59b5a;
-        border-radius: 8px;
-        font-size: 18px;
-        cursor: pointer;
-        transition: all 0.3s ease;
-      ">Submit</button>
-      <div id="regMessage" style="margin-top:12px; color:#ffd78c;"></div>
+    <div style="max-width: 400px; margin: 20px auto; text-align:center;">
+      <input id="regWhatsApp" type="text" placeholder="Enter your WhatsApp number" style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
+      <button id="whatsappSubmit" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#ffffff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
+      <div id="regMessage" style="margin-top:10px; font-weight:bold;"></div>
+      <div id="extraFields" style="margin-top:12px; display:none;">
+        <input id="regFirstName" type="text" placeholder="First Name" style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
+        <input id="regLastName" type="text" placeholder="Last Name" style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
+        <input id="regEmail" type="email" placeholder="Email" style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
+        <button id="fullRegister" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#ffffff; border:none; border-radius:8px; cursor:pointer;">Register</button>
+      </div>
     </div>
   `;
 
-  // Hover effect for luxury button
-  const btn = document.getElementById("btnWhatsAppSubmit");
-  btn.addEventListener("mouseenter", () => {
-    btn.style.background = "#ffd78c";
-    btn.style.color = "#000000";
-    btn.style.borderColor = "#ffd78c";
-  });
-  btn.addEventListener("mouseleave", () => {
-    btn.style.background = "#c59b5a";
-    btn.style.color = "#ffffff";
-    btn.style.borderColor = "#c59b5a";
-  });
-
-  document.getElementById("btnWhatsAppSubmit").addEventListener("click", handleWhatsAppSubmit);
+  document.getElementById("whatsappSubmit").addEventListener("click", handleWhatsAppSubmit);
+  document.getElementById("fullRegister")?.addEventListener("click", handleFullRegistration);
 }
 
-
-// --- Handle WhatsApp lookup ---
+// --------------------
+// Handle WhatsApp Submit
+// --------------------
 async function handleWhatsAppSubmit() {
-  const whatsapp = document.getElementById("inputWhatsApp").value.trim();
+  const whatsapp = document.getElementById("regWhatsApp").value.trim();
   const msgBox = document.getElementById("regMessage");
+
   if (!whatsapp) {
     msgBox.textContent = "Please enter your WhatsApp number.";
     msgBox.style.color = "red";
@@ -78,53 +55,42 @@ async function handleWhatsAppSubmit() {
   const user = users.find(u => u.whatsapp === whatsapp);
 
   if (user) {
-    // Existing user found
+    // Existing user
     currentUser = user;
-    msgBox.innerHTML = `Welcome ${user.firstName}! Please toggle the classes you would like to join.`;
+    userRegistered = true;
+    msgBox.textContent = `Welcome ${currentUser.firstName}! Please toggle the classes you would like to join.`;
     msgBox.style.color = "#ffffff";
-
-    document.getElementById("inputWhatsApp").style.display = "none";
-    document.getElementById("btnWhatsAppSubmit").style.display = "none";
-
-    enableClassToggles();
   } else {
-    // New user
-    msgBox.innerHTML = "WhatsApp not found. Please complete your registration.";
-    msgBox.style.color = "#ffd78c";
-
-    const wrapper = document.getElementById("registration-section");
-    wrapper.innerHTML += `
-      <div style="max-width:380px;margin:20px auto;text-align:center;">
-        <input id="inputFirstName" type="text" placeholder="First Name">
-        <input id="inputLastName" type="text" placeholder="Last Name">
-        <input id="inputEmail" type="email" placeholder="Email">
-        <button id="btnRegisterUser">Register</button>
-        <div id="regMessage2" style="margin-top:12px; color:#ffd78c;"></div>
-      </div>
-    `;
-
-    document.getElementById("btnRegisterUser").addEventListener("click", handleNewUserRegistration);
+    // New user -> show extra fields
+    document.getElementById("extraFields").style.display = "block";
+    msgBox.textContent = "Please complete your registration.";
+    msgBox.style.color = "#ffffff";
   }
+
+  // Hide WhatsApp field
+  document.getElementById("regWhatsApp").style.display = "none";
+  document.getElementById("whatsappSubmit").style.display = "none";
+
+  renderClasses(); // Re-render so toggles are active/inactive
 }
 
-// --- Handle new user registration ---
-async function handleNewUserRegistration() {
-  const firstName = document.getElementById("inputFirstName").value.trim();
-  const lastName = document.getElementById("inputLastName").value.trim();
-  const email = document.getElementById("inputEmail").value.trim();
-  const whatsapp = document.getElementById("inputWhatsApp").value.trim();
-  const msgBox = document.getElementById("regMessage2");
+// --------------------
+// Handle Full Registration
+// --------------------
+async function handleFullRegistration() {
+  const firstName = document.getElementById("regFirstName").value.trim();
+  const lastName = document.getElementById("regLastName").value.trim();
+  const email = document.getElementById("regEmail").value.trim();
+  const whatsapp = document.getElementById("regWhatsApp").value.trim();
+  const msgBox = document.getElementById("regMessage");
 
-  if (!firstName || !lastName || !email || !whatsapp) {
+  if (!firstName || !lastName || !email) {
     msgBox.textContent = "Please complete all fields.";
     msgBox.style.color = "red";
     return;
   }
 
-  msgBox.textContent = "Registering...";
-  msgBox.style.color = "#ffd78c";
-
-  const newUser = { firstName, lastName, email, whatsapp };
+  // Send new user to Users tab
   const result = await fetch(API_BASE, {
     method: "POST",
     body: new URLSearchParams({
@@ -132,42 +98,40 @@ async function handleNewUserRegistration() {
       lastName,
       email,
       whatsapp,
-      ack: true,
-      type: "addUser"
+      ack: true
     })
   }).then(r => r.json());
 
   if (result.success) {
-    currentUser = newUser;
+    currentUser = { firstName, lastName, email, whatsapp };
+    userRegistered = true;
     msgBox.textContent = `Welcome to the Reiki Collective, ${firstName}! Please toggle the classes you would like to join.`;
     msgBox.style.color = "#ffffff";
 
-    // Remove registration fields
-    document.getElementById("inputFirstName").remove();
-    document.getElementById("inputLastName").remove();
-    document.getElementById("inputEmail").remove();
-    document.getElementById("btnRegisterUser").remove();
+    // Hide extra fields
+    document.getElementById("extraFields").style.display = "none";
+
+    renderClasses(); // Now toggles are active
   } else {
     msgBox.textContent = `Error: ${result.message || "Unknown error"}`;
     msgBox.style.color = "red";
   }
-
-  enableClassToggles();
 }
 
-// --- Enable class toggles only after user recognized/registered ---
-function enableClassToggles() {
-  document.querySelectorAll(".lux-toggle").forEach(toggle => {
-    toggle.style.pointerEvents = "auto";
-  });
+// --------------------
+// Format class time
+// --------------------
+function formatClassTime(dateStr, timeStr) {
+  return `${dateStr || ""} @ ${timeStr || ""}`;
 }
 
-// --- Render Classes ---
+// --------------------
+// Render Classes
+// --------------------
 function renderClasses() {
   const container = document.getElementById("classes");
   container.innerHTML = "";
-
-
+  container.style.display = "block";
 
   classesData.sort((a, b) => parseInt(a.displayOrder || 999) - parseInt(b.displayOrder || 999));
 
@@ -177,7 +141,7 @@ function renderClasses() {
     const div = document.createElement("div");
     div.className = "class-container";
 
-    // --- Participants ---
+    // Participants
     const participants = registrationsData
       .filter(r => r.classId === cls.id && r.status === "confirmed")
       .map(r => r.fullName)
@@ -188,7 +152,7 @@ function renderClasses() {
       .map(r => r.fullName)
       .sort((a, b) => a.localeCompare(b));
 
-    // --- Location & Date ---
+    // Location & date
     const locElem = document.createElement("div");
     locElem.className = "class-location";
     locElem.textContent = `${cls.location} – ${participants.length} healer${participants.length !== 1 ? "s" : ""}`;
@@ -200,7 +164,7 @@ function renderClasses() {
     div.appendChild(locElem);
     div.appendChild(dateElem);
 
-    // --- Participant list ---
+    // Participant list
     const ul = document.createElement("ul");
     participants.forEach(p => {
       const li = document.createElement("li");
@@ -209,17 +173,14 @@ function renderClasses() {
     });
     div.appendChild(ul);
 
-    // --- Standby list ---
+    // Standby list
     if (standbyParticipants.length) {
-      const standbyTitle = document.createElement("span");
+      const standbyTitle = document.createElement("div");
       standbyTitle.textContent = "ON STANDBY";
-      standbyTitle.style.color = "#c59b5a";
+      standbyTitle.style.marginTop = "10px";
       standbyTitle.style.fontWeight = "bold";
       standbyTitle.style.fontSize = "18px";
-      standbyTitle.style.display = "block";
-      standbyTitle.style.marginTop = "6px";
-
-      div.appendChild(standbyTitle);
+      standbyTitle.style.color = "#c59b5a";
 
       const standbyUl = document.createElement("ul");
       standbyParticipants.forEach(p => {
@@ -228,41 +189,46 @@ function renderClasses() {
         standbyUl.appendChild(li);
       });
 
+      div.appendChild(standbyTitle);
       div.appendChild(standbyUl);
     }
 
-    // --- Remaining / Toggle ---
+    // Remaining / toggle
     const remaining = cls.capacity - participants.length;
+
     const wrapper = document.createElement("div");
     wrapper.className = "spaces-toggle-wrapper";
 
     const remainText = document.createElement("span");
     remainText.textContent =
-      remaining > 0 ? `→ ${remaining} spaces remaining` : "CLASS FULL – JOIN STANDBY";
+      remaining > 0
+        ? `→ ${remaining} spaces remaining`
+        : "CLASS FULL – JOIN STANDBY";
 
-    // --- Toggle ---
+    // Toggle
     const toggle = document.createElement("div");
     toggle.className = "lux-toggle";
     toggle.dataset.classId = cls.id;
 
-    // Disabled by default until user recognized/registered
-    toggle.style.pointerEvents = currentUser ? "auto" : "none";
+    if (!userRegistered) toggle.style.pointerEvents = "none"; // disabled if not submitted WhatsApp
 
     toggle.addEventListener("click", async () => {
-      if (!currentUser) return;
+      if (!userRegistered) return;
 
-      const classId = cls.id;
-      const status = remaining > 0 ? "confirmed" : "standby";
+      const isActive = toggle.classList.contains("active");
+      toggle.classList.toggle("active");
 
-      // Prevent double clicks
       toggle.style.pointerEvents = "none";
 
-      await submitSingleClass(classId, status, currentUser);
-      toggle.style.pointerEvents = "auto";
+      if (!isActive) {
+        // Add registration
+        await submitSingleClass(cls.id, remaining > 0 ? "confirmed" : "standby");
+      } else {
+        // Remove registration
+        await submitSingleClass(cls.id, "remove");
+      }
 
-      // Optional: update class cards live
-      registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
-      renderClasses();
+      toggle.style.pointerEvents = "auto";
     });
 
     wrapper.appendChild(remainText);
@@ -271,6 +237,7 @@ function renderClasses() {
 
     container.appendChild(div);
 
+    // Fade-in
     setTimeout(() => {
       div.style.opacity = "1";
       div.style.transform = "translateY(0)";
@@ -278,21 +245,28 @@ function renderClasses() {
   });
 }
 
-// --- Submit a single class for the current user ---
-async function submitSingleClass(classId, status, user) {
-  if (!user) return;
+// --------------------
+// Submit single class (add/remove)
+// --------------------
+async function submitSingleClass(classId, status) {
+  if (!currentUser) return;
 
-  const selected = [{ classId, status }];
+  const selectedClasses = [{ classId, status }];
+
   await fetch(API_BASE, {
     method: "POST",
     body: new URLSearchParams({
-      email: user.email || "",
-      fullName: `${user.firstName} ${user.lastName}`,
-      whatsapp: user.whatsapp,
-      selectedClasses: JSON.stringify(selected),
+      email: currentUser.email || "",
+      fullName: `${currentUser.firstName} ${currentUser.lastName || ""}`,
+      whatsapp: currentUser.whatsapp,
+      selectedClasses: JSON.stringify(selectedClasses),
       ack: true
     })
   });
+
+  // Refresh registrations and class cards
+  registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
+  renderClasses();
 }
 
 init();
