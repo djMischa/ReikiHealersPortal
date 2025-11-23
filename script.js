@@ -2,38 +2,148 @@ const API_BASE = "https://script.google.com/macros/s/AKfycbxIh2pNznerXY9k6hDS912
 
 let classesData = [];
 let registrationsData = [];
+let currentUser = null; // Stores the recognized or newly registered user
+let selectedClasses = {}; // Stores toggled classes { classId: status }
 
 async function init() {
   classesData = await fetch(`${API_BASE}?type=classes`).then(r => r.json());
   registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
+  renderRegistrationSection();
   renderClasses();
-  renderRegistrationForm();
 }
 
+// Utility to format class date/time
 function formatClassTime(dateStr, timeStr) {
   return `${dateStr || ''} @ ${timeStr || ''}`;
 }
 
-// --------------------
-// Render Classes
-// --------------------
+// --- Render Registration / Login Section ---
+function renderRegistrationSection() {
+  const wrapper = document.getElementById("registration-section");
+  wrapper.innerHTML = `
+    <h2 style="text-align:center; margin-top:40px;">Enter your WhatsApp to start</h2>
+    <div style="max-width:380px;margin:20px auto;text-align:center;">
+      <input id="inputWhatsApp" type="text" placeholder="WhatsApp Number">
+      <button id="btnWhatsAppSubmit">Submit</button>
+      <div id="regMessage" style="margin-top:12px; color:#ffd78c;"></div>
+    </div>
+  `;
+
+  document.getElementById("btnWhatsAppSubmit").addEventListener("click", handleWhatsAppSubmit);
+}
+
+// --- Handle WhatsApp lookup ---
+async function handleWhatsAppSubmit() {
+  const whatsapp = document.getElementById("inputWhatsApp").value.trim();
+  const msgBox = document.getElementById("regMessage");
+  if (!whatsapp) {
+    msgBox.textContent = "Please enter your WhatsApp number.";
+    msgBox.style.color = "red";
+    return;
+  }
+
+  const users = await fetch(`${API_BASE}?type=users`).then(r => r.json());
+  const user = users.find(u => u.whatsapp === whatsapp);
+
+  if (user) {
+    // Existing user found
+    currentUser = user;
+    msgBox.innerHTML = `Welcome ${user.firstName}! Please toggle the classes you would like to join.`;
+    msgBox.style.color = "#ffffff";
+
+    document.getElementById("inputWhatsApp").style.display = "none";
+    document.getElementById("btnWhatsAppSubmit").style.display = "none";
+
+    enableClassToggles();
+  } else {
+    // New user
+    msgBox.innerHTML = "WhatsApp not found. Please complete your registration.";
+    msgBox.style.color = "#ffd78c";
+
+    const wrapper = document.getElementById("registration-section");
+    wrapper.innerHTML += `
+      <div style="max-width:380px;margin:20px auto;text-align:center;">
+        <input id="inputFirstName" type="text" placeholder="First Name">
+        <input id="inputLastName" type="text" placeholder="Last Name">
+        <input id="inputEmail" type="email" placeholder="Email">
+        <button id="btnRegisterUser">Register</button>
+        <div id="regMessage2" style="margin-top:12px; color:#ffd78c;"></div>
+      </div>
+    `;
+
+    document.getElementById("btnRegisterUser").addEventListener("click", handleNewUserRegistration);
+  }
+}
+
+// --- Handle new user registration ---
+async function handleNewUserRegistration() {
+  const firstName = document.getElementById("inputFirstName").value.trim();
+  const lastName = document.getElementById("inputLastName").value.trim();
+  const email = document.getElementById("inputEmail").value.trim();
+  const whatsapp = document.getElementById("inputWhatsApp").value.trim();
+  const msgBox = document.getElementById("regMessage2");
+
+  if (!firstName || !lastName || !email || !whatsapp) {
+    msgBox.textContent = "Please complete all fields.";
+    msgBox.style.color = "red";
+    return;
+  }
+
+  msgBox.textContent = "Registering...";
+  msgBox.style.color = "#ffd78c";
+
+  const newUser = { firstName, lastName, email, whatsapp };
+  const result = await fetch(API_BASE, {
+    method: "POST",
+    body: new URLSearchParams({
+      firstName,
+      lastName,
+      email,
+      whatsapp,
+      ack: true,
+      type: "addUser"
+    })
+  }).then(r => r.json());
+
+  if (result.success) {
+    currentUser = newUser;
+    msgBox.textContent = `Welcome to the Reiki Collective, ${firstName}! Please toggle the classes you would like to join.`;
+    msgBox.style.color = "#ffffff";
+
+    // Remove registration fields
+    document.getElementById("inputFirstName").remove();
+    document.getElementById("inputLastName").remove();
+    document.getElementById("inputEmail").remove();
+    document.getElementById("btnRegisterUser").remove();
+  } else {
+    msgBox.textContent = `Error: ${result.message || "Unknown error"}`;
+    msgBox.style.color = "red";
+  }
+
+  enableClassToggles();
+}
+
+// --- Enable class toggles only after user recognized/registered ---
+function enableClassToggles() {
+  document.querySelectorAll(".lux-toggle").forEach(toggle => {
+    toggle.style.pointerEvents = "auto";
+  });
+}
+
+// --- Render Classes ---
 function renderClasses() {
   const container = document.getElementById("classes");
   container.innerHTML = "";
 
-// --- Instruction banner ---
+  // Instruction banner
   const instructions = document.createElement("div");
-  instructions.textContent = "Select the classes you would like to participate in and register at the bottom of the page.";
-  instructions.style.color = "#ffffff";       // White text
+  instructions.textContent = "Select the classes you would like to participate in and toggle to join.";
+  instructions.style.color = "#ffffff";
   instructions.style.fontSize = "18px";
   instructions.style.fontWeight = "bold";
   instructions.style.marginBottom = "20px";
   instructions.style.textAlign = "center";
   container.appendChild(instructions);
-
-
-  
-  container.style.display = "block";
 
   classesData.sort((a, b) => parseInt(a.displayOrder || 999) - parseInt(b.displayOrder || 999));
 
@@ -54,7 +164,7 @@ function renderClasses() {
       .map(r => r.fullName)
       .sort((a, b) => a.localeCompare(b));
 
-    // --- Location & date ---
+    // --- Location & Date ---
     const locElem = document.createElement("div");
     locElem.className = "class-location";
     locElem.textContent = `${cls.location} – ${participants.length} healer${participants.length !== 1 ? "s" : ""}`;
@@ -77,12 +187,15 @@ function renderClasses() {
 
     // --- Standby list ---
     if (standbyParticipants.length) {
-      const standbyTitle = document.createElement("div");
+      const standbyTitle = document.createElement("span");
       standbyTitle.textContent = "ON STANDBY";
-      standbyTitle.style.marginTop = "6px";
-      standbyTitle.style.fontWeight = "bold";
       standbyTitle.style.color = "#c59b5a";
-      standbyTitle.style.fontSize = "18px"; // same as remaining spaces
+      standbyTitle.style.fontWeight = "bold";
+      standbyTitle.style.fontSize = "18px";
+      standbyTitle.style.display = "block";
+      standbyTitle.style.marginTop = "6px";
+
+      div.appendChild(standbyTitle);
 
       const standbyUl = document.createElement("ul");
       standbyParticipants.forEach(p => {
@@ -91,58 +204,39 @@ function renderClasses() {
         standbyUl.appendChild(li);
       });
 
-      div.appendChild(standbyTitle);
       div.appendChild(standbyUl);
     }
 
-    // --- Remaining / toggle ---
+    // --- Remaining / Toggle ---
     const remaining = cls.capacity - participants.length;
     const wrapper = document.createElement("div");
     wrapper.className = "spaces-toggle-wrapper";
 
     const remainText = document.createElement("span");
     remainText.textContent =
-      remaining > 0
-        ? `→ ${remaining} spaces remaining`
-        : "CLASS FULL – JOIN STANDBY";
+      remaining > 0 ? `→ ${remaining} spaces remaining` : "CLASS FULL – JOIN STANDBY";
 
-    // --- Luxury toggle switch ---
+    // --- Toggle ---
     const toggle = document.createElement("div");
     toggle.className = "lux-toggle";
     toggle.dataset.classId = cls.id;
 
-    // Check if user is already registered for this class
-    const registered = registrationsData.some(r =>
-      r.classId === cls.id &&
-      (r.status === "confirmed" || r.status === "standby")
-    );
-
-    toggle.classList.toggle("active", registered);
+    // Disabled by default until user recognized/registered
+    toggle.style.pointerEvents = currentUser ? "auto" : "none";
 
     toggle.addEventListener("click", async () => {
-      const currentlyActive = toggle.classList.contains("active");
+      if (!currentUser) return;
 
-      // Toggle UI state immediately
-      toggle.classList.toggle("active");
+      const classId = cls.id;
+      const status = remaining > 0 ? "confirmed" : "standby";
 
-      // Disable while sending
+      // Prevent double clicks
       toggle.style.pointerEvents = "none";
 
-      if (!currentlyActive) {
-        // Turning ON
-        await submitSingleClass(
-          cls.id,
-          remaining > 0 ? "confirmed" : "standby"
-        );
-      } else {
-        // Turning OFF = remove registration
-        await submitSingleClass(cls.id, "remove");
-      }
-
-      // Re-enable
+      await submitSingleClass(classId, status, currentUser);
       toggle.style.pointerEvents = "auto";
 
-      // Refresh classes to update participant counts
+      // Optional: update class cards live
       registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
       renderClasses();
     });
@@ -153,7 +247,6 @@ function renderClasses() {
 
     container.appendChild(div);
 
-    // Fade-in animation
     setTimeout(() => {
       div.style.opacity = "1";
       div.style.transform = "translateY(0)";
@@ -161,114 +254,25 @@ function renderClasses() {
   });
 }
 
+// --- Submit a single class for the current user ---
+async function submitSingleClass(classId, status, user) {
+  if (!user) return;
 
-
-
-// --------------------
-// Submit single class
-// --------------------
-async function submitSingleClass(classId, status) {
-  const email = document.getElementById("regEmail").value.trim();
-  const name = document.getElementById("regName").value.trim();
-  const whatsapp = document.getElementById("regWhatsApp").value.trim();
-  const msgBox = document.getElementById("regMessage");
-
-  if (!email || !name || !whatsapp) {
-    msgBox.innerHTML = "Please complete all fields before joining a class.";
-    msgBox.style.color = "red";
-    return;
-  }
-
-  msgBox.innerHTML = "Submitting...";
-  msgBox.style.color = "#ffd78c";
-
-  const selectedClasses = [{ classId, status }];
-
-  const result = await fetch(API_BASE, {
+  const selected = [{ classId, status }];
+  await fetch(API_BASE, {
     method: "POST",
     body: new URLSearchParams({
-      email,
-      fullName: name,
-      whatsapp,
-      selectedClasses: JSON.stringify(selectedClasses),
+      email: user.email || "",
+      fullName: `${user.firstName} ${user.lastName}`,
+      whatsapp: user.whatsapp,
+      selectedClasses: JSON.stringify(selected),
       ack: true
     })
-  }).then(r => r.json());
-
-  if (result.success) {
-    msgBox.innerHTML = "Registration successful!";
-    msgBox.style.color = "lightgreen";
-    registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
-    renderClasses();
-  } else {
-    msgBox.innerHTML = `Error: ${result.message || "Unknown error"}`;
-    msgBox.style.color = "red";
-  }
-}
-
-// --------------------
-// Render Registration Form
-// --------------------
-function renderRegistrationForm() {
-  const wrapper = document.getElementById("registration-section");
-  if (!wrapper) return;
-
-  wrapper.innerHTML = `
-    <h2 style="text-align:center; margin-top:60px;">Register for Classes</h2>
-    <div style="max-width:380px;margin:25px auto;text-align:center;">
-      <input id="regEmail" type="email" placeholder="Enter your email">
-      <input id="regName" type="text" placeholder="Full Name">
-      <input id="regWhatsApp" type="text" placeholder="WhatsApp Number">
-      <button id="regSubmit">Submit Registration</button>
-      <div id="regMessage" style="margin-top:10px;"></div>
-    </div>
-  `;
-
-  document.getElementById("regEmail").addEventListener("blur", checkUserExists);
-  document.getElementById("regSubmit").addEventListener("click", submitRegistration);
-}
-
-// --------------------
-// Check user exists
-// --------------------
-async function checkUserExists() {
-  const email = document.getElementById("regEmail").value.trim();
-  if (!email) return;
-
-  const users = await fetch(`${API_BASE}?type=users`).then(r => r.json());
-  const match = users.find(u => u.email?.toLowerCase() === email.toLowerCase());
-
-  if (match) {
-    document.getElementById("regName").value = match.fullName || "";
-    document.getElementById("regWhatsApp").value = match.whatsapp || "";
-  }
-}
-
-// --------------------
-// Submit registration (just email + info, join classes via toggle)
-// --------------------
-async function submitRegistration() {
-  const email = document.getElementById("regEmail").value.trim();
-  const name = document.getElementById("regName").value.trim();
-  const whatsapp = document.getElementById("regWhatsApp").value.trim();
-  const msgBox = document.getElementById("regMessage");
-
-  if (!email || !name || !whatsapp) {
-    msgBox.innerHTML = "Please complete all fields.";
-    msgBox.style.color = "red";
-    return;
-  }
-
-  msgBox.innerHTML = "Submitting...";
-  msgBox.style.color = "#ffd78c";
-
-  registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
-
-  msgBox.innerHTML = "Email registered! Now join classes below.";
-  msgBox.style.color = "#c59b5a";
+  });
 }
 
 init();
+
 
 
 // https://script.google.com/macros/s/AKfycbxIh2pNznerXY9k6hDS912Brb5w6-nhJVTNQP37Av0yffRedLf4KYqtvyS05iFEGQ2V/exec
