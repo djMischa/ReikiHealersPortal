@@ -3,9 +3,6 @@ const API_BASE = "https://script.google.com/macros/s/AKfycbxIh2pNznerXY9k6hDS912
 let classesData = [];
 let registrationsData = [];
 
-// =======================
-// Initialize
-// =======================
 async function init() {
   classesData = await fetch(`${API_BASE}?type=classes`).then(r => r.json());
   registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
@@ -13,68 +10,62 @@ async function init() {
   renderRegistrationForm();
 }
 
-// =======================
-// Format date/time
-// =======================
 function formatClassTime(dateStr, timeStr) {
-  if (!dateStr) dateStr = '';
-  if (!timeStr) timeStr = '';
-  return `${dateStr} @ ${timeStr}`;
+  return `${dateStr || ''} @ ${timeStr || ''}`;
 }
 
-// =======================
-// Render class cards
-// =======================
 function renderClasses() {
   const container = document.getElementById("classes");
   container.innerHTML = "";
   container.style.display = "block";
 
-  classesData.sort((a, b) => (parseInt(a.displayOrder || 999) - parseInt(b.displayOrder || 999)));
+  classesData.sort((a, b) => parseInt(a.displayOrder || 999) - parseInt(b.displayOrder || 999));
 
   classesData.forEach((cls, i) => {
     if (cls.status === "hidden") return;
 
     const div = document.createElement("div");
     div.className = "class-container";
-    div.style.position = "relative";
 
     // Participants
     const participants = registrationsData
       .filter(r => r.classId === cls.id && r.status === "confirmed")
       .map(r => r.fullName)
-      .sort((a,b) => a.localeCompare(b));
+      .sort((a, b) => a.localeCompare(b));
 
     const standbyParticipants = registrationsData
       .filter(r => r.classId === cls.id && r.status === "standby")
       .map(r => r.fullName)
-      .sort((a,b) => a.localeCompare(b));
+      .sort((a, b) => a.localeCompare(b));
 
-    // Location + headcount
+    // ===== Location & Date =====
     const locElem = document.createElement("div");
     locElem.className = "class-location";
     locElem.textContent = `${cls.location} - ${participants.length} healer${participants.length !== 1 ? 's' : ''}`;
 
-    // Date/time
     const dateElem = document.createElement("div");
     dateElem.className = "class-date";
     dateElem.textContent = formatClassTime(cls.date, cls.time);
 
-    // Participant list
+    div.appendChild(locElem);
+    div.appendChild(dateElem);
+
+    // ===== Participant list =====
     const ul = document.createElement("ul");
     participants.forEach(p => {
       const li = document.createElement("li");
       li.textContent = p;
       ul.appendChild(li);
     });
+    div.appendChild(ul);
 
-    // Standby sublist
+    // ===== Standby list (if any) =====
     if (standbyParticipants.length) {
       const standbyTitle = document.createElement("div");
-      standbyTitle.textContent = "Standby:";
+      standbyTitle.textContent = "ON STANDBY";
       standbyTitle.style.marginTop = "10px";
-      standbyTitle.style.color = "#ffd78c";
       standbyTitle.style.fontWeight = "bold";
+      standbyTitle.style.color = "#c59b5a";
 
       const standbyUl = document.createElement("ul");
       standbyParticipants.forEach(p => {
@@ -87,39 +78,31 @@ function renderClasses() {
       div.appendChild(standbyUl);
     }
 
-    // Remaining spaces + Join toggle (Ferrari-style)
+    // ===== Remaining / Toggle Wrapper =====
     const remaining = cls.capacity - participants.length;
     const wrapper = document.createElement("div");
     wrapper.className = "spaces-toggle-wrapper";
 
     const remainText = document.createElement("span");
-    remainText.textContent = remaining > 0 ? `→ ${remaining} spaces remaining` : "CLASS FULL – STANDBY AVAILABLE";
-    remainText.style.color = "#c59b5a";
+    remainText.textContent = remaining > 0 ? `→ ${remaining} spaces remaining` : "CLASS FULL";
     remainText.style.fontWeight = "bold";
     remainText.style.fontSize = "18px";
+    remainText.style.color = "#c59b5a";
 
     const toggleLabel = document.createElement("label");
     toggleLabel.className = "class-toggle";
-    toggleLabel.style.color = remaining > 0 ? "#00ffff" : "#00ff00"; // neon blue / neon green
+    toggleLabel.textContent = remaining > 0 ? "Join Class" : "Join Standby";
 
-    const toggleCheckbox = document.createElement("input");
-    toggleCheckbox.type = "checkbox";
-    toggleCheckbox.dataset.classId = cls.id;
-    toggleCheckbox.dataset.status = remaining > 0 ? "confirmed" : "standby";
-    toggleCheckbox.style.accentColor = remaining > 0 ? "#00ffff" : "#00ff00";
+    const toggleInput = document.createElement("input");
+    toggleInput.type = "checkbox";
+    toggleInput.dataset.classId = cls.id;
+    toggleInput.dataset.status = remaining > 0 ? "confirmed" : "standby";
 
-    toggleLabel.appendChild(document.createTextNode(remaining > 0 ? "Join Class" : "Join Standby"));
-    toggleLabel.appendChild(toggleCheckbox);
-
+    toggleLabel.appendChild(toggleInput);
     wrapper.appendChild(remainText);
     wrapper.appendChild(toggleLabel);
+
     div.appendChild(wrapper);
-
-    // Append other elements
-    div.appendChild(locElem);
-    div.appendChild(dateElem);
-    div.appendChild(ul);
-
     container.appendChild(div);
 
     // Fade-in animation
@@ -130,9 +113,6 @@ function renderClasses() {
   });
 }
 
-// =======================
-// Render registration form
-// =======================
 function renderRegistrationForm() {
   const wrapper = document.getElementById("registration-section");
   if (!wrapper) return;
@@ -140,19 +120,11 @@ function renderRegistrationForm() {
   wrapper.innerHTML = `
     <h2 style="text-align:center; margin-top:60px;">Register for Classes</h2>
     <div style="max-width:380px;margin:25px auto;text-align:center;">
-      <input id="regEmail" type="email" placeholder="Enter your email"
-        style="width:100%;padding:12px;border-radius:8px;margin-bottom:12px;border:2px solid #c59b5a;">
-      <input id="regName" type="text" placeholder="Full Name"
-        style="width:100%;padding:12px;border-radius:8px;margin-bottom:12px;border:2px solid #c59b5a;">
-      <input id="regWhatsApp" type="text" placeholder="WhatsApp Number"
-        style="width:100%;padding:12px;border-radius:8px;margin-bottom:12px;border:2px solid #c59b5a;">
-
-      <button id="regSubmit"
-        style="width:100%;padding:12px;border-radius:8px;background:#c59b5a;color:white;font-size:18px;font-weight:bold;">
-        Submit Registration
-      </button>
-
-      <div id="regMessage" style="margin-top:15px;font-size:16px;"></div>
+      <input id="regEmail" type="email" placeholder="Enter your email">
+      <input id="regName" type="text" placeholder="Full Name">
+      <input id="regWhatsApp" type="text" placeholder="WhatsApp Number">
+      <button id="regSubmit">Submit Registration</button>
+      <div id="regMessage"></div>
     </div>
   `;
 
@@ -160,15 +132,12 @@ function renderRegistrationForm() {
   document.getElementById("regSubmit").addEventListener("click", submitRegistration);
 }
 
-// =======================
-// Check if user exists
-// =======================
 async function checkUserExists() {
   const email = document.getElementById("regEmail").value.trim();
   if (!email) return;
 
   const users = await fetch(`${API_BASE}?type=users`).then(r => r.json());
-  const match = users.find(u => u.email && u.email.toLowerCase() === email.toLowerCase());
+  const match = users.find(u => u.email?.toLowerCase() === email.toLowerCase());
 
   if (match) {
     document.getElementById("regName").value = match.fullName || "";
@@ -176,9 +145,6 @@ async function checkUserExists() {
   }
 }
 
-// =======================
-// Submit registration
-// =======================
 async function submitRegistration() {
   const email = document.getElementById("regEmail").value.trim();
   const name = document.getElementById("regName").value.trim();
@@ -191,13 +157,12 @@ async function submitRegistration() {
     return;
   }
 
-  // Collect selected classes with status
   const selected = [...document.querySelectorAll(".class-toggle input:checked")].map(c => ({
     classId: c.dataset.classId,
     status: c.dataset.status
   }));
 
-  if (selected.length === 0) {
+  if (!selected.length) {
     msgBox.innerHTML = "Please choose at least one class.";
     msgBox.style.color = "red";
     return;
