@@ -14,6 +14,9 @@ function formatClassTime(dateStr, timeStr) {
   return `${dateStr || ''} @ ${timeStr || ''}`;
 }
 
+// --------------------
+// Render Classes
+// --------------------
 function renderClasses() {
   const container = document.getElementById("classes");
   container.innerHTML = "";
@@ -27,7 +30,7 @@ function renderClasses() {
     const div = document.createElement("div");
     div.className = "class-container";
 
-    // Participants
+    // ===== Participants =====
     const participants = registrationsData
       .filter(r => r.classId === cls.id && r.status === "confirmed")
       .map(r => r.fullName)
@@ -50,7 +53,7 @@ function renderClasses() {
     div.appendChild(locElem);
     div.appendChild(dateElem);
 
-    // ===== Participant list =====
+    // ===== Participant List =====
     const ul = document.createElement("ul");
     participants.forEach(p => {
       const li = document.createElement("li");
@@ -59,7 +62,7 @@ function renderClasses() {
     });
     div.appendChild(ul);
 
-    // ===== Standby list (if any) =====
+    // ===== Standby List (if any) =====
     if (standbyParticipants.length) {
       const standbyTitle = document.createElement("div");
       standbyTitle.textContent = "ON STANDBY";
@@ -78,7 +81,7 @@ function renderClasses() {
       div.appendChild(standbyUl);
     }
 
-    // ===== Remaining / Toggle Wrapper =====
+    // ===== Remaining / Luxury Animated Toggle =====
     const remaining = cls.capacity - participants.length;
     const wrapper = document.createElement("div");
     wrapper.className = "spaces-toggle-wrapper";
@@ -89,18 +92,22 @@ function renderClasses() {
     remainText.style.fontSize = "18px";
     remainText.style.color = "#c59b5a";
 
-    const toggleLabel = document.createElement("label");
-    toggleLabel.className = "class-toggle";
-    toggleLabel.textContent = remaining > 0 ? "Join Class" : "Join Standby";
+    // Luxury animated toggle
+    const toggleWrapper = document.createElement("div");
+    toggleWrapper.className = "lux-toggle";
+    toggleWrapper.dataset.classId = cls.id;
+    toggleWrapper.dataset.status = remaining > 0 ? "confirmed" : "standby";
+    toggleWrapper.textContent = remaining > 0 ? "Join Class" : "Join Standby";
 
-    const toggleInput = document.createElement("input");
-    toggleInput.type = "checkbox";
-    toggleInput.dataset.classId = cls.id;
-    toggleInput.dataset.status = remaining > 0 ? "confirmed" : "standby";
+    toggleWrapper.addEventListener("click", async () => {
+      // Disable toggle while submitting
+      toggleWrapper.style.pointerEvents = "none";
+      await submitSingleClass(cls.id, remaining > 0 ? "confirmed" : "standby");
+      toggleWrapper.style.pointerEvents = "auto";
+    });
 
-    toggleLabel.appendChild(toggleInput);
     wrapper.appendChild(remainText);
-    wrapper.appendChild(toggleLabel);
+    wrapper.appendChild(toggleWrapper);
 
     div.appendChild(wrapper);
     container.appendChild(div);
@@ -113,57 +120,17 @@ function renderClasses() {
   });
 }
 
-function renderRegistrationForm() {
-  const wrapper = document.getElementById("registration-section");
-  if (!wrapper) return;
-
-  wrapper.innerHTML = `
-    <h2 style="text-align:center; margin-top:60px;">Register for Classes</h2>
-    <div style="max-width:380px;margin:25px auto;text-align:center;">
-      <input id="regEmail" type="email" placeholder="Enter your email">
-      <input id="regName" type="text" placeholder="Full Name">
-      <input id="regWhatsApp" type="text" placeholder="WhatsApp Number">
-      <button id="regSubmit">Submit Registration</button>
-      <div id="regMessage"></div>
-    </div>
-  `;
-
-  document.getElementById("regEmail").addEventListener("blur", checkUserExists);
-  document.getElementById("regSubmit").addEventListener("click", submitRegistration);
-}
-
-async function checkUserExists() {
-  const email = document.getElementById("regEmail").value.trim();
-  if (!email) return;
-
-  const users = await fetch(`${API_BASE}?type=users`).then(r => r.json());
-  const match = users.find(u => u.email?.toLowerCase() === email.toLowerCase());
-
-  if (match) {
-    document.getElementById("regName").value = match.fullName || "";
-    document.getElementById("regWhatsApp").value = match.whatsapp || "";
-  }
-}
-
-async function submitRegistration() {
+// --------------------
+// Submit a single class via toggle
+// --------------------
+async function submitSingleClass(classId, status) {
   const email = document.getElementById("regEmail").value.trim();
   const name = document.getElementById("regName").value.trim();
   const whatsapp = document.getElementById("regWhatsApp").value.trim();
   const msgBox = document.getElementById("regMessage");
 
   if (!email || !name || !whatsapp) {
-    msgBox.innerHTML = "Please complete all fields.";
-    msgBox.style.color = "red";
-    return;
-  }
-
-  const selected = [...document.querySelectorAll(".class-toggle input:checked")].map(c => ({
-    classId: c.dataset.classId,
-    status: c.dataset.status
-  }));
-
-  if (!selected.length) {
-    msgBox.innerHTML = "Please choose at least one class.";
+    msgBox.innerHTML = "Please complete all fields before joining a class.";
     msgBox.style.color = "red";
     return;
   }
@@ -171,13 +138,15 @@ async function submitRegistration() {
   msgBox.innerHTML = "Submitting...";
   msgBox.style.color = "#ffd78c";
 
+  const selectedClasses = [{ classId, status }];
+
   const result = await fetch(API_BASE, {
     method: "POST",
     body: new URLSearchParams({
       email,
       fullName: name,
       whatsapp,
-      selectedClasses: JSON.stringify(selected),
+      selectedClasses: JSON.stringify(selectedClasses),
       ack: true
     })
   }).then(r => r.json());
@@ -191,6 +160,69 @@ async function submitRegistration() {
     msgBox.innerHTML = `Error: ${result.message || "Unknown error"}`;
     msgBox.style.color = "red";
   }
+}
+
+// --------------------
+// Render Registration Form
+// --------------------
+function renderRegistrationForm() {
+  const wrapper = document.getElementById("registration-section");
+  if (!wrapper) return;
+
+  wrapper.innerHTML = `
+    <h2 style="text-align:center; margin-top:60px;">Register for Classes</h2>
+    <div style="max-width:380px;margin:25px auto;text-align:center;">
+      <input id="regEmail" type="email" placeholder="Enter your email">
+      <input id="regName" type="text" placeholder="Full Name">
+      <input id="regWhatsApp" type="text" placeholder="WhatsApp Number">
+      <button id="regSubmit">Submit Registration</button>
+      <div id="regMessage" style="margin-top:10px;"></div>
+    </div>
+  `;
+
+  document.getElementById("regEmail").addEventListener("blur", checkUserExists);
+  document.getElementById("regSubmit").addEventListener("click", submitRegistration);
+}
+
+// --------------------
+// Check if user exists
+// --------------------
+async function checkUserExists() {
+  const email = document.getElementById("regEmail").value.trim();
+  if (!email) return;
+
+  const users = await fetch(`${API_BASE}?type=users`).then(r => r.json());
+  const match = users.find(u => u.email?.toLowerCase() === email.toLowerCase());
+
+  if (match) {
+    document.getElementById("regName").value = match.fullName || "";
+    document.getElementById("regWhatsApp").value = match.whatsapp || "";
+  }
+}
+
+// --------------------
+// Submit Registration
+// --------------------
+async function submitRegistration() {
+  const email = document.getElementById("regEmail").value.trim();
+  const name = document.getElementById("regName").value.trim();
+  const whatsapp = document.getElementById("regWhatsApp").value.trim();
+  const msgBox = document.getElementById("regMessage");
+
+  if (!email || !name || !whatsapp) {
+    msgBox.innerHTML = "Please complete all fields.";
+    msgBox.style.color = "red";
+    return;
+  }
+
+  msgBox.innerHTML = "Submitting...";
+  msgBox.style.color = "#ffd78c";
+
+  // No pre-selection, must select via toggles after entering info
+  registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
+
+  msgBox.innerHTML = "Email registered! Now join classes below.";
+  msgBox.style.color = "#c59b5a";
 }
 
 init();
