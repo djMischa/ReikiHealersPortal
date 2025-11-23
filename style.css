@@ -22,7 +22,6 @@ header {
 
 /* Page title */
 #pageTitle {
-  font-family: 'Bebas Neue', sans-serif;
   font-size: 4rem;
   font-weight: 900;
   letter-spacing: 4px;
@@ -47,7 +46,7 @@ header {
   border-radius: 15px;
   padding: 25px;
   text-align: left;
-  transition: 0.5s;
+  transition: all 0.5s ease;
   opacity: 0;
   transform: translateY(50px);
   position: relative;
@@ -85,16 +84,43 @@ ul li::marker {
 }
 
 /* Remaining spaces line */
-.class-container span {
+.spaces-toggle-wrapper span {
   font-size: 18px;
-  color: var(--gold-dark);
-  display: block;
-  margin-top: 6px;
-  margin-bottom: 0;
   font-weight: bold;
+  color: var(--gold-dark);
+  white-space: nowrap;
 }
 
-/* ---------- Inline Join Class / Standby Toggle (Ferrari Luxury) ---------- */
+/* ---------- Luxury Animated Toggle ---------- */
+.lux-toggle {
+  display: inline-block;
+  background: var(--gold-dark);
+  color: var(--bg-black);
+  padding: 8px 20px;
+  border-radius: 25px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-align: center;
+  min-width: 140px;
+  box-shadow: 0 4px 12px rgba(197,155,90,0.4);
+  user-select: none;
+  font-size: 16px;
+}
+
+.lux-toggle:hover {
+  background: var(--gold-light);
+  color: var(--bg-black);
+  box-shadow: 0 6px 18px rgba(197,155,90,0.6);
+  transform: translateY(-2px);
+}
+
+.lux-toggle:active {
+  transform: translateY(1px);
+  box-shadow: 0 2px 6px rgba(197,155,90,0.4);
+}
+
+/* Wrapper for remaining spaces + toggle */
 .spaces-toggle-wrapper {
   display: flex;
   justify-content: space-between;
@@ -102,54 +128,6 @@ ul li::marker {
   margin-top: 12px;
   flex-wrap: wrap;
   gap: 8px;
-}
-
-.class-toggle {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  font-size: 16px;
-  color: var(--gold-dark);
-}
-
-.class-toggle input[type="checkbox"] {
-  width: 20px;
-  height: 20px;
-  -webkit-appearance: none;
-  appearance: none;
-  border: 2px solid var(--gold-dark);
-  border-radius: 4px;
-  background-color: var(--white);
-  position: relative;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-.class-toggle input[type="checkbox"]:checked::after {
-  content: "";
-  position: absolute;
-  left: 4px;
-  top: 0px;
-  width: 6px;
-  height: 12px;
-  border: solid var(--gold-dark);
-  border-width: 0 3px 3px 0;
-  transform: rotate(45deg);
-}
-
-/* Hover glow for toggle */
-.class-toggle input[type="checkbox"]:hover {
-  box-shadow: 0 0 6px rgba(197,155,90,0.5);
-}
-
-/* Prevent remaining text from shrinking */
-.spaces-toggle-wrapper span {
-  white-space: nowrap;
-  font-weight: bold;
-  font-size: 18px;
-  color: var(--gold-dark);
 }
 
 /* ---------- Registration Form ---------- */
