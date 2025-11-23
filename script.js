@@ -91,8 +91,8 @@ function renderClasses() {
 // Remaining spaces link at bottom
 const remaining = cls.capacity - participants.length;
 const remainLink = document.createElement("a");
-remainLink.href = "https://tinyurl.com/ReikiReg";
-remainLink.target = "_blank";
+//remainLink.href = "https://tinyurl.com/ReikiReg";
+//remainLink.target = "_blank";
 remainLink.style.fontSize = "18px";
 remainLink.style.color = "#c59b5a";
 remainLink.style.textDecoration = "none";
