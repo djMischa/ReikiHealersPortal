@@ -58,11 +58,15 @@ async function handleWhatsAppSubmit() {
     // Existing user
     currentUser = user;
     userRegistered = true;
+    // added font size
+    msgBox.style.fontSize = "26px"
     msgBox.textContent = `Welcome ${currentUser.firstName}! Please toggle the classes you would like to join.`;
     msgBox.style.color = "#ffffff";
   } else {
     // New user -> show extra fields
     document.getElementById("extraFields").style.display = "block";
+    // added font size
+    msgBox.style.fontSize = "26px"
     msgBox.textContent = "Please complete your registration.";
     msgBox.style.color = "#ffffff";
   }
