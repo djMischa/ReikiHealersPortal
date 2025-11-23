@@ -62,7 +62,7 @@ function renderClasses() {
     });
     div.appendChild(ul);
 
-    // ===== Standby List (if any) =====
+    // ===== Standby List =====
     if (standbyParticipants.length) {
       const standbyTitle = document.createElement("div");
       standbyTitle.textContent = "ON STANDBY";
@@ -81,34 +81,23 @@ function renderClasses() {
       div.appendChild(standbyUl);
     }
 
-    // ===== Remaining / Luxury Animated Toggle =====
+    // ===== Remaining / Toggle =====
     const remaining = cls.capacity - participants.length;
     const wrapper = document.createElement("div");
     wrapper.className = "spaces-toggle-wrapper";
 
     const remainText = document.createElement("span");
-    if (remaining > 0) {
-      remainText.textContent = `→ ${remaining} spaces remaining`;
-    } else if (standbyParticipants.length < cls.capacity) {
-      remainText.textContent = "CLASS FULL – STANDBY AVAILABLE";
-    } else {
-      remainText.textContent = "CLASS FULL";
-    }
-    remainText.style.fontWeight = "bold";
-    remainText.style.fontSize = "18px";
-    remainText.style.color = "#c59b5a";
+    remainText.textContent = remaining > 0 ? `→ ${remaining} spaces remaining` : "CLASS FULL – STANDBY AVAILABLE";
 
-    // Luxury animated toggle
+    // Luxury toggle
     const toggleWrapper = document.createElement("div");
     toggleWrapper.className = "lux-toggle";
     toggleWrapper.dataset.classId = cls.id;
     toggleWrapper.dataset.status = remaining > 0 ? "confirmed" : "standby";
-    toggleWrapper.textContent = remaining > 0 ? "Join Class" : "Join Standby";
 
+    // Slide toggle animation & submit
     toggleWrapper.addEventListener("click", async () => {
-      // If already active, ignore clicks
       if (toggleWrapper.classList.contains("active")) return;
-
       toggleWrapper.classList.add("active");
       toggleWrapper.style.pointerEvents = "none";
 
@@ -119,11 +108,10 @@ function renderClasses() {
 
     wrapper.appendChild(remainText);
     wrapper.appendChild(toggleWrapper);
-
     div.appendChild(wrapper);
+
     container.appendChild(div);
 
-    // Fade-in animation
     setTimeout(() => {
       div.style.opacity = "1";
       div.style.transform = "translateY(0)";
@@ -132,7 +120,7 @@ function renderClasses() {
 }
 
 // --------------------
-// Submit a single class via toggle
+// Submit single class
 // --------------------
 async function submitSingleClass(classId, status) {
   const email = document.getElementById("regEmail").value.trim();
@@ -196,7 +184,7 @@ function renderRegistrationForm() {
 }
 
 // --------------------
-// Check if user exists
+// Check user exists
 // --------------------
 async function checkUserExists() {
   const email = document.getElementById("regEmail").value.trim();
@@ -212,7 +200,7 @@ async function checkUserExists() {
 }
 
 // --------------------
-// Submit Registration
+// Submit registration (just email + info, join classes via toggle)
 // --------------------
 async function submitRegistration() {
   const email = document.getElementById("regEmail").value.trim();
