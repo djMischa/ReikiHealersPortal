@@ -21,16 +21,48 @@ function formatClassTime(dateStr, timeStr) {
 function renderRegistrationSection() {
   const wrapper = document.getElementById("registration-section");
   wrapper.innerHTML = `
-    <h2 style="text-align:center; margin-top:40px;">Enter your WhatsApp to start</h2>
-    <div style="max-width:380px;margin:20px auto;text-align:center;">
-      <input id="inputWhatsApp" type="text" placeholder="WhatsApp Number">
-      <button id="btnWhatsAppSubmit">Submit</button>
+    <div style="max-width:400px; margin:20px auto; text-align:center;">
+      <input id="inputWhatsApp" type="text" placeholder="Enter your WhatsApp Number" style="
+        width: 100%;
+        padding: 12px;
+        font-size: 18px;
+        border-radius: 8px;
+        border: 2px solid #c59b5a;
+        margin-bottom: 12px;
+        box-sizing: border-box;
+      ">
+      <button id="btnWhatsAppSubmit" style="
+        width: 100%;
+        padding: 12px;
+        background: #c59b5a;
+        color: #ffffff;
+        font-weight: bold;
+        border: 2px solid #c59b5a;
+        border-radius: 8px;
+        font-size: 18px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      ">Submit</button>
       <div id="regMessage" style="margin-top:12px; color:#ffd78c;"></div>
     </div>
   `;
 
+  // Hover effect for luxury button
+  const btn = document.getElementById("btnWhatsAppSubmit");
+  btn.addEventListener("mouseenter", () => {
+    btn.style.background = "#ffd78c";
+    btn.style.color = "#000000";
+    btn.style.borderColor = "#ffd78c";
+  });
+  btn.addEventListener("mouseleave", () => {
+    btn.style.background = "#c59b5a";
+    btn.style.color = "#ffffff";
+    btn.style.borderColor = "#c59b5a";
+  });
+
   document.getElementById("btnWhatsAppSubmit").addEventListener("click", handleWhatsAppSubmit);
 }
+
 
 // --- Handle WhatsApp lookup ---
 async function handleWhatsAppSubmit() {
