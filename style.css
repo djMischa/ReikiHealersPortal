@@ -94,23 +94,49 @@ ul li::marker {
 /* ---------- Luxury Animated Toggle ---------- */
 .lux-toggle {
   display: inline-block;
+  position: relative;
   background: var(--gold-dark);
   color: var(--bg-black);
-  padding: 8px 20px;
+  padding: 8px 24px;
   border-radius: 25px;
   font-weight: bold;
   cursor: pointer;
   transition: all 0.3s ease;
   text-align: center;
   min-width: 140px;
+  font-size: 16px;
   box-shadow: 0 4px 12px rgba(197,155,90,0.4);
   user-select: none;
-  font-size: 16px;
 }
 
-.lux-toggle:hover {
+.lux-toggle::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 12px;
+  transform: translateY(-50%);
+  width: 20px;
+  height: 20px;
+  background: var(--bg-black);
+  border-radius: 50%;
+  border: 2px solid var(--gold-dark);
+  transition: all 0.3s ease;
+}
+
+.lux-toggle.active {
   background: var(--gold-light);
   color: var(--bg-black);
+}
+
+.lux-toggle.active::after {
+  right: calc(100% - 32px); /* slides toggle indicator to left */
+  background: var(--bg-black);
+  border-color: var(--gold-dark);
+}
+
+/* Hover/active effects */
+.lux-toggle:hover {
+  background: var(--gold-light);
   box-shadow: 0 6px 18px rgba(197,155,90,0.6);
   transform: translateY(-2px);
 }
