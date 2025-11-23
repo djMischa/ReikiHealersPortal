@@ -169,7 +169,7 @@ ul li::marker {
 
 /* Registration form cleanup */
 #registration-section {
-max-width: 420px;
+max-width: 380px;
 margin: 50px auto;
 padding: 0 15px;
 text-align: center;
