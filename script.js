@@ -23,7 +23,7 @@ function renderRegistrationSection() {
   wrapper.innerHTML = `
     <div style="max-width:400px; margin:20px auto; text-align:center;">
       <input id="inputWhatsApp" type="text" placeholder="Enter your WhatsApp Number" style="
-        width: 100%;
+        width: 90%;
         padding: 12px;
         font-size: 18px;
         border-radius: 8px;
@@ -32,7 +32,7 @@ function renderRegistrationSection() {
         box-sizing: border-box;
       ">
       <button id="btnWhatsAppSubmit" style="
-        width: 100%;
+        width: 90%;
         padding: 12px;
         background: #c59b5a;
         color: #ffffff;
