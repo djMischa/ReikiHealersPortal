@@ -167,6 +167,54 @@ ul li::marker {
   z-index:0;
 }
 
+/* Registration form cleanup */
+#registration-section {
+max-width: 420px;
+margin: 50px auto;
+padding: 0 15px;
+text-align: center;
+}
+
+#registration-section form input,
+#registration-section form textarea,
+#registration-section form select {
+width: 100%;
+max-width: 100%;
+padding: 12px;
+margin-top: 12px;
+border: 2px solid var(--gold-dark);
+border-radius: 8px;
+background: rgba(255,255,255,0.05);
+color: var(--white);
+font-size: 18px;
+box-sizing: border-box;
+}
+
+#registration-section button {
+width: 100%;
+max-width: 100%;
+margin-top: 25px;
+padding: 14px;
+background: var(--gold-dark);
+border: none;
+border-radius: 8px;
+color: var(--bg-black);
+font-size: 20px;
+font-weight: bold;
+cursor: pointer;
+}
+
+#registration-section button:hover {
+background: var(--gold-light);
+}
+
+/* Ensure no horizontal scrolling on mobile */
+body, html {
+overflow-x: hidden;
+}
+
+
+
 /* Responsive */
 @media (max-width:768px){
   #pageTitle { font-size:3rem; }
