@@ -22,12 +22,7 @@ function renderClasses() {
   container.innerHTML = "";
   container.style.display = "block";
 
-  // Sort by display order
-  classesData.sort(
-    (a, b) => parseInt(a.displayOrder || 999) - parseInt(b.displayOrder || 999)
-  );
-
-  const currentEmail = document.getElementById("regEmail")?.value?.trim()?.toLowerCase() || "";
+  classesData.sort((a, b) => parseInt(a.displayOrder || 999) - parseInt(b.displayOrder || 999));
 
   classesData.forEach((cls, i) => {
     if (cls.status === "hidden") return;
@@ -35,9 +30,7 @@ function renderClasses() {
     const div = document.createElement("div");
     div.className = "class-container";
 
-    // ---------------------------
-    // Get Participants
-    // ---------------------------
+    // --- Participants ---
     const participants = registrationsData
       .filter(r => r.classId === cls.id && r.status === "confirmed")
       .map(r => r.fullName)
@@ -48,16 +41,7 @@ function renderClasses() {
       .map(r => r.fullName)
       .sort((a, b) => a.localeCompare(b));
 
-    // Check if this user is signed up already
-    const myRegistration = registrationsData.find(
-      r => r.classId === cls.id && r.email?.toLowerCase() === currentEmail
-    );
-    const isMeConfirmed = myRegistration?.status === "confirmed";
-    const isMeStandby = myRegistration?.status === "standby";
-
-    // ---------------------------
-    // Location + Date
-    // ---------------------------
+    // --- Location & date ---
     const locElem = document.createElement("div");
     locElem.className = "class-location";
     locElem.textContent = `${cls.location} – ${participants.length} healer${participants.length !== 1 ? "s" : ""}`;
@@ -69,9 +53,7 @@ function renderClasses() {
     div.appendChild(locElem);
     div.appendChild(dateElem);
 
-    // ---------------------------
-    // Participant List
-    // ---------------------------
+    // --- Participant list ---
     const ul = document.createElement("ul");
     participants.forEach(p => {
       const li = document.createElement("li");
@@ -80,14 +62,14 @@ function renderClasses() {
     });
     div.appendChild(ul);
 
-    // Standby List
+    // --- Standby list ---
     if (standbyParticipants.length) {
       const standbyTitle = document.createElement("div");
       standbyTitle.textContent = "ON STANDBY";
-      standbyTitle.style.fontSize = "18px";
-      standbyTitle.style.marginTop = "10px";
+      standbyTitle.style.marginTop = "6px";
       standbyTitle.style.fontWeight = "bold";
       standbyTitle.style.color = "#c59b5a";
+      standbyTitle.style.fontSize = "18px"; // same as remaining spaces
 
       const standbyUl = document.createElement("ul");
       standbyParticipants.forEach(p => {
@@ -100,11 +82,8 @@ function renderClasses() {
       div.appendChild(standbyUl);
     }
 
-    // ---------------------------
-    // Remaining Spaces
-    // ---------------------------
+    // --- Remaining / toggle ---
     const remaining = cls.capacity - participants.length;
-
     const wrapper = document.createElement("div");
     wrapper.className = "spaces-toggle-wrapper";
 
@@ -114,48 +93,45 @@ function renderClasses() {
         ? `→ ${remaining} spaces remaining`
         : "CLASS FULL – JOIN STANDBY";
 
-    // ---------------------------
-    // Luxury Toggle
-    // ---------------------------
+    // --- Luxury toggle switch ---
     const toggle = document.createElement("div");
     toggle.className = "lux-toggle";
     toggle.dataset.classId = cls.id;
 
-    // Turn ON if user already registered
-    if (isMeConfirmed || isMeStandby) {
-      toggle.classList.add("active");
-    }
+    // Check if user is already registered for this class
+    const registered = registrationsData.some(r =>
+      r.classId === cls.id &&
+      (r.status === "confirmed" || r.status === "standby")
+    );
+
+    toggle.classList.toggle("active", registered);
 
     toggle.addEventListener("click", async () => {
-      const name = document.getElementById("regName")?.value?.trim();
-      const email = document.getElementById("regEmail")?.value?.trim();
-      const whatsapp = document.getElementById("regWhatsApp")?.value?.trim();
-      const msgBox = document.getElementById("regMessage");
+      const currentlyActive = toggle.classList.contains("active");
 
-      if (!email || !name || !whatsapp) {
-        msgBox.innerHTML = "Please complete all fields before joining a class.";
-        msgBox.style.color = "red";
-        return;
-      }
+      // Toggle UI state immediately
+      toggle.classList.toggle("active");
 
-      const wasActive = toggle.classList.contains("active");
-
+      // Disable while sending
       toggle.style.pointerEvents = "none";
 
-      if (wasActive) {
-        // User is removing themselves from the class
-        await submitSingleClass(cls.id, "remove");
-        toggle.classList.remove("active");
-      } else {
-        // User joining
+      if (!currentlyActive) {
+        // Turning ON
         await submitSingleClass(
           cls.id,
           remaining > 0 ? "confirmed" : "standby"
         );
-        toggle.classList.add("active");
+      } else {
+        // Turning OFF = remove registration
+        await submitSingleClass(cls.id, "remove");
       }
 
+      // Re-enable
       toggle.style.pointerEvents = "auto";
+
+      // Refresh classes to update participant counts
+      registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
+      renderClasses();
     });
 
     wrapper.appendChild(remainText);
@@ -171,6 +147,7 @@ function renderClasses() {
     }, i * 150);
   });
 }
+
 
 
 
