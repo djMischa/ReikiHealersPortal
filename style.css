@@ -52,7 +52,7 @@ header {
   transform: translateY(50px);
   position: relative;
   overflow: visible;
-  margin-bottom: 24px; /* spacing between class cards */
+  margin-bottom: 24px;
 }
 
 .class-container:hover {
@@ -99,6 +99,8 @@ ul li::marker {
   justify-content: space-between;
   align-items: center;
   margin-top: 12px;
+  flex-wrap: wrap; /* ensures proper wrapping on small screens */
+  gap: 8px;
 }
 
 .class-toggle {
@@ -122,9 +124,9 @@ ul li::marker {
   cursor: pointer;
 }
 
-/* Checked toggle neon glow (override dynamically via JS) */
+/* Checked toggle neon glow (overridden dynamically via JS for confirmed vs standby) */
 .class-toggle input[type="checkbox"]:checked {
-  accent-color: #00ffff; /* JS overrides for standby #00ff00 */
+  accent-color: #00ffff; /* JS dynamically changes to #00ff00 for standby */
 }
 
 .class-toggle input[type="checkbox"]:checked::after {
@@ -142,6 +144,14 @@ ul li::marker {
 /* Hover glow for toggle */
 .class-toggle input[type="checkbox"]:hover {
   box-shadow: 0 0 6px rgba(197,155,90,0.8);
+}
+
+/* Prevent remaining text from shrinking too small */
+.spaces-toggle-wrapper span {
+  white-space: nowrap;
+  font-weight: bold;
+  font-size: 18px;
+  color: var(--gold-dark);
 }
 
 /* ---------- Registration Form ---------- */
@@ -175,7 +185,7 @@ ul li::marker {
 
 /* Submit button */
 #registration-section form button {
-  background: #c59b5a;   /* exact gold */
+  background: #c59b5a;
   color: var(--bg-black);
   font-weight: bold;
   cursor: pointer;
@@ -183,7 +193,7 @@ ul li::marker {
 }
 
 #registration-section form button:hover {
-  background: #ffd78c;  /* lighter gold on hover */
+  background: #ffd78c;
 }
 
 /* Sparkle Canvas */
@@ -206,4 +216,3 @@ ul li::marker {
     grid-template-columns: 1fr;
   }
 }
-
