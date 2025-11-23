@@ -103,7 +103,6 @@ ul li::marker {
   border-radius: 14px;
   background: var(--gold-dark);
   cursor: pointer;
-  flex-shrink: 0;
   transition: background 0.3s ease;
 }
 
@@ -127,6 +126,7 @@ ul li::marker {
 .lux-toggle.active::after {
   transform: translateX(32px);
 }
+
 
 .lux-toggle:hover {
   box-shadow: 0 0 6px rgba(255, 215, 140, 0.6);
