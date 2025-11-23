@@ -30,12 +30,7 @@ function renderClasses() {
   container.innerHTML = "";
   container.style.display = "block";
 
-  // Respect displayOrder
-  classesData.sort((a, b) => {
-    const ao = parseInt(a.displayOrder || 999);
-    const bo = parseInt(b.displayOrder || 999);
-    return ao - bo;
-  });
+  classesData.sort((a, b) => (parseInt(a.displayOrder || 999) - parseInt(b.displayOrder || 999)));
 
   classesData.forEach((cls, i) => {
     if (cls.status === "hidden") return;
@@ -74,7 +69,6 @@ function renderClasses() {
     });
 
     // Standby sublist
-    let standbyUl = null;
     if (standbyParticipants.length) {
       const standbyTitle = document.createElement("div");
       standbyTitle.textContent = "Standby:";
@@ -82,7 +76,7 @@ function renderClasses() {
       standbyTitle.style.color = "#ffd78c";
       standbyTitle.style.fontWeight = "bold";
 
-      standbyUl = document.createElement("ul");
+      const standbyUl = document.createElement("ul");
       standbyParticipants.forEach(p => {
         const li = document.createElement("li");
         li.textContent = p;
@@ -93,50 +87,38 @@ function renderClasses() {
       div.appendChild(standbyUl);
     }
 
-    // Remaining spaces + Join toggle
+    // Remaining spaces + Join toggle (Ferrari-style)
     const remaining = cls.capacity - participants.length;
-    const joinDiv = document.createElement("div");
-    joinDiv.style.display = "flex";
-    joinDiv.style.justifyContent = "space-between";
-    joinDiv.style.alignItems = "center";
-    joinDiv.style.marginTop = "12px";
+    const wrapper = document.createElement("div");
+    wrapper.className = "spaces-toggle-wrapper";
 
     const remainText = document.createElement("span");
-    remainText.style.color = "#c59b5a";
-    remainText.style.fontSize = "18px";
-    remainText.style.fontWeight = "bold";
     remainText.textContent = remaining > 0 ? `→ ${remaining} spaces remaining` : "CLASS FULL – STANDBY AVAILABLE";
+    remainText.style.color = "#c59b5a";
+    remainText.style.fontWeight = "bold";
+    remainText.style.fontSize = "18px";
 
-    const checkboxLabel = document.createElement("label");
-    checkboxLabel.style.display = "flex";
-    checkboxLabel.style.alignItems = "center";
-    checkboxLabel.style.gap = "6px";
-    checkboxLabel.style.cursor = "pointer";
-    checkboxLabel.style.fontWeight = "bold";
-    checkboxLabel.style.fontSize = "16px";
-    checkboxLabel.style.color = remaining > 0 ? "#00ffff" : "#00ff00"; // neon blue / neon green
+    const toggleLabel = document.createElement("label");
+    toggleLabel.className = "class-toggle";
+    toggleLabel.style.color = remaining > 0 ? "#00ffff" : "#00ff00"; // neon blue / neon green
 
-    const checkbox = document.createElement("input");
-    checkbox.type = "checkbox";
-    checkbox.dataset.classId = cls.id;
-    checkbox.dataset.status = remaining > 0 ? "confirmed" : "standby";
-    checkbox.style.width = "18px";
-    checkbox.style.height = "18px";
-    checkbox.style.margin = "0";
-    checkbox.style.cursor = "pointer";
-    checkbox.style.accentColor = remaining > 0 ? "#00ffff" : "#00ff00"; // neon glow color
+    const toggleCheckbox = document.createElement("input");
+    toggleCheckbox.type = "checkbox";
+    toggleCheckbox.dataset.classId = cls.id;
+    toggleCheckbox.dataset.status = remaining > 0 ? "confirmed" : "standby";
+    toggleCheckbox.style.accentColor = remaining > 0 ? "#00ffff" : "#00ff00";
 
-    checkboxLabel.appendChild(document.createTextNode(remaining > 0 ? "Join Class" : "Join Standby"));
-    checkboxLabel.appendChild(checkbox);
+    toggleLabel.appendChild(document.createTextNode(remaining > 0 ? "Join Class" : "Join Standby"));
+    toggleLabel.appendChild(toggleCheckbox);
 
-    joinDiv.appendChild(remainText);
-    joinDiv.appendChild(checkboxLabel);
+    wrapper.appendChild(remainText);
+    wrapper.appendChild(toggleLabel);
+    div.appendChild(wrapper);
 
-    // Append all to card
+    // Append other elements
     div.appendChild(locElem);
     div.appendChild(dateElem);
     div.appendChild(ul);
-    div.appendChild(joinDiv);
 
     container.appendChild(div);
 
@@ -210,7 +192,7 @@ async function submitRegistration() {
   }
 
   // Collect selected classes with status
-  const selected = [...document.querySelectorAll(".class-checkbox input:checked")].map(c => ({
+  const selected = [...document.querySelectorAll(".class-toggle input:checked")].map(c => ({
     classId: c.dataset.classId,
     status: c.dataset.status
   }));
@@ -247,7 +229,6 @@ async function submitRegistration() {
 }
 
 init();
-
 
 
 // https://script.google.com/macros/s/AKfycbxIh2pNznerXY9k6hDS912Brb5w6-nhJVTNQP37Av0yffRedLf4KYqtvyS05iFEGQ2V/exec
