@@ -51,7 +51,7 @@ header {
   transform: translateY(50px);
   position: relative;
   overflow: visible;
-  margin-bottom: 20px; /* adds blank space between class cards */
+  margin-bottom: 30px; /* adds blank space between class cards */
 }
 
 .class-container:hover {
@@ -102,7 +102,7 @@ header {
 .class-date { font-size:18px; margin-bottom:12px; }
 ul { padding-left:20px; font-size:18px; list-style-type:disc; list-style-position:inside; color: var(--white); }
 ul li::marker { color: var(--gold-dark); }
-.class-container a { color: var(--gold-dark); text-decoration:none; font-size:18px; display:block; margin-top:12px; margin-bottom:0; }
+.class-container a { color: var(--gold-dark); text-decoration:none; font-size:18px; display:block; margin-top:6px; margin-bottom:0; }
 .class-container a:hover { text-shadow:0 0 8px var(--gold-light); }
 
 /* Registration section */
