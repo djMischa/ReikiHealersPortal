@@ -66,6 +66,7 @@ header {
   margin-bottom: 12px;
 }
 
+/* Participant Lists */
 ul {
   padding-left: 20px;
   font-size: 18px;
@@ -78,13 +79,14 @@ ul li::marker {
   color: var(--gold-dark);
 }
 
+/* ---------- Remaining / Toggle Row ---------- */
 .spaces-toggle-wrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 12px;
-  flex-wrap: wrap;
-  gap: 8px;
+  flex-wrap: nowrap;
+  gap: 12px;
 }
 
 .spaces-toggle-wrapper span {
@@ -92,53 +94,47 @@ ul li::marker {
   font-weight: bold;
   color: var(--gold-dark);
   white-space: nowrap;
-  flex-shrink: 0;
+  flex-shrink: 1;
 }
 
-/* ---------- Luxury Animated Toggle ---------- */
+/* ---------- Ferrari Luxury Toggle ---------- */
 .lux-toggle {
   position: relative;
-  width: 60px;
-  height: 28px;
-  border-radius: 14px;
-  background: var(--gold-dark);
+  width: 46px;
+  height: 22px;
+  border-radius: 30px;
+  background: #555;
   cursor: pointer;
-  transition: background 0.3s ease;
+  transition: background 0.25s;
+  flex-shrink: 0;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
 }
 
 .lux-toggle::after {
   content: "";
   position: absolute;
+  width: 18px;
+  height: 18px;
   top: 2px;
   left: 2px;
-  width: 24px;
-  height: 24px;
-  background: var(--white);
   border-radius: 50%;
-  transition: all 0.3s ease;
-  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+  background: white;
+  transition: left 0.25s;
+  box-shadow: 0 0 6px rgba(0,0,0,0.4);
 }
 
 .lux-toggle.active {
-  background: var(--gold-light);
+  background: var(--gold-dark);
+  box-shadow: 0 0 8px rgba(197,155,90,0.8), inset 0 0 6px rgba(0,0,0,0.4);
 }
 
 .lux-toggle.active::after {
-  transform: translateX(32px);
+  left: 26px;
 }
 
-/* Make sure the row spacing stays clean */
-.spaces-toggle-wrapper {
-display: flex;
-justify-content: space-between;
-align-items: center;
-margin-top: 12px;
-flex-wrap: nowrap;
-gap: 12px;
-}
-
+/* Hover glow */
 .lux-toggle:hover {
-  box-shadow: 0 0 6px rgba(255, 215, 140, 0.6);
+  box-shadow: 0 0 10px rgba(197,155,90,0.6), inset 0 0 6px rgba(0,0,0,0.4);
 }
 
 /* ---------- Registration Form ---------- */
@@ -173,7 +169,6 @@ gap: 12px;
   color: var(--bg-black);
   font-weight: bold;
   cursor: pointer;
-  border: 2px solid var(--gold-dark);
   transition: all 0.3s ease;
 }
 
@@ -182,7 +177,7 @@ gap: 12px;
   border-color: var(--gold-light);
 }
 
-/* Sparkle Canvas */
+/* Sparkle Background Canvas */
 #sparkleCanvas {
   position: fixed;
   top: 0;
@@ -202,7 +197,7 @@ gap: 12px;
     grid-template-columns: 1fr;
   }
   .spaces-toggle-wrapper {
-    flex-direction: row;
     justify-content: space-between;
+    gap: 10px;
   }
 }
