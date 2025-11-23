@@ -84,6 +84,7 @@ function renderClasses() {
     if (standbyParticipants.length) {
       const standbyTitle = document.createElement("div");
       standbyTitle.textContent = "ON STANDBY";
+      standbyTitle.style.fontSize = "18px";
       standbyTitle.style.marginTop = "10px";
       standbyTitle.style.fontWeight = "bold";
       standbyTitle.style.color = "#c59b5a";
