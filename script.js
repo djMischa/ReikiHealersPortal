@@ -214,6 +214,20 @@ function renderClasses() {
     toggle.className = "lux-toggle";
     toggle.dataset.classId = cls.id;
 
+    // Check if current user is registered for this class
+if (currentUser) {
+  const isEnrolled = registrationsData.some(r =>
+    r.classId === cls.id &&
+    r.whatsapp == currentUser.whatsapp &&
+    (r.status === "confirmed" || r.status === "standby")
+  );
+
+  if (isEnrolled) {
+    toggle.classList.add("active");
+  }
+}
+
+
     if (!userRegistered) toggle.style.pointerEvents = "none"; // disabled if not submitted WhatsApp
 
     toggle.addEventListener("click", async () => {
