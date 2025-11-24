@@ -122,6 +122,7 @@ async function handleFullRegistration() {
   const email = document.getElementById("regEmail").value.trim();
   const rawWhatsApp = document.getElementById("regWhatsApp").value.trim();
   const whatsapp = normalizePhone(rawWhatsApp);
+
   const msgBox = document.getElementById("regMessage");
 
   if (!firstName || !lastName || !email) {
@@ -130,40 +131,51 @@ async function handleFullRegistration() {
     return;
   }
 
-  const result = await fetch(API_BASE, {
-    method: "POST",
-    body: new URLSearchParams({
-      firstName,
-      lastName,
-      email,
-      whatsapp,
-      ack: true
-    })
-  }).then(r => r.json());
+  try {
+    // Send new user to Users tab
+    const resText = await fetch(API_BASE, {
+      method: "POST",
+      body: new URLSearchParams({
+        firstName,
+        lastName,
+        email,
+        whatsapp,
+        ack: true
+      })
+    }).then(r => r.text());
 
-  if (result.success) {
-    currentUser = { firstName, lastName, email, whatsapp };
-    userRegistered = true;
-
-    msgBox.textContent = `Welcome to the Reiki Collective, ${firstName}! Please toggle classes you would like to join.`;
-    msgBox.style.color = "#ffffff";
-
-    document.getElementById("extraFields").style.display = "none";
-    document.getElementById("regWhatsApp").style.display = "none";
-    document.getElementById("whatsappSubmit").style.display = "none";
-
-    // Ensure registrationsData is valid before rendering
-    if (!Array.isArray(registrationsData)) {
-     console.warn("registrationsData missing!");
-     registrationsData = [];
+    let result;
+    try {
+      result = JSON.parse(resText);
+    } catch (e) {
+      console.error("Failed to parse JSON from server:", resText);
+      msgBox.textContent = `Error: Unexpected response from server.`;
+      msgBox.style.color = "red";
+      return;
     }
-    
-    renderClasses();
-  } else {
-    msgBox.textContent = `Error: ${result.message || "Unknown error"}`;
+
+    if (result.success) {
+      currentUser = { firstName, lastName, email, whatsapp };
+      userRegistered = true;
+      msgBox.style.fontSize = "26px";
+      msgBox.textContent = `Welcome to the Reiki Collective, ${firstName}! Please toggle classes you would like to join.`;
+      msgBox.style.color = "#ffffff";
+
+      // Hide extra fields
+      document.getElementById("extraFields").style.display = "none";
+
+      renderClasses(); // Now toggles are active
+    } else {
+      msgBox.textContent = `Error: ${result.message || "Unknown error"}`;
+      msgBox.style.color = "red";
+    }
+  } catch (err) {
+    console.error("Registration request failed:", err);
+    msgBox.textContent = "Error: Could not connect to server.";
     msgBox.style.color = "red";
   }
 }
+
 
 // --------------------
 // Format class time
