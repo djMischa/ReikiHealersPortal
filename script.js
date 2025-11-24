@@ -56,56 +56,60 @@ function renderRegistrationForm() {
 // Handle WhatsApp submit
 // --------------------
 async function handleWhatsAppSubmit() {
-  const msgBox = document.getElementById("regMessage");
   const whatsappInput = document.getElementById("regWhatsApp");
   const submitBtn = document.getElementById("whatsappSubmit");
+  const msgBox = document.getElementById("regMessage");
+  const rawWhatsApp = whatsappInput.value.trim();
 
-  msgBox.style.color = "#ffffff";
-  msgBox.style.fontSize = "26px";
-
-  const whatsapp = whatsappInput.value.trim();
-  if (!whatsapp) {
+  if (!rawWhatsApp) {
     msgBox.textContent = "Please enter your WhatsApp number.";
     msgBox.style.color = "red";
     return;
   }
 
-  // Disable input & button to prevent multiple clicks
   whatsappInput.disabled = true;
   submitBtn.disabled = true;
 
   try {
-    const users = await fetch(`${API_BASE}?type=users`).then(r => r.json());
-    const user = users.find(u => u.whatsapp === whatsapp);
+    const usersResponse = await fetch(`${API_BASE}?type=users`);
+    if (!usersResponse.ok) throw new Error("Failed to fetch users");
+    const users = await usersResponse.json();
+
+    // Find user exactly
+    const user = users.find(u => u.whatsapp === rawWhatsApp);
 
     if (user) {
       currentUser = user;
       userRegistered = true;
-      msgBox.textContent = `Welcome ${currentUser.firstName}! Please toggle classes you would like to join.`;
-
+      msgBox.style.fontSize = "26px";
+      msgBox.style.color = "#ffffff";
+      msgBox.textContent = `Welcome ${user.firstName}! Please toggle classes you would like to join.`;
     } else {
-      // New user: show extra registration fields
       document.getElementById("extraFields").style.display = "block";
+      msgBox.style.fontSize = "26px";
+      msgBox.style.color = "#ffffff";
       msgBox.textContent = "Please complete your registration.";
     }
 
-    // Only hide WhatsApp input after user processing
     whatsappInput.style.display = "none";
     submitBtn.style.display = "none";
 
-    // Activate toggles after userRegistered is set
-    renderClasses();
+    // Only call renderClasses if registrationsData is loaded
+    if (Array.isArray(registrationsData)) {
+      renderClasses();
+    } else {
+      console.warn("registrationsData not loaded yet!");
+    }
 
   } catch (err) {
     console.error("WhatsApp submit error:", err);
-    msgBox.textContent = "Error contacting server. Please try again.";
     msgBox.style.color = "red";
-
-    // Re-enable input & button
+    msgBox.textContent = "Error contacting server. Try again.";
     whatsappInput.disabled = false;
     submitBtn.disabled = false;
   }
 }
+
 
 
 
@@ -148,6 +152,12 @@ async function handleFullRegistration() {
     document.getElementById("regWhatsApp").style.display = "none";
     document.getElementById("whatsappSubmit").style.display = "none";
 
+    // Ensure registrationsData is valid before rendering
+    if (!Array.isArray(registrationsData)) {
+     console.warn("registrationsData missing!");
+     registrationsData = [];
+    }
+    
     renderClasses();
   } else {
     msgBox.textContent = `Error: ${result.message || "Unknown error"}`;
