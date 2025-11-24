@@ -83,7 +83,7 @@ async function handleWhatsAppSubmit() {
       userRegistered = true;
       msgBox.style.fontSize = "26px";
       msgBox.style.color = "#ffffff";
-      msgBox.textContent = `Welcome ${user.firstName}! Please toggle classes you would like to join.`;
+      msgBox.textContent = `Welcome ${user.firstName}! Please toggle classes below to join.`;
     } else {
       document.getElementById("extraFields").style.display = "block";
       msgBox.style.fontSize = "26px";
@@ -158,7 +158,7 @@ async function handleFullRegistration() {
       currentUser = { firstName, lastName, email, whatsapp };
       userRegistered = true;
       msgBox.style.fontSize = "26px";
-      msgBox.textContent = `Welcome to the Reiki Collective, ${firstName}! Please toggle classes you would like to join.`;
+      msgBox.textContent = `Welcome to the Reiki Collective, ${firstName}! Please toggle classes below to join.`;
       msgBox.style.color = "#ffffff";
 
       // Hide extra fields
