@@ -101,11 +101,11 @@ ul li::marker {
 .lux-toggle {
   position: relative;
   width: 46px;
-  height: 22px;
+  height: 26px; /* slightly taller/fatter for better touch */
   border-radius: 30px;
   background: #555;
   cursor: pointer;
-  transition: background 0.25s;
+  transition: background 0.3s, box-shadow 0.3s; /* smooth animation */
   flex-shrink: 0;
   box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
 }
@@ -115,26 +115,48 @@ ul li::marker {
   position: absolute;
   width: 18px;
   height: 18px;
-  top: 2px;
-  left: 2px;
+  top: 4px; /* centered vertically in taller toggle */
+  left: 4px;
   border-radius: 50%;
   background: white;
-  transition: left 0.25s;
+  transition: all 0.3s ease; /* smooth knob movement */
   box-shadow: 0 0 6px rgba(0,0,0,0.4);
 }
 
 .lux-toggle.active {
   background: var(--gold-dark);
+  border: 2px solid var(--gold-dark); /* gold border for active */
   box-shadow: 0 0 8px rgba(197,155,90,0.8), inset 0 0 6px rgba(0,0,0,0.4);
 }
 
 .lux-toggle.active::after {
-  left: 26px;
+  left: 24px; /* move knob smoothly */
 }
 
 /* Hover glow */
 .lux-toggle:hover {
-  box-shadow: 0 0 10px rgba(197,155,90,0.6), inset 0 0 6px rgba(0,0,0,0.4);
+  box-shadow: 0 0 12px rgba(197,155,90,0.6), inset 0 0 6px rgba(0,0,0,0.4);
+}
+
+/* Disabled toggles */
+.lux-toggle[style*="pointer-events: none"] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Slightly taller toggle on mobile (fatter knob as well) */
+@media (max-width: 480px) {
+  .lux-toggle {
+    height: 30px;
+  }
+  .lux-toggle::after {
+    top: 6px;
+    width: 20px;
+    height: 20px;
+  }
+  .lux-toggle.active::after {
+    left: 26px;
+  }
 }
 
 /* ---------- Registration Form ---------- */
