@@ -5,6 +5,22 @@ let registrationsData = [];
 let currentUser = null; // Stores the logged-in user's data
 let userRegistered = false; // Tracks if user submitted WhatsApp or registered
 
+function normalizePhone(num) {
+  if (!num) return "";
+
+  // Remove everything except digits
+  let digits = num.replace(/\D/g, "");
+
+  // If starts with 1 and is 11 digits, strip country code
+  if (digits.length === 11 && digits.startsWith("1")) {
+    digits = digits.substring(1);
+  }
+
+  return digits;
+}
+
+
+
 async function init() {
   classesData = await fetch(`${API_BASE}?type=classes`).then(r => r.json());
   registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
@@ -22,7 +38,8 @@ function renderRegistrationForm() {
 
   wrapper.innerHTML = `
     <div style="max-width: 400px; margin: 20px auto; text-align:center;">
-      <input id="regWhatsApp" type="text" placeholder="Enter your WhatsApp number" style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
+      <input id="regWhatsApp" type="tel" placeholder="Enter your WhatsApp number" 
+             style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
       <button id="whatsappSubmit" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#ffffff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
       <div id="regMessage" style="margin-top:10px; font-weight:bold;"></div>
       <div id="extraFields" style="margin-top:12px; display:none;">
@@ -38,11 +55,14 @@ function renderRegistrationForm() {
   document.getElementById("fullRegister")?.addEventListener("click", handleFullRegistration);
 }
 
+
 // --------------------
 // Handle WhatsApp Submit
 // --------------------
 async function handleWhatsAppSubmit() {
-  const whatsapp = document.getElementById("regWhatsApp").value.trim();
+  const rawWhatsApp = document.getElementById("regWhatsApp").value.trim();
+  const whatsapp = normalizePhone(rawWhatsApp);
+
   const msgBox = document.getElementById("regMessage");
 
   if (!whatsapp) {
@@ -52,7 +72,8 @@ async function handleWhatsAppSubmit() {
   }
 
   const users = await fetch(`${API_BASE}?type=users`).then(r => r.json());
-  const user = users.find(u => u.whatsapp === whatsapp);
+  const user = users.find(u => normalizePhone(u.whatsapp) === whatsapp);
+
 
   if (user) {
     // Existing user
@@ -85,7 +106,9 @@ async function handleFullRegistration() {
   const firstName = document.getElementById("regFirstName").value.trim();
   const lastName = document.getElementById("regLastName").value.trim();
   const email = document.getElementById("regEmail").value.trim();
-  const whatsapp = document.getElementById("regWhatsApp").value.trim();
+  const rawWhatsApp = document.getElementById("regWhatsApp").value.trim();
+  const whatsapp = normalizePhone(rawWhatsApp);
+
   const msgBox = document.getElementById("regMessage");
 
   if (!firstName || !lastName || !email) {
