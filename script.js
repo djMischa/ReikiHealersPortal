@@ -57,55 +57,56 @@ function renderRegistrationForm() {
 // --------------------
 async function handleWhatsAppSubmit() {
   const msgBox = document.getElementById("regMessage");
+  const whatsappInput = document.getElementById("regWhatsApp");
+  const submitBtn = document.getElementById("whatsappSubmit");
+
   msgBox.style.color = "#ffffff";
   msgBox.style.fontSize = "26px";
 
+  const whatsapp = whatsappInput.value.trim();
+  if (!whatsapp) {
+    msgBox.textContent = "Please enter your WhatsApp number.";
+    msgBox.style.color = "red";
+    return;
+  }
+
+  // Disable input & button to prevent multiple clicks
+  whatsappInput.disabled = true;
+  submitBtn.disabled = true;
+
   try {
-    const whatsapp = document.getElementById("regWhatsApp").value.trim();
-
-    if (!whatsapp) {
-      msgBox.textContent = "Please enter your WhatsApp number.";
-      msgBox.style.color = "red";
-      return;
-    }
-
-    // Fetch all users
-    const response = await fetch(`${API_BASE}?type=users`);
-    const users = await response.json();
-
-    // Check if user exists
+    const users = await fetch(`${API_BASE}?type=users`).then(r => r.json());
     const user = users.find(u => u.whatsapp === whatsapp);
 
     if (user) {
-      // Existing user
       currentUser = user;
       userRegistered = true;
-
       msgBox.textContent = `Welcome ${currentUser.firstName}! Please toggle classes you would like to join.`;
 
-      // Hide WhatsApp input
-      document.getElementById("regWhatsApp").style.display = "none";
-      document.getElementById("whatsappSubmit").style.display = "none";
-
     } else {
-      // New user -> show registration fields
+      // New user: show extra registration fields
       document.getElementById("extraFields").style.display = "block";
       msgBox.textContent = "Please complete your registration.";
-
-      // Keep WhatsApp hidden (user already submitted)
-      document.getElementById("regWhatsApp").style.display = "none";
-      document.getElementById("whatsappSubmit").style.display = "none";
     }
 
-    // Re-render classes to activate toggles if needed
+    // Only hide WhatsApp input after user processing
+    whatsappInput.style.display = "none";
+    submitBtn.style.display = "none";
+
+    // Activate toggles after userRegistered is set
     renderClasses();
 
-  } catch (error) {
-    console.error("WhatsApp submit error:", error);
-    msgBox.textContent = "Oops! Something went wrong. Please try again.";
+  } catch (err) {
+    console.error("WhatsApp submit error:", err);
+    msgBox.textContent = "Error contacting server. Please try again.";
     msgBox.style.color = "red";
+
+    // Re-enable input & button
+    whatsappInput.disabled = false;
+    submitBtn.disabled = false;
   }
 }
+
 
 
 // --------------------
