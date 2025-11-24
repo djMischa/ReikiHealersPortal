@@ -56,40 +56,57 @@ function renderRegistrationForm() {
 // Handle WhatsApp submit
 // --------------------
 async function handleWhatsAppSubmit() {
-  const rawWhatsApp = document.getElementById("regWhatsApp").value.trim();
-  const whatsapp = normalizePhone(rawWhatsApp);
   const msgBox = document.getElementById("regMessage");
+  msgBox.style.color = "#ffffff";
+  msgBox.style.fontSize = "26px";
 
-  if (!whatsapp) {
-    msgBox.textContent = "Please enter your WhatsApp number.";
+  try {
+    const whatsapp = document.getElementById("regWhatsApp").value.trim();
+
+    if (!whatsapp) {
+      msgBox.textContent = "Please enter your WhatsApp number.";
+      msgBox.style.color = "red";
+      return;
+    }
+
+    // Fetch all users
+    const response = await fetch(`${API_BASE}?type=users`);
+    const users = await response.json();
+
+    // Check if user exists
+    const user = users.find(u => u.whatsapp === whatsapp);
+
+    if (user) {
+      // Existing user
+      currentUser = user;
+      userRegistered = true;
+
+      msgBox.textContent = `Welcome ${currentUser.firstName}! Please toggle classes you would like to join.`;
+
+      // Hide WhatsApp input
+      document.getElementById("regWhatsApp").style.display = "none";
+      document.getElementById("whatsappSubmit").style.display = "none";
+
+    } else {
+      // New user -> show registration fields
+      document.getElementById("extraFields").style.display = "block";
+      msgBox.textContent = "Please complete your registration.";
+
+      // Keep WhatsApp hidden (user already submitted)
+      document.getElementById("regWhatsApp").style.display = "none";
+      document.getElementById("whatsappSubmit").style.display = "none";
+    }
+
+    // Re-render classes to activate toggles if needed
+    renderClasses();
+
+  } catch (error) {
+    console.error("WhatsApp submit error:", error);
+    msgBox.textContent = "Oops! Something went wrong. Please try again.";
     msgBox.style.color = "red";
-    return;
   }
-
-  const users = await fetch(`${API_BASE}?type=users`).then(r => r.json());
-  const user = users.find(u => normalizePhone(u.whatsapp) === whatsapp);
-
-  if (user) {
-    // Existing user
-    currentUser = user;
-    userRegistered = true;
-
-    msgBox.style.fontSize = "26px";
-    msgBox.textContent = `Welcome ${currentUser.firstName}! Please toggle classes you would like to join.`;
-    msgBox.style.color = "#ffffff";
-
-    document.getElementById("regWhatsApp").style.display = "none";
-    document.getElementById("whatsappSubmit").style.display = "none";
-  } else {
-    // New user -> show extra fields
-    document.getElementById("extraFields").style.display = "block";
-    msgBox.style.fontSize = "26px";
-    msgBox.textContent = "Please complete your registration.";
-    msgBox.style.color = "#ffffff";
-  }
-
-  renderClasses();
 }
+
 
 // --------------------
 // Handle full registration
