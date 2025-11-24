@@ -2,31 +2,28 @@ const API_BASE = "https://script.google.com/macros/s/AKfycbxIh2pNznerXY9k6hDS912
 
 let classesData = [];
 let registrationsData = [];
-let currentUser = null; // Stores the logged-in user's data
+let currentUser = null; // Logged-in user's data
 let userRegistered = false; // Tracks if user submitted WhatsApp or registered
 
+// --------------------
+// Normalize phone numbers
+// --------------------
 function normalizePhone(num) {
   if (!num) return "";
-
-  // Remove everything except digits
   let digits = num.replace(/\D/g, "");
-
-  // If starts with 1 and is 11 digits, strip country code
-  if (digits.length === 11 && digits.startsWith("1")) {
-    digits = digits.substring(1);
-  }
-
+  if (digits.length === 11 && digits.startsWith("1")) digits = digits.substring(1);
   return digits;
 }
 
-
-
+// --------------------
+// Initialization
+// --------------------
 async function init() {
   classesData = await fetch(`${API_BASE}?type=classes`).then(r => r.json());
   registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
 
-  renderRegistrationForm(); // WhatsApp / registration fields at top
-  renderClasses(); // Class cards below
+  renderRegistrationForm();
+  renderClasses();
 }
 
 // --------------------
@@ -38,7 +35,7 @@ function renderRegistrationForm() {
 
   wrapper.innerHTML = `
     <div style="max-width: 400px; margin: 20px auto; text-align:center;">
-      <input id="regWhatsApp" type="tel" placeholder="Enter your WhatsApp number" 
+      <input id="regWhatsApp" type="tel" inputmode="numeric" placeholder="Enter your WhatsApp number"
              style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
       <button id="whatsappSubmit" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#ffffff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
       <div id="regMessage" style="margin-top:10px; font-weight:bold;"></div>
@@ -55,14 +52,12 @@ function renderRegistrationForm() {
   document.getElementById("fullRegister")?.addEventListener("click", handleFullRegistration);
 }
 
-
 // --------------------
-// Handle WhatsApp Submit
+// Handle WhatsApp submit
 // --------------------
 async function handleWhatsAppSubmit() {
   const rawWhatsApp = document.getElementById("regWhatsApp").value.trim();
   const whatsapp = normalizePhone(rawWhatsApp);
-
   const msgBox = document.getElementById("regMessage");
 
   if (!whatsapp) {
@@ -74,33 +69,30 @@ async function handleWhatsAppSubmit() {
   const users = await fetch(`${API_BASE}?type=users`).then(r => r.json());
   const user = users.find(u => normalizePhone(u.whatsapp) === whatsapp);
 
-
   if (user) {
     // Existing user
     currentUser = user;
     userRegistered = true;
-    // added font size
-    msgBox.style.fontSize = "26px"
+
+    msgBox.style.fontSize = "26px";
     msgBox.textContent = `Welcome ${currentUser.firstName}! Please toggle classes you would like to join.`;
     msgBox.style.color = "#ffffff";
+
+    document.getElementById("regWhatsApp").style.display = "none";
+    document.getElementById("whatsappSubmit").style.display = "none";
   } else {
     // New user -> show extra fields
     document.getElementById("extraFields").style.display = "block";
-    // added font size
-    msgBox.style.fontSize = "26px"
+    msgBox.style.fontSize = "26px";
     msgBox.textContent = "Please complete your registration.";
     msgBox.style.color = "#ffffff";
   }
 
-  // Hide WhatsApp field
-  document.getElementById("regWhatsApp").style.display = "none";
-  document.getElementById("whatsappSubmit").style.display = "none";
-
-  renderClasses(); // Re-render so toggles are active/inactive
+  renderClasses();
 }
 
 // --------------------
-// Handle Full Registration
+// Handle full registration
 // --------------------
 async function handleFullRegistration() {
   const firstName = document.getElementById("regFirstName").value.trim();
@@ -108,7 +100,6 @@ async function handleFullRegistration() {
   const email = document.getElementById("regEmail").value.trim();
   const rawWhatsApp = document.getElementById("regWhatsApp").value.trim();
   const whatsapp = normalizePhone(rawWhatsApp);
-
   const msgBox = document.getElementById("regMessage");
 
   if (!firstName || !lastName || !email) {
@@ -117,7 +108,6 @@ async function handleFullRegistration() {
     return;
   }
 
-  // Send new user to Users tab
   const result = await fetch(API_BASE, {
     method: "POST",
     body: new URLSearchParams({
@@ -132,13 +122,15 @@ async function handleFullRegistration() {
   if (result.success) {
     currentUser = { firstName, lastName, email, whatsapp };
     userRegistered = true;
+
     msgBox.textContent = `Welcome to the Reiki Collective, ${firstName}! Please toggle classes you would like to join.`;
     msgBox.style.color = "#ffffff";
 
-    // Hide extra fields
     document.getElementById("extraFields").style.display = "none";
+    document.getElementById("regWhatsApp").style.display = "none";
+    document.getElementById("whatsappSubmit").style.display = "none";
 
-    renderClasses(); // Now toggles are active
+    renderClasses();
   } else {
     msgBox.textContent = `Error: ${result.message || "Unknown error"}`;
     msgBox.style.color = "red";
@@ -168,7 +160,6 @@ function renderClasses() {
     const div = document.createElement("div");
     div.className = "class-container";
 
-    // Participants
     const participants = registrationsData
       .filter(r => r.classId === cls.id && r.status === "confirmed")
       .map(r => r.fullName)
@@ -183,7 +174,6 @@ function renderClasses() {
     const locElem = document.createElement("div");
     locElem.className = "class-location";
     locElem.textContent = `${cls.location} – ${participants.length} healer${participants.length !== 1 ? "s" : ""}`;
-
     const dateElem = document.createElement("div");
     dateElem.className = "class-date";
     dateElem.textContent = formatClassTime(cls.date, cls.time);
@@ -191,7 +181,7 @@ function renderClasses() {
     div.appendChild(locElem);
     div.appendChild(dateElem);
 
-    // Participant list
+    // Participants list
     const ul = document.createElement("ul");
     participants.forEach(p => {
       const li = document.createElement("li");
@@ -206,7 +196,7 @@ function renderClasses() {
       standbyTitle.textContent = "ON STANDBY";
       standbyTitle.style.marginTop = "10px";
       standbyTitle.style.fontWeight = "bold";
-      standbyTitle.style.fontSize = "18px";
+      standbyTitle.style.fontSize = "26px"; // match location
       standbyTitle.style.color = "#c59b5a";
 
       const standbyUl = document.createElement("ul");
@@ -222,36 +212,31 @@ function renderClasses() {
 
     // Remaining / toggle
     const remaining = cls.capacity - participants.length;
-
     const wrapper = document.createElement("div");
     wrapper.className = "spaces-toggle-wrapper";
 
     const remainText = document.createElement("span");
-    remainText.textContent =
-      remaining > 0
-        ? `→ ${remaining} spaces remaining`
-        : "CLASS FULL – JOIN STANDBY";
+    remainText.textContent = remaining > 0 ? `→ ${remaining} spaces remaining` : "CLASS FULL – JOIN STANDBY";
 
-    // Toggle
     const toggle = document.createElement("div");
     toggle.className = "lux-toggle";
     toggle.dataset.classId = cls.id;
 
-    // Check if current user is registered for this class
-if (currentUser) {
-  const isEnrolled = registrationsData.some(r =>
-    r.classId === cls.id &&
-    r.whatsapp == currentUser.whatsapp &&
-    (r.status === "confirmed" || r.status === "standby")
-  );
+    // Disable until registered
+    if (!userRegistered) toggle.style.pointerEvents = "none";
 
-  if (isEnrolled) {
-    toggle.classList.add("active");
-  }
-}
-
-
-    if (!userRegistered) toggle.style.pointerEvents = "none"; // disabled if not submitted WhatsApp
+    // Highlight if currentUser already enrolled
+    if (currentUser) {
+      const isEnrolled = registrationsData.some(r =>
+        r.classId === cls.id &&
+        r.whatsapp === currentUser.whatsapp &&
+        (r.status === "confirmed" || r.status === "standby")
+      );
+      if (isEnrolled) {
+        toggle.classList.add("active");
+        toggle.style.border = "2px solid #ffd78c"; // gold border
+      }
+    }
 
     toggle.addEventListener("click", async () => {
       if (!userRegistered) return;
@@ -262,10 +247,21 @@ if (currentUser) {
       toggle.style.pointerEvents = "none";
 
       if (!isActive) {
-        // Add registration
+        // Add registration locally
+        registrationsData.push({
+          classId: cls.id,
+          fullName: `${currentUser.firstName} ${currentUser.lastName || ""}`,
+          whatsapp: currentUser.whatsapp,
+          status: remaining > 0 ? "confirmed" : "standby"
+        });
+        toggle.style.border = "2px solid #ffd78c"; // gold border
         await submitSingleClass(cls.id, remaining > 0 ? "confirmed" : "standby");
       } else {
-        // Remove registration
+        // Remove registration locally
+        registrationsData = registrationsData.filter(r =>
+          !(r.classId === cls.id && r.whatsapp === currentUser.whatsapp)
+        );
+        toggle.style.border = ""; // remove gold border
         await submitSingleClass(cls.id, "remove");
       }
 
@@ -287,7 +283,7 @@ if (currentUser) {
 }
 
 // --------------------
-// Submit single class (add/remove)
+// Submit single class (server)
 // --------------------
 async function submitSingleClass(classId, status) {
   if (!currentUser) return;
@@ -304,10 +300,6 @@ async function submitSingleClass(classId, status) {
       ack: true
     })
   });
-
-  // Refresh registrations and class cards
-  registrationsData = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
-  renderClasses();
 }
 
 init();
