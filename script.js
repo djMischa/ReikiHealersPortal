@@ -73,19 +73,19 @@ function showToast(msg, isError = false) {
 // --------------------
 async function init() {
   // Try to load cached currentUser from sessionStorage (clears when tab/browser closes)
-try {
-  const cached = sessionStorage.getItem("rc_currentUser");
-  if (cached && cached !== "null" && cached !== "") {
-    currentUser = JSON.parse(cached);
-    if (currentUser) {
-      currentUser.normalizedWhatsapp = cleanNumber(
-        currentUser.normalizedWhatsapp || currentUser.whatsapp || ""
-      );
-      userRegistered = true;
+  try {
+    const cached = sessionStorage.getItem("rc_currentUser");
+    if (cached && cached !== "null" && cached !== "") {
+      currentUser = JSON.parse(cached);
+      if (currentUser) {
+        currentUser.normalizedWhatsapp = cleanNumber(
+          currentUser.normalizedWhatsapp || currentUser.whatsapp || ""
+        );
+        // Do NOT set userRegistered true yet — user must verify password on load
+        // We'll show a small "Welcome back — please enter password" if page opens with session user.
+      }
     }
-  }
-} catch (e) { /* ignore */ }
-
+  } catch (e) { /* ignore */ }
 
   // Basic parallel fetch for now
   try {
@@ -145,23 +145,120 @@ function renderRegistrationForm() {
   const wrapper = document.getElementById("registration-section");
   if (!wrapper) return;
 
+  // Main initial UI: whatsapp input + image placeholder area (you can replace image with actual <img>)
   wrapper.innerHTML = `
-    <div style="max-width: 400px; margin: 20px auto; text-align:center;">
+    <div style="max-width: 420px; margin: 20px auto; text-align:center;">
+      <h1 id="site-title" style="margin-bottom:12px;">Reiki Collective</h1>
       <input id="regWhatsApp" type="tel" inputmode="numeric" placeholder="Enter your WhatsApp number"
              style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
       <button id="whatsappSubmit" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#ffffff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
-      <div id="regMessage" style="margin-top:10px; font-weight:bold;"></div>
+      <div id="regMessage" style="margin-top:14px; font-weight:700; min-height:28px;"></div>
+
+      <div id="authArea" style="margin-top:12px;"></div>
+
       <div id="extraFields" style="margin-top:12px; display:none;">
         <input id="regFirstName" type="text" placeholder="First Name" style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
         <input id="regLastName" type="text" placeholder="Last Name" style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
         <input id="regEmail" type="email" placeholder="Email" style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
         <button id="fullRegister" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#ffffff; border:none; border-radius:8px; cursor:pointer;">Register</button>
       </div>
+
+      <div id="photoArea" style="margin-top:18px;">
+        <!-- Placeholder photo -->
+        <div style="width:120px; height:120px; margin:0 auto; border-radius:8px; background:#efefef; display:flex;align-items:center;justify-content:center;color:#888;">Photo</div>
+      </div>
     </div>
   `;
 
   document.getElementById("whatsappSubmit").addEventListener("click", handleWhatsAppSubmit);
   document.getElementById("fullRegister")?.addEventListener("click", handleFullRegistration);
+
+  // If a session user is present but not yet confirmed, show a minimal "Welcome back, enter password" UI
+  if (currentUser && currentUser.normalizedWhatsapp && !userRegistered) {
+    showPasswordPrompt('verify', currentUser);
+  }
+}
+
+// --------------------
+// Show password prompt area
+// mode = 'verify' or 'create'
+// userObj is optional (object with firstName, normalizedWhatsapp etc.)
+function showPasswordPrompt(mode = 'verify', userObj = null) {
+  const authArea = document.getElementById("authArea");
+  if (!authArea) return;
+
+  const firstName = (userObj && userObj.firstName) ? userObj.firstName : (currentUser && currentUser.firstName) ? currentUser.firstName : "";
+
+  if (mode === 'create') {
+    authArea.innerHTML = `
+      <div style="margin-top:12px; text-align:center;">
+        <div style="font-weight:700; font-size:22px; margin-bottom:8px;">Welcome ${firstName}!</div>
+        <div style="margin-bottom:8px;">Please create your password</div>
+        <input id="pwdInput" type="password" placeholder="Create password" style="width:100%; padding:10px; margin-bottom:8px; border-radius:6px; border:1px solid #ccc;">
+        <button id="pwdCreateBtn" style="width:100%; padding:10px; background:#2b8a3e; color:#fff; border-radius:6px; border:none; font-weight:700; cursor:pointer;">Save Password</button>
+      </div>
+    `;
+    document.getElementById("pwdCreateBtn").addEventListener("click", async () => {
+      const pwd = document.getElementById("pwdInput").value.trim();
+      if (!pwd) {
+        showToast("Please enter a password", true);
+        return;
+      }
+      // set password on server
+      try {
+        const norm = (userObj && userObj.normalizedWhatsapp) ? userObj.normalizedWhatsapp : (currentUser && currentUser.normalizedWhatsapp) ? currentUser.normalizedWhatsapp : "";
+        const resp = await apiSetPassword(norm, pwd);
+        if (resp && resp.success) {
+          // finalize login
+          currentUser = { ...(userObj || currentUser), password: pwd, normalizedWhatsapp: cleanNumber(norm) };
+          userRegistered = true;
+          sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+          document.getElementById("regMessage").textContent = `Welcome ${firstName}! Please select the classes you wish to join.`;
+          authArea.innerHTML = "";
+          renderClasses();
+        } else {
+          showToast("Could not save password", true);
+        }
+      } catch (err) {
+        console.error("setPassword failed", err);
+        showToast("Error saving password", true);
+      }
+    });
+  } else { // verify
+    authArea.innerHTML = `
+      <div style="margin-top:12px; text-align:center;">
+        <div style="font-weight:700; font-size:22px; margin-bottom:8px;">Welcome ${firstName}!</div>
+        <div style="margin-bottom:8px;">Please enter your password</div>
+        <input id="pwdInput" type="password" placeholder="Password" style="width:100%; padding:10px; margin-bottom:8px; border-radius:6px; border:1px solid #ccc;">
+        <button id="pwdVerifyBtn" style="width:100%; padding:10px; background:#2b8a3e; color:#fff; border-radius:6px; border:none; font-weight:700; cursor:pointer;">Verify</button>
+      </div>
+    `;
+    document.getElementById("pwdVerifyBtn").addEventListener("click", async () => {
+      const pwd = document.getElementById("pwdInput").value.trim();
+      if (!pwd) {
+        showToast("Please enter your password", true);
+        return;
+      }
+      try {
+        const norm = (userObj && userObj.normalizedWhatsapp) ? userObj.normalizedWhatsapp : (currentUser && currentUser.normalizedWhatsapp) ? currentUser.normalizedWhatsapp : "";
+        const resp = await apiVerifyPassword(norm, pwd);
+        if (resp && resp.success) {
+          // proceed
+          currentUser = { ...(userObj || currentUser), password: pwd, normalizedWhatsapp: cleanNumber(norm) };
+          userRegistered = true;
+          sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+          document.getElementById("regMessage").textContent = `Welcome ${firstName}! Please select the classes you wish to join.`;
+          document.getElementById("authArea").innerHTML = "";
+          renderClasses();
+        } else {
+          showToast(resp && resp.message ? resp.message : "Password invalid", true);
+        }
+      } catch (err) {
+        console.error("verifyPassword failed", err);
+        showToast("Error verifying password", true);
+      }
+    });
+  }
 }
 
 // --------------------
@@ -209,34 +306,39 @@ async function handleWhatsAppSubmit() {
     });
 
     if (user) {
-      // ensure we store normalizedWhatsapp on currentUser
+      // Found existing user — but DO NOT mark fully registered until password verify
+      // Build a minimal user object to pass into password flows
       const uNorm = normalizeWhatsapp(user.whatsapp || user.normalizedWhatsapp || "");
-      currentUser = {
+      const tmpUser = {
         ...user,
-        normalizedWhatsapp: uNorm.normalized || user.normalizedWhatsapp || uNorm.fallback
+        normalizedWhatsapp: cleanNumber(uNorm.normalized || user.normalizedWhatsapp || uNorm.fallback)
       };
-      currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp);
+      currentUser = tmpUser;
 
-      userRegistered = true;
-      // cache for faster return
-      sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
-      msgBox.style.fontSize = "26px";
-      msgBox.style.color = "#ffffff";
-      msgBox.textContent = `Welcome ${user.firstName}! Please toggle classes below to join.`;
+      // If user has a password stored on sheet (header "password"), prompt verify; otherwise create password
+      const hasPassword = (user.password && String(user.password || "").trim() !== "");
+      if (hasPassword) {
+        // show verify password UI
+        document.getElementById("regMessage").textContent = `Welcome ${user.firstName || ""}!`;
+        showPasswordPrompt('verify', tmpUser);
+      } else {
+        // show create password UI
+        document.getElementById("regMessage").textContent = `Welcome ${user.firstName || ""}!`;
+        showPasswordPrompt('create', tmpUser);
+      }
     } else {
-      // Not found
+      // Not found — show full registration
       document.getElementById("extraFields").style.display = "block";
-      msgBox.style.fontSize = "26px";
+      msgBox.style.fontSize = "20px";
       msgBox.style.color = "#ffffff";
       msgBox.textContent = "Please complete your registration.";
     }
 
+    // hide whatsapp entry now (until logout)
     whatsappInput.style.display = "none";
     submitBtn.style.display = "none";
 
-    // Re-render classes now that userRegistered/currentUser may be set
-    renderClasses();
-
+    // We do not call renderClasses() here until password success
   } catch (err) {
     console.error("WhatsApp submit error:", err);
     msgBox.style.color = "red";
@@ -290,23 +392,18 @@ async function handleFullRegistration() {
     }
 
     if (result.success) {
-      currentUser = {
+      // After creating user, we show CREATE PASSWORD flow
+      const tmpUser = {
         firstName,
         lastName,
         email,
         whatsapp,
         normalizedWhatsapp: cleanNumber(whatsapp)
       };
-      userRegistered = true;
-      sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
-      msgBox.style.fontSize = "26px";
-      msgBox.textContent = `Welcome to the Reiki Collective, ${firstName}! Please toggle classes you would like to join.`;
-      msgBox.style.color = "#ffffff";
-
-      // Hide extra fields
+      currentUser = tmpUser;
       document.getElementById("extraFields").style.display = "none";
-
-      renderClasses(); // Now toggles are active
+      document.getElementById("regMessage").textContent = `Welcome to the Reiki Collective, ${firstName}!`;
+      showPasswordPrompt('create', tmpUser);
     } else {
       msgBox.textContent = `Error: ${result.message || "Unknown error"}`;
       msgBox.style.color = "red";
@@ -561,12 +658,41 @@ async function submitSingleClass(classId, status) {
   return json;
 }
 
-init();
-// Auto-logout when tab or browser is closed
+// --------------------
+// Password API helpers
+// --------------------
+async function apiSetPassword(normalizedWhatsapp, password) {
+  const resp = await fetch(API_BASE, {
+    method: "POST",
+    body: new URLSearchParams({
+      action: "setPassword",
+      normalizedWhatsapp: String(normalizedWhatsapp || ""),
+      password: String(password || "")
+    })
+  });
+  if (!resp.ok) throw new Error("Network error");
+  return await resp.json();
+}
+
+async function apiVerifyPassword(normalizedWhatsapp, password) {
+  const resp = await fetch(API_BASE, {
+    method: "POST",
+    body: new URLSearchParams({
+      action: "verifyPassword",
+      normalizedWhatsapp: String(normalizedWhatsapp || ""),
+      password: String(password || "")
+    })
+  });
+  if (!resp.ok) throw new Error("Network error");
+  return await resp.json();
+}
+
+// Ensure session cleared when tab closed — keeps behavior you asked for
 window.addEventListener("beforeunload", () => {
   sessionStorage.removeItem("rc_currentUser");
 });
 
+init();
 
 
 
