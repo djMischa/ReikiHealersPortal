@@ -65,8 +65,12 @@ async function init() {
     fetch(`${API_BASE}?type=classes`),
     fetch(`${API_BASE}?type=registrations`)
   ]);
-  classesData = (classesResp.ok ? await classesResp.json() : []);
-  registrationsData = (regsResp.ok ? await regsResp.json() : []);
+  const rawClasses = await classesResp.json();
+const rawRegs = await regsResp.json();
+
+classesData = Array.isArray(rawClasses) ? rawClasses : [];
+registrationsData = Array.isArray(rawRegs) ? rawRegs : [];
+
 
   renderRegistrationForm();
   renderClasses();
@@ -122,8 +126,14 @@ async function handleWhatsAppSubmit() {
 
     // Fetch users (small dataset)
     const usersResponse = await fetch(`${API_BASE}?type=users`);
-    if (!usersResponse.ok) throw new Error("Failed to fetch users");
-    const users = await usersResponse.json();
+const users = await usersResponse.json();
+
+console.log("USERS RESPONSE:", users);
+
+if (!Array.isArray(users)) {
+  throw new Error("Users API did not return array");
+}
+
 
     // Try to find user by normalizedWhatsapp or fallback
     const user = users.find(u => {
