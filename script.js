@@ -134,7 +134,7 @@ function normalizeFetchedData() {
   registrationsData = registrationsData.map(r => {
     const copy = Object.assign({}, r);
 
-    copy.classId = convertISOToClassId(copy.classId || copy.date || "");
+    copy.classId = String(convertISOToClassId(copy.classId || "")).trim();
     copy.whatsapp = copy.whatsapp === undefined || copy.whatsapp === null ? '' : String(copy.whatsapp);
     copy.normalizedWhatsapp = cleanNumber(copy.normalizedWhatsapp || copy.whatsapp || '');
 
@@ -468,7 +468,7 @@ function renderClasses() {
       // Update local registrationsData optimistically
       if (!isActive) {
         registrationsData.push({
-          classId: cls.id,
+          classId: String(cls.id).trim(),
           fullName: `${currentUser.firstName} ${currentUser.lastName || ""}`.trim(),
           whatsapp: currentUser.whatsapp || currentUser.normalizedWhatsapp,
           normalizedWhatsapp: currentUser.normalizedWhatsapp,
@@ -540,7 +540,7 @@ function renderClasses() {
 // helper: determine whether a registration row belongs to a given class object
 function isRegistrationForClass(reg, cls) {
   if (!reg || !cls) return false;
-  const regClassId = String(reg.classId || '');
+  const regClassId = String(reg.classId || '').trim();
   if (regClassId === String(cls.id)) return true;
   // if regClassId parses as a date, try to convert to classId format
   const maybeDate = new Date(regClassId);
@@ -560,7 +560,7 @@ async function submitSingleClass(classId, status) {
 
   const payload = {
     action: "updateRegistration",
-    classId: String(classId),
+    classId: String(classId).trim(),
     status,
     email: currentUser.email || "",
     fullName: `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim(),
