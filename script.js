@@ -472,4 +472,4 @@ async function submitSingleClass(classId, status) {
 init();
 
 
-// https://script.google.com/macros/s/AKfycbyA8-1LEQCRtI9mORpX9gxvrPwRmMydVCsUMp6mZZwtoFjX35U-MyTGC4dUgLLluEYS/exec
+// https://script.google.com/macros/s/AKfycbxU65Xwa24_-Kzi0eksXIh0Lqk9oC9-yPdm-dIqsgNAnjWTv3VzpBwvIxqEX6gxorlu/exec
