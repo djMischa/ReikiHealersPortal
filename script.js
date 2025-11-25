@@ -72,16 +72,20 @@ function showToast(msg, isError = false) {
 // Initialization
 // --------------------
 async function init() {
-  // Try to load cached currentUser from localStorage (speeds up UX)
-  try {
-    const cached = localStorage.getItem("rc_currentUser");
-    if (cached) {
-      currentUser = JSON.parse(cached);
-      // ensure normalizedWhatsapp is digits-only string
-      if (currentUser) currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp || currentUser.whatsapp || "");
+  // Try to load cached currentUser from sessionStorage (clears when tab/browser closes)
+try {
+  const cached = sessionStorage.getItem("rc_currentUser");
+  if (cached && cached !== "null" && cached !== "") {
+    currentUser = JSON.parse(cached);
+    if (currentUser) {
+      currentUser.normalizedWhatsapp = cleanNumber(
+        currentUser.normalizedWhatsapp || currentUser.whatsapp || ""
+      );
       userRegistered = true;
     }
-  } catch (e) { /* ignore */ }
+  }
+} catch (e) { /* ignore */ }
+
 
   // Basic parallel fetch for now
   try {
@@ -215,7 +219,7 @@ async function handleWhatsAppSubmit() {
 
       userRegistered = true;
       // cache for faster return
-      localStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+      sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
       msgBox.style.fontSize = "26px";
       msgBox.style.color = "#ffffff";
       msgBox.textContent = `Welcome ${user.firstName}! Please toggle classes below to join.`;
@@ -294,7 +298,7 @@ async function handleFullRegistration() {
         normalizedWhatsapp: cleanNumber(whatsapp)
       };
       userRegistered = true;
-      localStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+      sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
       msgBox.style.fontSize = "26px";
       msgBox.textContent = `Welcome to the Reiki Collective, ${firstName}! Please toggle classes you would like to join.`;
       msgBox.style.color = "#ffffff";
@@ -558,5 +562,12 @@ async function submitSingleClass(classId, status) {
 }
 
 init();
+// Auto-logout when tab or browser is closed
+window.addEventListener("beforeunload", () => {
+  sessionStorage.removeItem("rc_currentUser");
+});
+
+
+
 
 // https://script.google.com/macros/s/AKfycbxeuw_fLkUwSs_mV_t7zZTRfMCRwrG_AjAxFFhTiIw76lZRTTCZ0sd7fvRNTS34Jik5/exec
