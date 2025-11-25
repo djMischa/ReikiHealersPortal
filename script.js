@@ -124,40 +124,43 @@ async function handleWhatsAppSubmit() {
     // Normalize once for lookup
     const { normalized, fallback } = normalizeWhatsapp(rawWhatsApp);
 
-    // Fetch users (small dataset)
     const usersResponse = await fetch(`${API_BASE}?type=users`);
-const users = await usersResponse.json();
+    const users = await usersResponse.json();
 
-console.log("USERS RESPONSE:", users);
+    console.log("USERS RESPONSE:", users);
 
-if (!Array.isArray(users)) {
-  throw new Error("Users API did not return array");
-}
+    if (!Array.isArray(users)) {
+      throw new Error("Users API did not return array");
+    }
 
-
-    // Try to find user by normalizedWhatsapp or fallback
+    // ✅ SAFE MATCHING - NO MORE CRASHES
     const user = users.find(u => {
       if (!u) return false;
-      const uNorm = (u.normalizedWhatsapp || "").replace(/\D/g, "");
-      const uRaw = (u.whatsapp || "").replace(/\D/g, "");
-      return (uNorm && uNorm === normalized) || (uRaw && (uRaw === normalized || uRaw === fallback));
+
+      const uNorm = String(u.normalizedWhatsapp ?? "").replace(/\D/g, "");
+      const uRaw  = String(u.whatsapp ?? "").replace(/\D/g, "");
+
+      return (
+        (uNorm && uNorm === normalized) ||
+        (uRaw && (uRaw === normalized || uRaw === fallback))
+      );
     });
 
     if (user) {
-      // ensure we store normalizedWhatsapp on currentUser
       const uNorm = normalizeWhatsapp(user.whatsapp || user.normalizedWhatsapp || "");
+
       currentUser = {
         ...user,
         normalizedWhatsapp: uNorm.normalized || user.normalizedWhatsapp || uNorm.fallback
       };
+
       userRegistered = true;
-      // cache for faster return
       localStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+
       msgBox.style.fontSize = "26px";
       msgBox.style.color = "#ffffff";
       msgBox.textContent = `Welcome ${user.firstName}! Please toggle classes below to join.`;
     } else {
-      // Not found
       document.getElementById("extraFields").style.display = "block";
       msgBox.style.fontSize = "26px";
       msgBox.style.color = "#ffffff";
@@ -167,7 +170,6 @@ if (!Array.isArray(users)) {
     whatsappInput.style.display = "none";
     submitBtn.style.display = "none";
 
-    // Re-render classes now that userRegistered/currentUser may be set
     renderClasses();
 
   } catch (err) {
@@ -178,6 +180,7 @@ if (!Array.isArray(users)) {
     submitBtn.disabled = false;
   }
 }
+
 
 // --------------------
 // Handle full registration (CREATE user)
