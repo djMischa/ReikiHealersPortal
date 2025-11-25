@@ -560,7 +560,7 @@ async function submitSingleClass(classId, status) {
 
   const payload = {
     action: "updateRegistration",
-    classId,
+    classId: String(classId),
     status,
     email: currentUser.email || "",
     fullName: `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim(),
