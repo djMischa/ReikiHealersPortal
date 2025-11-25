@@ -1,5 +1,5 @@
 // ---------- config ----------
-const API_BASE = "https://script.google.com/macros/s/AKfycbzEpUSDXq6roXHQhibbpHlXTRa_XyA9uQyPl2pOXxAWgwpB4DMNM6-eiSfowHr59Smb/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbwIYNqlxCysCoWxXEaIM5hqPhT8ZXjDrpib1LirqeFlAcuhHsr3Zx1013e3nZ9llDQD/exec";
 
 let classesData = [];
 let registrationsData = [];
@@ -696,4 +696,4 @@ init();
 
 
 
-// https://script.google.com/macros/s/AKfycbxeuw_fLkUwSs_mV_t7zZTRfMCRwrG_AjAxFFhTiIw76lZRTTCZ0sd7fvRNTS34Jik5/exec
+// https://script.google.com/macros/s/AKfycbwIYNqlxCysCoWxXEaIM5hqPhT8ZXjDrpib1LirqeFlAcuhHsr3Zx1013e3nZ9llDQD/exec
