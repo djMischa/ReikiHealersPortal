@@ -14,7 +14,8 @@ let userRegistered = false; // Tracks if user submitted WhatsApp or registered
 // --------------------
 function normalizeWhatsapp(raw) {
   if (!raw) return { normalized: "", fallback: "" };
-  let digits = raw.replace(/\D/g, "");
+  const s = String(raw);
+  let digits = s.replace(/\D/g, "");
   // remove leading zeros
   digits = digits.replace(/^0+/, "");
   // If US-style leading '1' and 11 digits, strip
@@ -22,6 +23,26 @@ function normalizeWhatsapp(raw) {
   const normalized = digits;
   const fallback = digits.length >= 10 ? digits.slice(-10) : digits;
   return { normalized, fallback };
+}
+
+// small helper: coerce any incoming value to digits-only string
+function cleanNumber(v) {
+  if (v === undefined || v === null) return "";
+  return String(v).replace(/\D/g, "");
+}
+
+// convert an ISO date (or Date) to your manual classId format, e.g. Nov2524
+function formatClassIdFromDate(d) {
+  try {
+    const date = (d instanceof Date) ? d : new Date(d);
+    if (Number.isNaN(date.getTime())) return "";
+    const month = date.toLocaleString('en-US', { month: 'short' }); // e.g. "Nov"
+    const day = String(date.getDate()).padStart(2, '0'); // 01..31
+    const yr = String(date.getFullYear()).slice(-2); // last 2 digits
+    return `${month}${day}${yr}`;
+  } catch (e) {
+    return "";
+  }
 }
 
 // small utility: show a transient message
@@ -56,24 +77,61 @@ async function init() {
     const cached = localStorage.getItem("rc_currentUser");
     if (cached) {
       currentUser = JSON.parse(cached);
+      // ensure normalizedWhatsapp is digits-only string
+      if (currentUser) currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp || currentUser.whatsapp || "");
       userRegistered = true;
     }
   } catch (e) { /* ignore */ }
 
-  // Basic parallel fetch for now; we'll replace with a batch endpoint in code.gs
-  const [classesResp, regsResp] = await Promise.all([
-    fetch(`${API_BASE}?type=classes`),
-    fetch(`${API_BASE}?type=registrations`)
-  ]);
-  const rawClasses = await classesResp.json();
-const rawRegs = await regsResp.json();
+  // Basic parallel fetch for now
+  try {
+    const [classesResp, regsResp] = await Promise.all([
+      fetch(`${API_BASE}?type=classes`),
+      fetch(`${API_BASE}?type=registrations`)
+    ]);
 
-classesData = Array.isArray(rawClasses) ? rawClasses : [];
-registrationsData = Array.isArray(rawRegs) ? rawRegs : [];
+    const rawClasses = classesResp.ok ? await classesResp.json() : [];
+    const rawRegs = regsResp.ok ? await regsResp.json() : [];
 
+    classesData = Array.isArray(rawClasses) ? rawClasses : [];
+    registrationsData = Array.isArray(rawRegs) ? rawRegs : [];
 
-  renderRegistrationForm();
-  renderClasses();
+    // Normalize incoming users/registrations so comparisons are consistent
+    normalizeFetchedData();
+
+    renderRegistrationForm();
+    renderClasses();
+  } catch (err) {
+    console.error('Initialization failed:', err);
+    showToast('Error loading data. Try reloading.', true);
+  }
+}
+
+// Ensure fetched registrations and classes have consistent types and normalized numbers
+function normalizeFetchedData() {
+  // normalize registrations
+  registrationsData = registrationsData.map(r => {
+    const copy = Object.assign({}, r);
+    // ensure classId is string
+    copy.classId = copy.classId === undefined || copy.classId === null ? '' : String(copy.classId);
+    copy.whatsapp = copy.whatsapp === undefined || copy.whatsapp === null ? '' : String(copy.whatsapp);
+    // normalizedWhatsapp may be stored as number in sheets; coerce
+    copy.normalizedWhatsapp = cleanNumber(copy.normalizedWhatsapp || copy.whatsapp || '');
+    return copy;
+  });
+
+  // normalize classes (ensure id is string)
+  classesData = classesData.map(c => {
+    const copy = Object.assign({}, c);
+    copy.id = copy.id === undefined || copy.id === null ? '' : String(copy.id);
+    copy.capacity = Number(copy.capacity || 0);
+    return copy;
+  });
+
+  // If currentUser exists but normalizedWhatsapp is missing, try to compute it
+  if (currentUser) {
+    currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp || currentUser.whatsapp || '');
+  }
 }
 
 // --------------------
@@ -124,43 +182,45 @@ async function handleWhatsAppSubmit() {
     // Normalize once for lookup
     const { normalized, fallback } = normalizeWhatsapp(rawWhatsApp);
 
+    // Fetch users (small dataset)
     const usersResponse = await fetch(`${API_BASE}?type=users`);
-    const users = await usersResponse.json();
+    const users = usersResponse.ok ? await usersResponse.json() : [];
 
-    console.log("USERS RESPONSE:", users);
+    if (!Array.isArray(users)) throw new Error('Users API did not return array');
 
-    if (!Array.isArray(users)) {
-      throw new Error("Users API did not return array");
-    }
+    // Normalize users locally for comparison safety
+    const normUsers = users.map(u => {
+      const copy = Object.assign({}, u);
+      copy.whatsapp = copy.whatsapp === undefined || copy.whatsapp === null ? '' : String(copy.whatsapp);
+      copy.normalizedWhatsapp = cleanNumber(copy.normalizedWhatsapp || copy.whatsapp || '');
+      return copy;
+    });
 
-    // ✅ SAFE MATCHING - NO MORE CRASHES
-    const user = users.find(u => {
+    // Try to find user by normalizedWhatsapp or fallback
+    const user = normUsers.find(u => {
       if (!u) return false;
-
-      const uNorm = String(u.normalizedWhatsapp ?? "").replace(/\D/g, "");
-      const uRaw  = String(u.whatsapp ?? "").replace(/\D/g, "");
-
-      return (
-        (uNorm && uNorm === normalized) ||
-        (uRaw && (uRaw === normalized || uRaw === fallback))
-      );
+      const uNorm = u.normalizedWhatsapp;
+      const uRaw = cleanNumber(u.whatsapp);
+      return (uNorm && uNorm === normalized) || (uRaw && (uRaw === normalized || uRaw === fallback));
     });
 
     if (user) {
+      // ensure we store normalizedWhatsapp on currentUser
       const uNorm = normalizeWhatsapp(user.whatsapp || user.normalizedWhatsapp || "");
-
       currentUser = {
         ...user,
         normalizedWhatsapp: uNorm.normalized || user.normalizedWhatsapp || uNorm.fallback
       };
+      currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp);
 
       userRegistered = true;
+      // cache for faster return
       localStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
-
       msgBox.style.fontSize = "26px";
       msgBox.style.color = "#ffffff";
       msgBox.textContent = `Welcome ${user.firstName}! Please toggle classes below to join.`;
     } else {
+      // Not found
       document.getElementById("extraFields").style.display = "block";
       msgBox.style.fontSize = "26px";
       msgBox.style.color = "#ffffff";
@@ -170,6 +230,7 @@ async function handleWhatsAppSubmit() {
     whatsappInput.style.display = "none";
     submitBtn.style.display = "none";
 
+    // Re-render classes now that userRegistered/currentUser may be set
     renderClasses();
 
   } catch (err) {
@@ -180,7 +241,6 @@ async function handleWhatsAppSubmit() {
     submitBtn.disabled = false;
   }
 }
-
 
 // --------------------
 // Handle full registration (CREATE user)
@@ -231,7 +291,7 @@ async function handleFullRegistration() {
         lastName,
         email,
         whatsapp,
-        normalizedWhatsapp: whatsapp
+        normalizedWhatsapp: cleanNumber(whatsapp)
       };
       userRegistered = true;
       localStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
@@ -281,12 +341,14 @@ function renderClasses() {
 
     // Build canonical participants list from registrationsData
     const participants = registrationsData
-      .filter(r => r.classId === cls.id && r.status === "confirmed")
-      .map(r => ({ fullName: r.fullName, normalizedWhatsapp: (r.normalizedWhatsapp || normalizeWhatsapp(r.whatsapp || "").normalized) }))
+      .filter(r => isRegistrationForClass(r, cls))
+      .filter(r => r.status === "confirmed")
+      .map(r => ({ fullName: r.fullName, normalizedWhatsapp: (r.normalizedWhatsapp || cleanNumber(r.whatsapp || "")) }))
       .sort((a, b) => a.fullName.localeCompare(b.fullName));
 
     const standbyParticipants = registrationsData
-      .filter(r => r.classId === cls.id && r.status === "standby")
+      .filter(r => isRegistrationForClass(r, cls))
+      .filter(r => r.status === "standby")
       .map(r => ({ fullName: r.fullName }))
       .sort((a, b) => a.fullName.localeCompare(b.fullName));
 
@@ -331,7 +393,7 @@ function renderClasses() {
     }
 
     // Remaining / toggle
-    const remaining = cls.capacity - participants.length;
+    const remaining = (Number(cls.capacity) || 0) - participants.length;
     const wrapper = document.createElement("div");
     wrapper.className = "spaces-toggle-wrapper";
 
@@ -353,9 +415,9 @@ function renderClasses() {
     // Highlight if currentUser already enrolled (use normalized matching)
     if (currentUser && currentUser.normalizedWhatsapp) {
       const isEnrolled = registrationsData.some(r => {
-        if (r.classId !== cls.id) return false;
-        const rNorm = (r.normalizedWhatsapp || "").replace(/\D/g, "");
-        const rRaw = (r.whatsapp || "").replace(/\D/g, "");
+        if (!isRegistrationForClass(r, cls)) return false;
+        const rNorm = cleanNumber(r.normalizedWhatsapp || r.whatsapp || "");
+        const rRaw = cleanNumber(r.whatsapp || "");
         return (rNorm && rNorm === currentUser.normalizedWhatsapp) || (rRaw && (rRaw === currentUser.normalizedWhatsapp));
       });
       if (isEnrolled) {
@@ -393,7 +455,7 @@ function renderClasses() {
         });
       } else {
         registrationsData = registrationsData.filter(r =>
-          !(r.classId === cls.id && ( (r.normalizedWhatsapp && currentUser.normalizedWhatsapp && r.normalizedWhatsapp === currentUser.normalizedWhatsapp) || (r.whatsapp && currentUser.normalizedWhatsapp && r.whatsapp.replace(/\D/g, "") === currentUser.normalizedWhatsapp) ))
+          !(isRegistrationForClass(r, cls) && ((cleanNumber(r.normalizedWhatsapp) && cleanNumber(r.normalizedWhatsapp) === currentUser.normalizedWhatsapp) || (cleanNumber(r.whatsapp) && cleanNumber(r.whatsapp) === currentUser.normalizedWhatsapp)))
         );
       }
 
@@ -405,12 +467,12 @@ function renderClasses() {
           // If server returned authoritative registrations, replace those entries in registrationsData
           if (Array.isArray(resp.updatedRegistrations)) {
             // remove local entries for this class, then push server's authoritative ones
-            registrationsData = registrationsData.filter(r => r.classId !== cls.id);
+            registrationsData = registrationsData.filter(r => !isRegistrationForClass(r, cls));
             // ensure normalizedWhatsapp exists on each
             resp.updatedRegistrations.forEach(r => {
               registrationsData.push({
                 ...r,
-                normalizedWhatsapp: r.normalizedWhatsapp || normalizeWhatsapp(r.whatsapp || "").normalized
+                normalizedWhatsapp: cleanNumber(r.normalizedWhatsapp || r.whatsapp || "")
               });
             });
           }
@@ -425,14 +487,13 @@ function renderClasses() {
         // Revert optimistic change
         if (!isActive) {
           // we tried to add; remove added entries
-          registrationsData = registrationsData.filter(r => !(r.classId === cls.id && r.normalizedWhatsapp === currentUser.normalizedWhatsapp));
+          registrationsData = registrationsData.filter(r => !(isRegistrationForClass(r, cls) && cleanNumber(r.normalizedWhatsapp) === currentUser.normalizedWhatsapp));
           toggle.classList.remove("active");
           toggle.style.border = "";
         } else {
           // we tried to remove; re-add entry (can't rebuild full object here, force re-render to reflect server)
-          // best attempt: re-request registrations for this class (simple approach: re-fetch whole registrations)
           const reloadRegs = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
-          registrationsData = reloadRegs;
+          registrationsData = Array.isArray(reloadRegs) ? reloadRegs.map(rr => ({ ...rr, normalizedWhatsapp: cleanNumber(rr.normalizedWhatsapp || rr.whatsapp || '') })) : [];
         }
         renderClasses();
       } finally {
@@ -452,6 +513,20 @@ function renderClasses() {
       div.style.transform = "translateY(0)";
     }, i * 150);
   });
+}
+
+// helper: determine whether a registration row belongs to a given class object
+function isRegistrationForClass(reg, cls) {
+  if (!reg || !cls) return false;
+  const regClassId = String(reg.classId || '');
+  if (regClassId === String(cls.id)) return true;
+  // if regClassId parses as a date, try to convert to classId format
+  const maybeDate = new Date(regClassId);
+  if (!Number.isNaN(maybeDate.getTime())) {
+    const converted = formatClassIdFromDate(maybeDate);
+    if (converted && converted === String(cls.id)) return true;
+  }
+  return false;
 }
 
 // --------------------
