@@ -1,5 +1,5 @@
 // ---------- config ----------
-const API_BASE = "https://script.google.com/macros/s/AKfycby6eiIheyA_-uRuBPzjR1hWNdSouKEnbSEh4HUpPcWKflWafVY7v2LX_cnALRXoQFJH/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbzxy_XbpxhKdj8oAxgxaCw8bzepxrETkbOKPD09R34uSj7cM3_qd1xwEVppJZ_c8r_O/exec";
 
 let classesData = [];
 let registrationsData = [];
