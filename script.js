@@ -1,5 +1,5 @@
 // ---------- config ----------
-const API_BASE = "https://script.google.com/macros/s/AKfycbxfXve8EfrfEP69k7l0Fmvu5TTz4FQ7qpyjEBNHA8LZrbrDADg6pDRoTxlyNmQPaKsk/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbx0e6H2QSYPDmI0yFa32pBUA9WrJ4Kw8qlKHw9yo629assnjEkAKeMl-WOSZ3XwT6k6/exec";
 
 let classesData = [];
 let registrationsData = [];
@@ -472,4 +472,4 @@ async function submitSingleClass(classId, status) {
 init();
 
 
-// https://script.google.com/macros/s/AKfycbxfXve8EfrfEP69k7l0Fmvu5TTz4FQ7qpyjEBNHA8LZrbrDADg6pDRoTxlyNmQPaKsk/exec
+// https://script.google.com/macros/s/AKfycbx0e6H2QSYPDmI0yFa32pBUA9WrJ4Kw8qlKHw9yo629assnjEkAKeMl-WOSZ3XwT6k6/exec
