@@ -446,13 +446,13 @@ function renderClasses() {
       // Update local registrationsData optimistically
       if (!isActive) {
         registrationsData.push({
-          classId: cls.id,
-          fullName: `${currentUser.firstName} ${currentUser.lastName || ""}`.trim(),
-          whatsapp: currentUser.whatsapp || currentUser.normalizedWhatsapp,
-          normalizedWhatsapp: currentUser.normalizedWhatsapp,
-          status: remaining > 0 ? "confirmed" : "standby",
-          timestamp: new Date().toISOString()
-        });
+  classId: cls.id, // ✅ ONLY Dec2503
+  fullName: `${currentUser.firstName} ${currentUser.lastName || ""}`.trim(),
+  whatsapp: currentUser.whatsapp || currentUser.normalizedWhatsapp,
+  normalizedWhatsapp: currentUser.normalizedWhatsapp,
+  status: remaining > 0 ? "confirmed" : "standby"
+});
+
       } else {
         registrationsData = registrationsData.filter(r =>
           !(isRegistrationForClass(r, cls) && ((cleanNumber(r.normalizedWhatsapp) && cleanNumber(r.normalizedWhatsapp) === currentUser.normalizedWhatsapp) || (cleanNumber(r.whatsapp) && cleanNumber(r.whatsapp) === currentUser.normalizedWhatsapp)))
@@ -518,16 +518,25 @@ function renderClasses() {
 // helper: determine whether a registration row belongs to a given class object
 function isRegistrationForClass(reg, cls) {
   if (!reg || !cls) return false;
-  const regClassId = String(reg.classId || '');
-  if (regClassId === String(cls.id)) return true;
-  // if regClassId parses as a date, try to convert to classId format
-  const maybeDate = new Date(regClassId);
-  if (!Number.isNaN(maybeDate.getTime())) {
-    const converted = formatClassIdFromDate(maybeDate);
-    if (converted && converted === String(cls.id)) return true;
+
+  const regClassId = String(reg.classId || '').trim();
+  const classId = String(cls.id || '').trim();
+
+  // ✅ Primary match (CORRECT WAY)
+  if (regClassId === classId) return true;
+
+  // ✅ Legacy rescue: ISO → Dec2503 conversion ONLY for display
+  if (regClassId.includes("T") && regClassId.includes("-")) {
+    const parsed = new Date(regClassId);
+    if (!Number.isNaN(parsed.getTime())) {
+      const converted = formatClassIdFromDate(parsed);
+      if (converted === classId) return true;
+    }
   }
+
   return false;
 }
+
 
 // --------------------
 // Submit single class (server)
@@ -544,7 +553,7 @@ async function submitSingleClass(classId, status) {
     fullName: `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim(),
     whatsapp: currentUser.whatsapp || currentUser.normalizedWhatsapp || "",
     normalizedWhatsapp: currentUser.normalizedWhatsapp || normalizeWhatsapp(currentUser.whatsapp || "").normalized,
-    timestamp: new Date().toISOString()
+    
   };
 
   const resp = await fetch(API_BASE, {
