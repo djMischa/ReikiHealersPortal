@@ -109,14 +109,35 @@ async function init() {
 
 // Ensure fetched registrations and classes have consistent types and normalized numbers
 function normalizeFetchedData() {
+
+  function convertISOToClassId(val) {
+    if (!val) return "";
+
+    // If already correct format like Dec2503, leave it alone
+    if (typeof val === "string" && /^[A-Za-z]{3}\d{4}$/.test(val)) {
+      return val;
+    }
+
+    // Try converting ISO date to class id format
+    const d = new Date(val);
+    if (isNaN(d)) return String(val);
+
+    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+    const mm = months[d.getMonth()];
+    const dd = String(d.getDate()).padStart(2, "0");
+    const yy = String(d.getFullYear()).slice(-2);
+
+    return `${mm}${dd}${yy}`;
+  }
+
   // normalize registrations
   registrationsData = registrationsData.map(r => {
     const copy = Object.assign({}, r);
-    // ensure classId is string
-    copy.classId = copy.classId === undefined || copy.classId === null ? '' : String(copy.classId);
+
+    copy.classId = convertISOToClassId(copy.classId || copy.date || "");
     copy.whatsapp = copy.whatsapp === undefined || copy.whatsapp === null ? '' : String(copy.whatsapp);
-    // normalizedWhatsapp may be stored as number in sheets; coerce
     copy.normalizedWhatsapp = cleanNumber(copy.normalizedWhatsapp || copy.whatsapp || '');
+
     return copy;
   });
 
@@ -128,11 +149,12 @@ function normalizeFetchedData() {
     return copy;
   });
 
-  // If currentUser exists but normalizedWhatsapp is missing, try to compute it
+  // Fix currentUser if present
   if (currentUser) {
     currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp || currentUser.whatsapp || '');
   }
 }
+
 
 // --------------------
 // Registration Form
