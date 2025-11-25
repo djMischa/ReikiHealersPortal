@@ -45,22 +45,6 @@ function formatClassIdFromDate(d) {
   }
 }
 
-// Small utility: given arbitrary classId-like value from sheet, return canonical classKey (matches Classes.id)
-function toClassKey(val) {
-  if (val === undefined || val === null) return "";
-  const s = String(val).trim();
-  // If already in your manual format like Dec2503 (three letters + 4 digits), accept
-  if (/^[A-Za-z]{3}\d{4}$/.test(s)) return s;
-  // If it looks like an ISO date or timestamp, convert
-  const d = new Date(s);
-  if (!Number.isNaN(d.getTime())) {
-    const converted = formatClassIdFromDate(d);
-    if (converted) return converted;
-  }
-  // Fallback: return original string
-  return s;
-}
-
 // small utility: show a transient message
 function showToast(msg, isError = false) {
   let box = document.getElementById("toast-box");
@@ -133,8 +117,6 @@ function normalizeFetchedData() {
     copy.whatsapp = copy.whatsapp === undefined || copy.whatsapp === null ? '' : String(copy.whatsapp);
     // normalizedWhatsapp may be stored as number in sheets; coerce
     copy.normalizedWhatsapp = cleanNumber(copy.normalizedWhatsapp || copy.whatsapp || '');
-    // compute canonical classKey that MUST match Classes.id (e.g. Dec2503)
-    copy.classKey = toClassKey(copy.classId || copy.date || copy.class || '');
     return copy;
   });
 
@@ -420,7 +402,6 @@ function renderClasses() {
 
     const toggle = document.createElement("div");
     toggle.className = "lux-toggle";
-    // NOTE: dataset.classId remains for DOM but represents the Classes.id (this is the single canonical id now)
     toggle.dataset.classId = cls.id;
 
     // Disable until registered
@@ -465,9 +446,7 @@ function renderClasses() {
       // Update local registrationsData optimistically
       if (!isActive) {
         registrationsData.push({
-          // write the canonical id here (cls.id) so client-side always uses Classes.id
           classId: cls.id,
-          classKey: cls.id,
           fullName: `${currentUser.firstName} ${currentUser.lastName || ""}`.trim(),
           whatsapp: currentUser.whatsapp || currentUser.normalizedWhatsapp,
           normalizedWhatsapp: currentUser.normalizedWhatsapp,
@@ -482,7 +461,6 @@ function renderClasses() {
 
       // Send to server and handle response
       try {
-        // send CLASS.ID (not a date) — server should record exactly this string
         const resp = await submitSingleClass(cls.id, !isActive ? (remaining > 0 ? "confirmed" : "standby") : "remove");
         // Expect server to return updated registrations for this class or a success flag
         if (resp && resp.success) {
@@ -490,12 +468,12 @@ function renderClasses() {
           if (Array.isArray(resp.updatedRegistrations)) {
             // remove local entries for this class, then push server's authoritative ones
             registrationsData = registrationsData.filter(r => !isRegistrationForClass(r, cls));
-            // ensure normalizedWhatsapp and classKey exists on each
+            // ensure normalizedWhatsapp exists on each
             resp.updatedRegistrations.forEach(r => {
-              const copy = Object.assign({}, r);
-              copy.normalizedWhatsapp = cleanNumber(copy.normalizedWhatsapp || copy.whatsapp || "");
-              copy.classKey = toClassKey(copy.classId || copy.date || copy.class || '');
-              registrationsData.push(copy);
+              registrationsData.push({
+                ...r,
+                normalizedWhatsapp: cleanNumber(r.normalizedWhatsapp || r.whatsapp || "")
+              });
             });
           }
           // Re-render the classes to update counts and lists
@@ -515,12 +493,7 @@ function renderClasses() {
         } else {
           // we tried to remove; re-add entry (can't rebuild full object here, force re-render to reflect server)
           const reloadRegs = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
-          registrationsData = Array.isArray(reloadRegs) ? reloadRegs.map(rr => {
-            const copy = Object.assign({}, rr);
-            copy.normalizedWhatsapp = cleanNumber(copy.normalizedWhatsapp || copy.whatsapp || '');
-            copy.classKey = toClassKey(copy.classId || copy.date || copy.class || '');
-            return copy;
-          }) : [];
+          registrationsData = Array.isArray(reloadRegs) ? reloadRegs.map(rr => ({ ...rr, normalizedWhatsapp: cleanNumber(rr.normalizedWhatsapp || rr.whatsapp || '') })) : [];
         }
         renderClasses();
       } finally {
@@ -543,11 +516,17 @@ function renderClasses() {
 }
 
 // helper: determine whether a registration row belongs to a given class object
-// NOTE: this now uses reg.classKey which is guaranteed to represent Classes.id format (e.g. Dec2503)
 function isRegistrationForClass(reg, cls) {
   if (!reg || !cls) return false;
-  const regKey = String(reg.classKey || toClassKey(reg.classId || reg.date || ''));
-  return regKey === String(cls.id);
+  const regClassId = String(reg.classId || '');
+  if (regClassId === String(cls.id)) return true;
+  // if regClassId parses as a date, try to convert to classId format
+  const maybeDate = new Date(regClassId);
+  if (!Number.isNaN(maybeDate.getTime())) {
+    const converted = formatClassIdFromDate(maybeDate);
+    if (converted && converted === String(cls.id)) return true;
+  }
+  return false;
 }
 
 // --------------------
@@ -559,8 +538,7 @@ async function submitSingleClass(classId, status) {
 
   const payload = {
     action: "updateRegistration",
-    // send the canonical Classes.id string
-    classId: String(classId),
+    classId,
     status,
     email: currentUser.email || "",
     fullName: `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim(),
