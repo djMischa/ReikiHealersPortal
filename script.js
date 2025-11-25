@@ -1,5 +1,5 @@
 // ---------- config ----------
-const API_BASE = "https://script.google.com/macros/s/AKfycbwo89DyFH2Zjje_63YdauAqGbUXHe5d4RSsyc76zS7yp5LbOKo_sry2cxrCvZTNq7hm/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbxeuw_fLkUwSs_mV_t7zZTRfMCRwrG_AjAxFFhTiIw76lZRTTCZ0sd7fvRNTS34Jik5/exec";
 
 let classesData = [];
 let registrationsData = [];
@@ -109,35 +109,14 @@ async function init() {
 
 // Ensure fetched registrations and classes have consistent types and normalized numbers
 function normalizeFetchedData() {
-
-  function convertISOToClassId(val) {
-    if (!val) return "";
-
-    // If already correct format like Dec2503, leave it alone
-    if (typeof val === "string" && /^[A-Za-z]{3}\d{4}$/.test(val)) {
-      return val;
-    }
-
-    // Try converting ISO date to class id format
-    const d = new Date(val);
-    if (isNaN(d)) return String(val);
-
-    const months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-    const mm = months[d.getMonth()];
-    const dd = String(d.getDate()).padStart(2, "0");
-    const yy = String(d.getFullYear()).slice(-2);
-
-    return `${mm}${dd}${yy}`;
-  }
-
   // normalize registrations
   registrationsData = registrationsData.map(r => {
     const copy = Object.assign({}, r);
-
-    copy.classId = String(convertISOToClassId(copy.classId || "")).trim();
+    // ensure classId is string
+    copy.classId = copy.classId === undefined || copy.classId === null ? '' : String(copy.classId);
     copy.whatsapp = copy.whatsapp === undefined || copy.whatsapp === null ? '' : String(copy.whatsapp);
+    // normalizedWhatsapp may be stored as number in sheets; coerce
     copy.normalizedWhatsapp = cleanNumber(copy.normalizedWhatsapp || copy.whatsapp || '');
-
     return copy;
   });
 
@@ -149,12 +128,11 @@ function normalizeFetchedData() {
     return copy;
   });
 
-  // Fix currentUser if present
+  // If currentUser exists but normalizedWhatsapp is missing, try to compute it
   if (currentUser) {
     currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp || currentUser.whatsapp || '');
   }
 }
-
 
 // --------------------
 // Registration Form
@@ -468,7 +446,7 @@ function renderClasses() {
       // Update local registrationsData optimistically
       if (!isActive) {
         registrationsData.push({
-          classId: String(cls.id).trim(),
+          classId: cls.id,
           fullName: `${currentUser.firstName} ${currentUser.lastName || ""}`.trim(),
           whatsapp: currentUser.whatsapp || currentUser.normalizedWhatsapp,
           normalizedWhatsapp: currentUser.normalizedWhatsapp,
@@ -540,7 +518,7 @@ function renderClasses() {
 // helper: determine whether a registration row belongs to a given class object
 function isRegistrationForClass(reg, cls) {
   if (!reg || !cls) return false;
-  const regClassId = String(reg.classId || '').trim();
+  const regClassId = String(reg.classId || '');
   if (regClassId === String(cls.id)) return true;
   // if regClassId parses as a date, try to convert to classId format
   const maybeDate = new Date(regClassId);
@@ -560,7 +538,7 @@ async function submitSingleClass(classId, status) {
 
   const payload = {
     action: "updateRegistration",
-    classId: String(classId).trim(),
+    classId,
     status,
     email: currentUser.email || "",
     fullName: `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim(),
@@ -581,5 +559,4 @@ async function submitSingleClass(classId, status) {
 
 init();
 
-
-// https://script.google.com/macros/s/AKfycbyg_dBA0YlEzuVVkFeXtUtnHkHRjpb3a9IvfzRkppDqQvG1I0iWVB3AkrYGopP7FVzb/exec
+// https://script.google.com/macros/s/AKfycbxeuw_fLkUwSs_mV_t7zZTRfMCRwrG_AjAxFFhTiIw76lZRTTCZ0sd7fvRNTS34Jik5/exec
