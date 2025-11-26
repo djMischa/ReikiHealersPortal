@@ -246,6 +246,7 @@ function showPasswordPrompt(mode = 'verify', userObj = null) {
       try {
         const norm = (userObj && userObj.normalizedWhatsapp) ? userObj.normalizedWhatsapp : (currentUser && currentUser.normalizedWhatsapp) ? currentUser.normalizedWhatsapp : "";
         const resp = await apiVerifyPassword(norm, pwd);
+console.log("VERIFY RESPONSE:", resp);
 
 if (resp && resp.valid === true) {
   currentUser = { ...(userObj || currentUser), password: pwd, normalizedWhatsapp: cleanNumber(norm) };
