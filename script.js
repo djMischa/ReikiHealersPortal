@@ -220,9 +220,15 @@ async function handleWhatsAppSubmit() {
       userRegistered = true;
       // cache for faster return
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
-      msgBox.style.fontSize = "26px";
-      msgBox.style.color = "#ffffff";
-      msgBox.textContent = `Welcome ${user.firstName}! Please toggle classes below to join.`;
+      msgBox.innerHTML = `
+  <div style="text-align:center;font-size:26px;font-weight:600;letter-spacing:1px;color:#ffffff;">
+    WELCOME ${user.firstName.toUpperCase()}
+  </div>
+  <div style="margin-top:6px;text-align:center;font-size:15px;letter-spacing:0.8px;color:#ffffff;opacity:0.85;">
+    PLEASE SELECT THE SESSIONS YOU’D LIKE TO RESERVE
+  </div>
+`;
+
     } else {
       // Not found
       document.getElementById("extraFields").style.display = "block";
@@ -299,9 +305,15 @@ async function handleFullRegistration() {
       };
       userRegistered = true;
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
-      msgBox.style.fontSize = "26px";
-      msgBox.textContent = `Welcome to the Reiki Collective, ${firstName}! Please toggle classes you would like to join.`;
-      msgBox.style.color = "#ffffff";
+      msgBox.innerHTML = `
+  <div style="text-align:center;font-size:26px;font-weight:600;letter-spacing:1px;color:#ffffff;">
+    WELCOME ${firstName.toUpperCase()}
+  </div>
+  <div style="margin-top:6px;text-align:center;font-size:15px;letter-spacing:0.8px;color:#ffffff;opacity:0.85;">
+    PLEASE SELECT THE SESSIONS YOU’D LIKE TO RESERVE
+  </div>
+`;
+
 
       // Hide extra fields
       document.getElementById("extraFields").style.display = "none";
