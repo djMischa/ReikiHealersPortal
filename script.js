@@ -205,13 +205,21 @@ function showPasswordPrompt(mode = 'verify', userObj = null) {
         const norm = (userObj && userObj.normalizedWhatsapp) ? userObj.normalizedWhatsapp : (currentUser && currentUser.normalizedWhatsapp) ? currentUser.normalizedWhatsapp : "";
         const resp = await apiSetPassword(norm, pwd);
         if (resp && resp.success) {
-          // finalize login
-          currentUser = { ...(userObj || currentUser), password: pwd, normalizedWhatsapp: cleanNumber(norm) };
-          userRegistered = true;
-          sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
-          document.getElementById("regMessage").textContent = `Welcome ${firstName}! Please select the classes you wish to join.`;
-          authArea.innerHTML = "";
-          renderClasses();
+  currentUser = { ...(userObj || currentUser), password: pwd, normalizedWhatsapp: cleanNumber(norm) };
+  userRegistered = true;
+  sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+
+  document.getElementById("regMessage").textContent =
+    `Welcome ${firstName}! Please select the classes you wish to join.`;
+
+  // ✅ HIDE PHOTO + SHOW CLASSES
+  document.getElementById("login-photo").classList.add("hidden");
+  document.getElementById("classes").classList.remove("hidden");
+
+  authArea.innerHTML = "";
+  renderClasses();
+}
+
         } else {
           showToast("Could not save password", true);
         }
@@ -238,21 +246,25 @@ function showPasswordPrompt(mode = 'verify', userObj = null) {
       try {
         const norm = (userObj && userObj.normalizedWhatsapp) ? userObj.normalizedWhatsapp : (currentUser && currentUser.normalizedWhatsapp) ? currentUser.normalizedWhatsapp : "";
         const resp = await apiVerifyPassword(norm, pwd);
-        if (resp && resp.success) {
-          // proceed
-          currentUser = { ...(userObj || currentUser), password: pwd, normalizedWhatsapp: cleanNumber(norm) };
-          userRegistered = true;
-          sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
-          document.getElementById("regMessage").textContent = `Welcome ${firstName}! Please select the classes you wish to join.`;
-          document.getElementById("authArea").innerHTML = "";
-          renderClasses();
-        } else {
-          showToast(resp && resp.message ? resp.message : "Password invalid", true);
-        }
-      } catch (err) {
-        console.error("verifyPassword failed", err);
-        showToast("Error verifying password", true);
-      }
+
+if (resp && resp.valid === true) {
+  currentUser = { ...(userObj || currentUser), password: pwd, normalizedWhatsapp: cleanNumber(norm) };
+  userRegistered = true;
+  sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+
+  document.getElementById("regMessage").textContent =
+    `Welcome ${firstName}! Please select the classes you wish to join.`;
+
+  // ✅ HIDE PHOTO + SHOW CLASSES
+  document.getElementById("login-photo").classList.add("hidden");
+  document.getElementById("classes").classList.remove("hidden");
+
+  authArea.innerHTML = "";
+  renderClasses();
+} else {
+  showToast("Password invalid", true);
+}
+
     });
   }
 }
