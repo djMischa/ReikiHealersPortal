@@ -307,7 +307,7 @@ async function handleFullRegistration() {
       userRegistered = true;
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
        msgBox.style.fontSize = "26px";
-      msgBox.textContent = `Welcome to the Reiki Collective, ${firstName}! Please toggle classes you would like to join.`;
+      msgBox.textContent = `Welcome to the Reiki Collective, ${firstName}! PLEASE SELECT THE SESSIONS YOU’D LIKE TO RESERVE`;
       msgBox.style.color = "#ffffff";
 
 
