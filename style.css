@@ -118,3 +118,8 @@ main#classes {
 body.loaded main#classes {
   opacity: 1;
 }
+
+window.addEventListener('load', () => {
+  document.body.classList.add('loaded');
+});
+
