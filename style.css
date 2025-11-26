@@ -1,22 +1,21 @@
 /* ================================
-   REIKI & RESTORE – LUXURY UI
-   Cinematic Hero + Refined UX
+   REIKI & RESTORE – FIXED & OPTIMISED UI
+   Cinematic Banner + Responsive UX
 ================================ */
-
-:root {
-  --bg-black: #000000;
-  --white: #ffffff;
-  --gold-light: #ffd78c;
-  --gold-dark: #c59b5a;
-}
 
 html, body {
   margin: 0;
   padding: 0;
-  background: var(--bg-black);
-  color: var(--white);
+  background: black;
+  color: white;
   font-family: 'Bebas Neue', sans-serif;
   overflow-x: hidden;
+}
+
+/* REMOVE ANY DEFAULT WP SPACING ABOVE HEADER */
+header, .site-header, #masthead {
+  margin: 0 !important;
+  padding: 0 !important;
 }
 
 /* ================================
@@ -40,12 +39,7 @@ html, body {
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(0,0,0,0.65),
-    rgba(0,0,0,0.4),
-    rgba(0,0,0,0)
-  );
+  background: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.3), rgba(0,0,0,0));
   z-index: 1;
 }
 
@@ -59,133 +53,97 @@ html, body {
   font-size: 4rem;
   letter-spacing: 4px;
   color: #ffffff;
-  font-weight: 400;
   margin: 0;
-  padding: 0 20px;
   opacity: 0;
-  animation: titleFade 1.8s ease forwards;
+  animation: titleFade 1.4s ease forwards;
 }
 
 @keyframes titleFade {
-  from { opacity: 0; transform: translateY(25px); }
+  from { opacity: 0; transform: translateY(20px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
-@media (max-width: 768px) {
-  .hero-banner {
-    height: 32vh;
-    min-height: 260px;
-    background-image: url('https://chiroyoga.ca/wp-content/uploads/2025/11/Reiki2b.jpg');
-  }
-  #pageTitle {
-    font-size: 2.6rem;
-  }
-}
-
 /* ================================
-   REGISTRATION SECTION (WhatsApp)
+   REGISTRATION / WHATSAPP FIELD
 ================================ */
 #registration-section {
-  width: 100%;
   text-align: center;
-  padding: 20px 10px 10px;
+  padding: 25px 20px 10px;
 }
 
 #registration-section form {
   display: flex;
   flex-direction: column;
   align-items: center;
+  gap: 10px;
 }
 
-/* INPUT + BUTTON SAME WIDTH */
+/* INPUT SAME WIDTH AS BUTTON */
 #registration-section input,
 #registration-section button {
-  width: auto;
-  min-width: 240px;
-  max-width: 300px;
-  padding: 12px 18px;
-  margin-top: 10px;
-  border-radius: 8px;
-  border: 2px solid var(--gold-dark);
-  font-size: 18px;
-  font-family: 'Bebas Neue', sans-serif;
-  box-sizing: border-box;
+  width: 220px;
+  max-width: 220px;
+}
+
+#registration-section input {
+  font-size: 1.1rem;
+  padding: 12px 16px;
 }
 
 #registration-section button {
-  background: var(--gold-dark);
-  color: var(--bg-black);
-  font-weight: bold;
+  padding: 12px 16px;
+  background: #111;
+  color: white;
+  border: 1px solid #666;
   cursor: pointer;
-  transition: all 0.3s ease;
 }
 
-#registration-section button:hover {
-  background: var(--gold-light);
-  border-color: var(--gold-light);
+/* ================================
+   CLASS CARDS – ENSURE VISIBLE
+================================ */
+main#classes {
+  opacity: 1 !important;
+  display: block !important;
 }
 
-@media (max-width: 480px) {
+/* REMOVE BROKEN JS-IN-CSS LOADING RULE */
+body.loaded main#classes {
+  opacity: 1;
+}
+
+/* ================================
+   TOGGLE SWITCH VISIBILITY FIX
+================================ */
+input[type="checkbox"],
+input[type="radio"] {
+  appearance: auto !important;
+  opacity: 1 !important;
+  position: relative !important;
+}
+
+.toggle, .switch {
+  display: inline-flex !important;
+  visibility: visible !important;
+}
+
+/* ================================
+   MOBILE FIXES
+================================ */
+@media (max-width: 768px) {
+  .hero-banner {
+    height: 32vh;
+    min-height: 260px;
+    background-image: url('https://chiroyoga.ca/wp-content/uploads/2025/11/Reiki2b.jpg');
+  }
+
+  #pageTitle {
+    font-size: 2.5rem;
+  }
+
   #registration-section input,
   #registration-section button {
-    max-width: 85%;
+    width: 180px;
+    max-width: 180px;
   }
-}
-
-/* ================================
-   CLASS CARDS
-================================ */
-#classes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 30px;
-  justify-content: center;
-  padding: 20px;
-}
-
-.class-container {
-  background: rgba(0,0,0,0.85);
-  border: 2px solid var(--gold-dark);
-  border-radius: 15px;
-  padding: 25px;
-  transition: all 0.5s ease;
-  opacity: 0;
-  transform: translateY(50px);
-  margin-bottom: 24px;
-}
-
-.class-container:hover {
-  box-shadow: 0 0 20px rgba(197,155,90,0.5);
-  transform: translateY(-5px);
-}
-
-.class-location {
-  font-size: 26px;
-  color: var(--gold-dark);
-}
-
-.class-date {
-  font-size: 18px;
-  margin-bottom: 12px;
-}
-
-/* ================================
-   SPARKLE CANVAS
-================================ */
-#sparkleCanvas {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 0;
-}
-
-.hero-banner,
-#registration-section,
-#classes {
-  position: relative;
-  z-index: 2;
 }
 
