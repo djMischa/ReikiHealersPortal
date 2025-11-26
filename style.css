@@ -1,21 +1,28 @@
 /* ================================
    REIKI & RESTORE – LUXURY UI UPGRADE
    Cinematic Photo Header + Smooth UX
+   CLEAN + FIXED VERSION
 ================================ */
+
+:root {
+  --bg-black: #000000;
+  --white: #ffffff;
+  --gold-light: #ffd78c;
+  --gold-dark: #c59b5a;
+}
 
 html, body {
   margin: 0;
   padding: 0;
-  background: black;
-  color: white;
+  background: var(--bg-black);
+  color: var(--white);
   font-family: 'Bebas Neue', sans-serif;
+  overflow-x: hidden;
 }
 
-/* ---------- CINEMATIC HEADER ---------- */
 /* ================================
    CINEMATIC HERO BANNER
 ================================ */
-
 .hero-banner {
   position: relative;
   width: 100%;
@@ -25,6 +32,7 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+  margin: 0;
 
   background-image: url('https://chiroyoga.ca/wp-content/uploads/2025/11/reiki1a-2.jpg');
   background-size: cover;
@@ -32,94 +40,182 @@ html, body {
   background-repeat: no-repeat;
 }
 
-/* Dark luxury overlay */
 .hero-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(0,0,0,0.65),
-    rgba(0,0,0,0.4),
+    rgba(0,0,0,0.6),
+    rgba(0,0,0,0.35),
     rgba(0,0,0,0)
   );
   z-index: 1;
 }
 
-/* Content layer */
 .hero-content {
   position: relative;
   z-index: 2;
   text-align: center;
 }
 
-/* Page Title */
 #pageTitle {
   font-size: 4rem;
   letter-spacing: 4px;
-  color: #ffffff;
+  color: var(--white);
   font-weight: 400;
   margin: 0;
   padding: 0 20px;
-  opacity: 0;
-  animation: titleFade 1.8s ease forwards;
+  animation: titleFade 1.6s ease forwards;
 }
 
-/* Fade in animation */
 @keyframes titleFade {
-  from {
-    opacity: 0;
-    transform: translateY(25px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-/* ================================
-   MOBILE VERSION
-================================ */
 @media (max-width: 768px) {
   .hero-banner {
-    height: 32vh;
+    height: 34vh;
     min-height: 260px;
     background-image: url('https://chiroyoga.ca/wp-content/uploads/2025/11/Reiki2b.jpg');
   }
-
   #pageTitle {
     font-size: 2.6rem;
     letter-spacing: 3px;
   }
 }
 
-
-
-/* ---------- REGISTRATION SECTION ---------- */
+/* ================================
+   REGISTRATION SECTION (INSTANT LOAD)
+================================ */
 #registration-section {
+  width: 100%;
+  max-width: 360px;
+  margin: 20px auto 10px auto;
+  padding: 0 12px;
   text-align: center;
-  padding: 30px 20px 10px;
+  box-sizing: border-box;
 }
 
-/* Ensure WhatsApp input appears instantly */
-#registration-section input,
-#registration-section button {
-  font-family: 'Bebas Neue', sans-serif;
-  font-size: 1.2rem;
-  padding: 14px 18px;
-  margin-top: 10px;
+#registration-section form input,
+#registration-section form button {
+  width: 100%;
+  padding: 14px;
+  margin-top: 12px;
+  border-radius: 10px;
+  border: 2px solid var(--gold-dark);
+  font-size: 18px;
 }
 
-/* ---------- CLASSES LOADING STATE ---------- */
+#registration-section form button {
+  background: var(--gold-dark);
+  color: var(--bg-black);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+#registration-section form button:hover {
+  background: var(--gold-light);
+  border-color: var(--gold-light);
+}
+
+@media (max-width: 480px) {
+  #registration-section {
+    max-width: 92%;
+  }
+}
+
+/* ================================
+   CLASS CARDS (VISIBLE IMMEDIATELY)
+================================ */
+#classes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 30px;
+  justify-content: center;
+  padding: 20px;
+}
+
+.class-container {
+  background: rgba(0,0,0,0.85);
+  border: 2px solid var(--gold-dark);
+  border-radius: 15px;
+  padding: 25px;
+  transition: all 0.4s ease;
+}
+
+.class-container:hover {
+  box-shadow: 0 0 20px rgba(197,155,90,0.5);
+  transform: translateY(-4px);
+}
+
+/* REMOVE LOADING DELAY (FIXES BLANK CARDS) */
 main#classes {
-  opacity: 0;
-  transition: opacity 0.6s ease;
+  opacity: 1 !important;
 }
 
-body.loaded main#classes {
-  opacity: 1;
+/* ================================
+   LIST STYLES
+================================ */
+ul {
+  padding-left: 20px;
+  font-size: 18px;
+  list-style-type: disc;
+  color: var(--white);
 }
 
-window.addEventListener('load', () => {
-  document.body.classList.add('loaded');
-});
+ul li::marker {
+  color: var(--gold-dark);
+}
+
+/* ================================
+   TOGGLE SWITCH
+================================ */
+.lux-toggle {
+  position: relative;
+  width: 46px;
+  height: 26px;
+  border-radius: 30px;
+  background: #555;
+  cursor: pointer;
+  transition: background 0.3s, box-shadow 0.3s;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+}
+
+.lux-toggle::after {
+  content: '';
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 4px;
+  left: 4px;
+  border-radius: 50%;
+  background: white;
+  transition: all 0.3s ease;
+}
+
+.lux-toggle.active {
+  background: var(--gold-dark);
+}
+
+.lux-toggle.active::after {
+  left: 24px;
+}
+
+/* ================================
+   SPARKLE BACKGROUND
+================================ */
+#sparkleCanvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Ensure all main content stays above sparkles */
+body > * {
+  position: relative;
+  z-index: 2;
+}
 
