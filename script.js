@@ -224,7 +224,7 @@ async function handleWhatsAppSubmit() {
   <div style="text-align:center;font-size:26px;font-weight:600;letter-spacing:1px;color:#c59b5a;">
     WELCOME ${user.firstName.toUpperCase()}
   </div>
-  <div style="margin-top:6px;text-align:center;font-size:15px;letter-spacing:0.8px;color:#ffffff;opacity:0.85;">
+  <div style="margin-top:6px;text-align:center;font-size:18px;letter-spacing:0.8px;color:#ffffff;opacity:1.00;">
     PLEASE SELECT THE SESSIONS YOU’D LIKE TO RESERVE
   </div>
 `;
