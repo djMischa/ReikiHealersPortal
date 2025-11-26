@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Reiki & Restore Collective</title>
-<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reiki & Restore Collective</title>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -15,23 +15,53 @@
   <h1 id="pageTitle">Reiki & Restore Collective</h1>
 </header>
 
-<!-- Registration section -->
-<div id="registration-section"></div>
-  
-<main id="classes">
+<!-- LOGIN + REGISTRATION AREA -->
+<section id="login-area">
+  <div id="registration-section"></div>
+</section>
+
+<!-- FULL WIDTH HERO PHOTO (VISIBLE ONLY BEFORE LOGIN) -->
+<section id="login-photo">
+  <img 
+    src="https://chiroyoga.ca/wp-content/uploads/2025/11/WhatsApp-Image-2025-11-25-at-12.57.51-e1764112873908.jpeg" 
+    alt="Reiki & Restore"
+  />
+</section>
+
+<!-- CLASSES (HIDDEN UNTIL FULL LOGIN) -->
+<main id="classes" class="hidden">
   <!-- Class cards injected here -->
 </main>
 
-
-
 <!-- Optional CTA link below modal -->
-<a id="cta" href="https://tinyurl.com/ReikiReg" target="_blank" style="display:none;">✨ Registration is now OPEN ✨</a>
+<a id="cta" href="https://tinyurl.com/ReikiReg" target="_blank" style="display:none;">
+  ✨ Registration is now OPEN ✨
+</a>
 
-<!-- PapaParse for CSV parsing if needed -->
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
-
-<!-- Main script -->
 <script src="script.js"></script>
+
+<style>
+  /* Edge-to-edge photo styling */
+  #login-photo {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: block;
+  }
+
+  #login-photo img {
+    width: 100%;
+    height: auto;
+    display: block;
+    object-fit: cover;
+  }
+
+  /* Utility */
+  .hidden {
+    display: none !important;
+  }
+</style>
+
 </body>
 </html>
-
