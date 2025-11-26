@@ -221,11 +221,11 @@ async function handleWhatsAppSubmit() {
       // cache for faster return
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
       msgBox.innerHTML = `
-  <div style="text-align:center;font-size:26px;font-weight:600;letter-spacing:1px;color:#c59b5a;">
+  <div style="text-align:center;font-size:26px;font-weight:500;letter-spacing:1px;color:#c59b5a;">
     <span style="color:#d4af37;">✦</span> WELCOME ${user.firstName.toUpperCase()} <span style="color:#d4af37;">✦</span>
 
   </div>
-  <div style="margin-top:6px;text-align:center;font-size:18px;letter-spacing:0.8px;color:#ffffff;opacity:1.00;">
+  <div style="margin-top:6px;text-align:center;font-size:18px;letter-spacing:0.8px;color:#ffffff;opacity:1;">
     PLEASE SELECT THE SESSIONS YOU’D LIKE TO RESERVE
   </div>
 `;
@@ -307,12 +307,12 @@ async function handleFullRegistration() {
       userRegistered = true;
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
       msgBox.innerHTML = `
-  <div style="text-align:center;font-size:26px;font-weight:600;letter-spacing:1px;color:#c59b5a;">
+  <div style="text-align:center;font-size:26px;font-weight:500;letter-spacing:1px;color:#c59b5a;">
     <span style="color:#d4af37;">✦</span> WELCOME ${user.firstName.toUpperCase()} <span style="color:#d4af37;">✦</span>
 
   </div>
-  <div style="margin-top:6px;text-align:center;font-size:18px;letter-spacing:0.8px;color:#ffffff;opacity:1.00;">
-    PLEASE SELECT THE SESSIONS YOU’D LIKE TO RESERVE
+  <div style="margin-top:6px;text-align:center;font-size:18px;letter-spacing:0.8px;color:#ffffff;opacity:1;">
+    WELCOME TO THE COLLECTIVE. PLEASE SELECT THE SESSIONS YOU’D LIKE TO RESERVE
   </div>
 `;
 
