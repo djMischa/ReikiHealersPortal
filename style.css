@@ -18,6 +18,8 @@ body {
 header {
   text-align: center;
   margin: 40px 0;
+  margin-bottom: 10px;
+
 }
 
 #pageTitle {
