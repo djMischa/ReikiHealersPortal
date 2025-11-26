@@ -1,0 +1,228 @@
+:root {
+  --bg-black: #000000;
+  --white: #ffffff;
+  --gold-light: #ffd78c;
+  --gold-dark: #c59b5a;
+}
+
+/* ---------- Body & Header ---------- */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Bebas Neue', sans-serif;
+  background: var(--bg-black);
+  color: var(--white);
+  overflow-x: hidden;
+}
+
+header {
+  text-align: center;
+  margin: 10px 0;
+  
+}
+
+#pageTitle {
+  font-size: 4rem;
+  font-weight: 900;
+  letter-spacing: 3px;
+  color: var(--gold-dark);
+  margin: 10px 5 5px 5;
+  
+  text-align: center;
+}
+
+/* ---------- Class Cards ---------- */
+#classes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 30px;
+  justify-content: center;
+  padding: 0 20px;
+}
+
+.class-container {
+  background: rgba(0,0,0,0.85);
+  border: 2px solid var(--gold-dark);
+  border-radius: 15px;
+  padding: 25px;
+  text-align: left;
+  transition: all 0.5s ease;
+  opacity: 0;
+  transform: translateY(50px);
+  margin-bottom: 24px;
+}
+
+.class-container:hover {
+  box-shadow: 0 0 20px rgba(197,155,90,0.5);
+  transform: translateY(-5px);
+}
+
+.class-location {
+  font-size: 26px;
+  color: var(--gold-dark);
+  margin-bottom: 6px;
+}
+
+.class-date {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+/* Participant Lists */
+ul {
+  padding-left: 20px;
+  font-size: 18px;
+  list-style-type: disc;
+  list-style-position: inside;
+  color: var(--white);
+}
+
+ul li::marker {
+  color: var(--gold-dark);
+}
+
+/* ---------- Remaining / Toggle Row ---------- */
+.spaces-toggle-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 12px;
+  flex-wrap: nowrap;
+  gap: 12px;
+}
+
+.spaces-toggle-wrapper span {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--gold-dark);
+  white-space: nowrap;
+  flex-shrink: 1;
+}
+
+/* ---------- Ferrari Luxury Toggle ---------- */
+.lux-toggle {
+  position: relative;
+  width: 46px;
+  height: 26px; /* slightly taller/fatter for better touch */
+  border-radius: 30px;
+  background: #555;
+  cursor: pointer;
+  transition: background 0.3s, box-shadow 0.3s; /* smooth animation */
+  flex-shrink: 0;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+}
+
+.lux-toggle::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 4px; /* centered vertically in taller toggle */
+  left: 4px;
+  border-radius: 50%;
+  background: white;
+  transition: all 0.3s ease; /* smooth knob movement */
+  box-shadow: 0 0 6px rgba(0,0,0,0.4);
+}
+
+.lux-toggle.active {
+  background: var(--gold-dark);
+  border: 2px solid var(--gold-dark); /* gold border for active */
+  box-shadow: 0 0 8px rgba(197,155,90,0.8), inset 0 0 6px rgba(0,0,0,0.4);
+}
+
+.lux-toggle.active::after {
+  left: 24px; /* move knob smoothly */
+}
+
+/* Hover glow */
+.lux-toggle:hover {
+  box-shadow: 0 0 12px rgba(197,155,90,0.6), inset 0 0 6px rgba(0,0,0,0.4);
+}
+
+/* Disabled toggles */
+.lux-toggle[style*="pointer-events: none"] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* Slightly taller toggle on mobile (fatter knob as well) */
+@media (max-width: 480px) {
+  .lux-toggle {
+    height: 30px;
+  }
+  .lux-toggle::after {
+    top: 6px;
+    width: 20px;
+    height: 20px;
+  }
+  .lux-toggle.active::after {
+    left: 26px;
+  }
+}
+
+/* ---------- Registration Form ---------- */
+#registration-section {
+  width: 100%;
+  max-width: 360px;
+  margin: 20px auto 10px auto;
+  padding: 0 10px;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+#registration-section *,
+#registration-section *:before,
+#registration-section *:after {
+  box-sizing: border-box;
+}
+
+#registration-section form input,
+#registration-section form button {
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  margin-bottom: 6px;
+  border-radius: 8px;
+  border: 2px solid var(--gold-dark);
+  font-size: 18px;
+  display: block;
+}
+
+#registration-section form button {
+  background: var(--gold-dark);
+  color: var(--bg-black);
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+#registration-section form button:hover {
+  background: var(--gold-light);
+  border-color: var(--gold-light);
+}
+
+/* Sparkle Background Canvas */
+#sparkleCanvas {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 768px) {
+  #pageTitle {
+    font-size: 3rem;
+  }
+  #classes {
+    grid-template-columns: 1fr;
+  }
+  .spaces-toggle-wrapper {
+    justify-content: space-between;
+    gap: 10px;
+  }
+}
