@@ -28,6 +28,7 @@ header {
   letter-spacing: 4px;
   color: var(--gold-dark);
   margin: 40px 0;
+  margin-bottom: 10px;
   text-align: center;
 }
 
