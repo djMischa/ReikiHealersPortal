@@ -1,7 +1,6 @@
 /* ================================
-   REIKI & RESTORE – LUXURY UI UPGRADE
-   Cinematic Photo Header + Smooth UX
-   CLEAN + FIXED VERSION
+   REIKI & RESTORE – LUXURY UI
+   Cinematic Hero + Refined UX
 ================================ */
 
 :root {
@@ -32,11 +31,9 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0;
-
   background-image: url('https://chiroyoga.ca/wp-content/uploads/2025/11/reiki1a-2.jpg');
   background-size: cover;
-  background-position: center center;
+  background-position: center;
   background-repeat: no-repeat;
 }
 
@@ -45,8 +42,8 @@ html, body {
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(0,0,0,0.6),
-    rgba(0,0,0,0.35),
+    rgba(0,0,0,0.65),
+    rgba(0,0,0,0.4),
     rgba(0,0,0,0)
   );
   z-index: 1;
@@ -61,73 +58,82 @@ html, body {
 #pageTitle {
   font-size: 4rem;
   letter-spacing: 4px;
-  color: var(--white);
+  color: #ffffff;
   font-weight: 400;
   margin: 0;
   padding: 0 20px;
-  animation: titleFade 1.6s ease forwards;
+  opacity: 0;
+  animation: titleFade 1.8s ease forwards;
 }
 
 @keyframes titleFade {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(25px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-width: 768px) {
   .hero-banner {
-    height: 34vh;
+    height: 32vh;
     min-height: 260px;
     background-image: url('https://chiroyoga.ca/wp-content/uploads/2025/11/Reiki2b.jpg');
   }
   #pageTitle {
     font-size: 2.6rem;
-    letter-spacing: 3px;
   }
 }
 
 /* ================================
-   REGISTRATION SECTION (INSTANT LOAD)
+   REGISTRATION SECTION (WhatsApp)
 ================================ */
 #registration-section {
   width: 100%;
-  max-width: 360px;
-  margin: 20px auto 10px auto;
-  padding: 0 12px;
   text-align: center;
+  padding: 20px 10px 10px;
+}
+
+#registration-section form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* INPUT + BUTTON SAME WIDTH */
+#registration-section input,
+#registration-section button {
+  width: auto;
+  min-width: 240px;
+  max-width: 300px;
+  padding: 12px 18px;
+  margin-top: 10px;
+  border-radius: 8px;
+  border: 2px solid var(--gold-dark);
+  font-size: 18px;
+  font-family: 'Bebas Neue', sans-serif;
   box-sizing: border-box;
 }
 
-#registration-section form input,
-#registration-section form button {
-  width: 100%;
-  padding: 14px;
-  margin-top: 12px;
-  border-radius: 10px;
-  border: 2px solid var(--gold-dark);
-  font-size: 18px;
-}
-
-#registration-section form button {
+#registration-section button {
   background: var(--gold-dark);
   color: var(--bg-black);
   font-weight: bold;
   cursor: pointer;
-  transition: all 0.25s ease;
+  transition: all 0.3s ease;
 }
 
-#registration-section form button:hover {
+#registration-section button:hover {
   background: var(--gold-light);
   border-color: var(--gold-light);
 }
 
 @media (max-width: 480px) {
-  #registration-section {
-    max-width: 92%;
+  #registration-section input,
+  #registration-section button {
+    max-width: 85%;
   }
 }
 
 /* ================================
-   CLASS CARDS (VISIBLE IMMEDIATELY)
+   CLASS CARDS
 ================================ */
 #classes {
   display: grid;
@@ -142,79 +148,43 @@ html, body {
   border: 2px solid var(--gold-dark);
   border-radius: 15px;
   padding: 25px;
-  transition: all 0.4s ease;
+  transition: all 0.5s ease;
+  opacity: 0;
+  transform: translateY(50px);
+  margin-bottom: 24px;
 }
 
 .class-container:hover {
   box-shadow: 0 0 20px rgba(197,155,90,0.5);
-  transform: translateY(-4px);
+  transform: translateY(-5px);
 }
 
-/* REMOVE LOADING DELAY (FIXES BLANK CARDS) */
-main#classes {
-  opacity: 1 !important;
-}
-
-/* ================================
-   LIST STYLES
-================================ */
-ul {
-  padding-left: 20px;
-  font-size: 18px;
-  list-style-type: disc;
-  color: var(--white);
-}
-
-ul li::marker {
+.class-location {
+  font-size: 26px;
   color: var(--gold-dark);
 }
 
-/* ================================
-   TOGGLE SWITCH
-================================ */
-.lux-toggle {
-  position: relative;
-  width: 46px;
-  height: 26px;
-  border-radius: 30px;
-  background: #555;
-  cursor: pointer;
-  transition: background 0.3s, box-shadow 0.3s;
-  box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
-}
-
-.lux-toggle::after {
-  content: '';
-  position: absolute;
-  width: 18px;
-  height: 18px;
-  top: 4px;
-  left: 4px;
-  border-radius: 50%;
-  background: white;
-  transition: all 0.3s ease;
-}
-
-.lux-toggle.active {
-  background: var(--gold-dark);
-}
-
-.lux-toggle.active::after {
-  left: 24px;
+.class-date {
+  font-size: 18px;
+  margin-bottom: 12px;
 }
 
 /* ================================
-   SPARKLE BACKGROUND
+   SPARKLE CANVAS
 ================================ */
 #sparkleCanvas {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   pointer-events: none;
   z-index: 0;
 }
 
-/* Ensure all main content stays above sparkles */
-body > * {
+.hero-banner,
+#registration-section,
+#classes {
   position: relative;
   z-index: 2;
 }
