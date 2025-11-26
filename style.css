@@ -68,47 +68,51 @@ header, .site-header, #masthead {
 ================================ */
 #registration-section {
   text-align: center;
-  padding: 25px 20px 10px;
+  padding: 25px 15px 10px;
 }
 
-#registration-section form {
+#registration-section form,
+#registration-section .whatsapp-wrapper {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 10px;
 }
 
-/* INPUT SAME WIDTH AS BUTTON */
-#registration-section input,
+#registration-section input[type="tel"],
+#registration-section input[type="text"],
 #registration-section button {
   width: 220px;
-  max-width: 220px;
+  max-width: 70vw;
+  box-sizing: border-box;
 }
 
 #registration-section input {
-  font-size: 1.1rem;
-  padding: 12px 16px;
+  margin-bottom: 6px;
 }
 
 #registration-section button {
-  padding: 12px 16px;
-  background: #111;
-  color: white;
-  border: 1px solid #666;
-  cursor: pointer;
+  margin-top: 0;
 }
 
-/* ================================
-   CLASS CARDS – ENSURE VISIBLE
-================================ */
 main#classes {
   opacity: 1 !important;
-  display: block !important;
 }
 
-/* REMOVE BROKEN JS-IN-CSS LOADING RULE */
-body.loaded main#classes {
-  opacity: 1;
+main#classes input[type="checkbox"],
+main#classes input[type="radio"] {
+  width: auto !important;
+  max-width: none !important;
+  display: inline-block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  position: relative !important;
+}
+
+.toggle-switch,
+.switch,
+.class-toggle {
+  display: flex !important;
+  align-items: center;
 }
 
 /* ================================
