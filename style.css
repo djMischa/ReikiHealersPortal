@@ -1,167 +1,87 @@
-/* =====================
-   REIKI & RESTORE COLLECTIVE
-   CINEMATIC LUX HEADER UPGRADE
-   (Nothing removed – only enhanced)
-   ===================== */
+/* ================================
+   REIKI & RESTORE – LUXURY UI UPGRADE
+   Cinematic Photo Header + Smooth UX
+================================ */
 
-:root {
-  --bg-black: #000000;
-  --white: #ffffff;
-  --gold-light: #ffd78c;
-  --gold-dark: #c59b5a;
-}
-
-/* ---------- Body ---------- */
-body {
+html, body {
   margin: 0;
   padding: 0;
+  background: black;
+  color: white;
   font-family: 'Bebas Neue', sans-serif;
-  background: var(--bg-black);
-  color: var(--white);
-  overflow-x: hidden;
 }
 
-/* =====================================
-   CINEMATIC HERO HEADER (NEW)
-   ===================================== */
+/* ---------- CINEMATIC HEADER ---------- */
 header {
   position: relative;
   width: 100%;
-  height: 28vh;
+  height: 28vh; /* ideal luxury proportion */
   min-height: 220px;
   max-height: 360px;
+  background-image: url('https://chiroyoga.ca/wp-content/uploads/2025/11/reiki1a-2.jpg');
+  background-size: cover;
+  background-position: center center;
   display: flex;
   align-items: center;
   justify-content: center;
-  text-align: center;
   overflow: hidden;
 }
 
+/* Soft gradient overlay */
 header::before {
-  content: "";
+  content: '';
   position: absolute;
   inset: 0;
-  background: 
-    linear-gradient(to bottom, rgba(0,0,0,0.65), rgba(0,0,0,0.2)),
-    url('https://chiroyoga.ca/wp-content/uploads/2025/11/reiki1a-2.jpg');
-  background-size: cover;
-  background-position: center;
+  background: linear-gradient(rgba(0,0,0,0.65), rgba(0,0,0,0.05));
   z-index: 1;
 }
 
+/* Title Styling */
 #pageTitle {
   position: relative;
   z-index: 2;
-  font-size: 4rem;
-  letter-spacing: 4px;
-  color: #ffffff;
-  text-shadow: 0 8px 25px rgba(0,0,0,0.7);
-  opacity: 0;
-  animation: titleFade 1.6s ease forwards;
-}
-
-@keyframes titleFade {
-  from {
-    opacity: 0;
-    transform: translateY(15px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Mobile hero image */
-@media (max-width: 768px) {
-  header::before {
-    background:
-      linear-gradient(to bottom, rgba(0,0,0,0.65), rgba(0,0,0,0.2)),
-      url('https://chiroyoga.ca/wp-content/uploads/2025/11/Reiki2b.jpg');
-    background-size: cover;
-    background-position: center;
-  }
-
-  #pageTitle {
-    font-size: 2.8rem;
-  }
-}
-
-/* ---------- Registration Section ---------- */
-#registration-section {
-  width: 100%;
-  max-width: 360px;
-  margin: 20px auto 10px auto;
-  padding: 0 10px;
+  color: white;
+  font-size: clamp(2.2rem, 5vw, 4rem);
+  letter-spacing: 3px;
   text-align: center;
-  box-sizing: border-box;
-}
-
-#registration-section form input,
-#registration-section form button {
-  width: 100%;
-  padding: 12px;
-  margin-top: 12px;
-  margin-bottom: 6px;
-  border-radius: 8px;
-  border: 2px solid var(--gold-dark);
-  font-size: 18px;
-  display: block;
-}
-
-#registration-section form button {
-  background: var(--gold-dark);
-  color: var(--bg-black);
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.3s ease;
-}
-
-#registration-section form button:hover {
-  background: var(--gold-light);
-  border-color: var(--gold-light);
-}
-
-/* ---------- Class Cards (Unchanged) ---------- */
-#classes {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-  gap: 30px;
-  justify-content: center;
-  padding: 0 20px;
-}
-
-.class-container {
-  background: rgba(0,0,0,0.85);
-  border: 2px solid var(--gold-dark);
-  border-radius: 15px;
-  padding: 25px;
-  text-align: left;
-  transition: all 0.5s ease;
   opacity: 0;
-  transform: translateY(50px);
-  margin-bottom: 24px;
+  animation: fadeInTitle 2s ease forwards;
 }
 
-.class-container:hover {
-  box-shadow: 0 0 20px rgba(197,155,90,0.5);
-  transform: translateY(-5px);
+@keyframes fadeInTitle {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-.class-location {
-  font-size: 26px;
-  color: var(--gold-dark);
-  margin-bottom: 6px;
+/* ---------- MOBILE IMAGE ---------- */
+@media (max-width: 768px) {
+  header {
+    background-image: url('https://chiroyoga.ca/wp-content/uploads/2025/11/Reiki2b.jpg');
+    height: 32vh;
+  }
 }
 
-.class-date {
-  font-size: 18px;
-  margin-bottom: 12px;
+/* ---------- REGISTRATION SECTION ---------- */
+#registration-section {
+  text-align: center;
+  padding: 30px 20px 10px;
 }
 
-/* ---------- Sparkle Canvas ---------- */
-#sparkleCanvas {
-  position: fixed;
-  inset: 0;
-  pointer-events: none;
-  z-index: 0;
+/* Ensure WhatsApp input appears instantly */
+#registration-section input,
+#registration-section button {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 1.2rem;
+  padding: 14px 18px;
+  margin-top: 10px;
+}
+
+/* ---------- CLASSES LOADING STATE ---------- */
+main#classes {
+  opacity: 0;
+  transition: opacity 0.6s ease;
+}
+
+body.loaded main#classes {
+  opacity: 1;
 }
