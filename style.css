@@ -1,21 +1,22 @@
 /* ================================
-   REIKI & RESTORE – FIXED & OPTIMISED UI
-   Cinematic Banner + Responsive UX
+   REIKI & RESTORE – STABLE LUXURY UI
+   Full Corrected Stylesheet
 ================================ */
+
+:root {
+  --bg-black: #000000;
+  --white: #ffffff;
+  --gold-light: #ffd78c;
+  --gold-dark: #c59b5a;
+}
 
 html, body {
   margin: 0;
   padding: 0;
-  background: black;
-  color: white;
+  background: var(--bg-black);
+  color: var(--white);
   font-family: 'Bebas Neue', sans-serif;
   overflow-x: hidden;
-}
-
-/* REMOVE ANY DEFAULT WP SPACING ABOVE HEADER */
-header, .site-header, #masthead {
-  margin: 0 !important;
-  padding: 0 !important;
 }
 
 /* ================================
@@ -39,7 +40,11 @@ header, .site-header, #masthead {
 .hero-overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to bottom, rgba(0,0,0,0.7), rgba(0,0,0,0.3), rgba(0,0,0,0));
+  background: linear-gradient(to bottom,
+    rgba(0,0,0,0.65),
+    rgba(0,0,0,0.4),
+    rgba(0,0,0,0)
+  );
   z-index: 1;
 }
 
@@ -52,87 +57,19 @@ header, .site-header, #masthead {
 #pageTitle {
   font-size: 4rem;
   letter-spacing: 4px;
-  color: #ffffff;
+  color: var(--white);
+  font-weight: 400;
   margin: 0;
+  padding: 0 20px;
   opacity: 0;
-  animation: titleFade 1.4s ease forwards;
+  animation: titleFade 1.6s ease forwards;
 }
 
 @keyframes titleFade {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; transform: translateY(25px); }
+  to   { opacity: 1; transform: translateY(0);  }
 }
 
-/* ================================
-   REGISTRATION / WHATSAPP FIELD
-================================ */
-#registration-section {
-  text-align: center;
-  padding: 25px 15px 10px;
-}
-
-#registration-section form,
-#registration-section .whatsapp-wrapper {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-
-#registration-section input[type="tel"],
-#registration-section input[type="text"],
-#registration-section button {
-  width: 220px;
-  max-width: 70vw;
-  box-sizing: border-box;
-}
-
-#registration-section input {
-  margin-bottom: 6px;
-}
-
-#registration-section button {
-  margin-top: 0;
-}
-
-main#classes {
-  opacity: 1 !important;
-}
-
-main#classes input[type="checkbox"],
-main#classes input[type="radio"] {
-  width: auto !important;
-  max-width: none !important;
-  display: inline-block !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  position: relative !important;
-}
-
-.toggle-switch,
-.switch,
-.class-toggle {
-  display: flex !important;
-  align-items: center;
-}
-
-/* ================================
-   TOGGLE SWITCH VISIBILITY FIX
-================================ */
-input[type="checkbox"],
-input[type="radio"] {
-  appearance: auto !important;
-  opacity: 1 !important;
-  position: relative !important;
-}
-
-.toggle, .switch {
-  display: inline-flex !important;
-  visibility: visible !important;
-}
-
-/* ================================
-   MOBILE FIXES
-================================ */
 @media (max-width: 768px) {
   .hero-banner {
     height: 32vh;
@@ -141,13 +78,167 @@ input[type="radio"] {
   }
 
   #pageTitle {
-    font-size: 2.5rem;
-  }
-
-  #registration-section input,
-  #registration-section button {
-    width: 180px;
-    max-width: 180px;
+    font-size: 2.6rem;
+    letter-spacing: 3px;
   }
 }
 
+/* ================================
+   REGISTRATION SECTION (WHATSAPP)
+================================ */
+#registration-section {
+  width: 100%;
+  max-width: 360px;
+  margin: 25px auto 15px;
+  text-align: center;
+}
+
+#registration-section form {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+#registration-section input,
+#registration-section button {
+  width: 260px; /* match perfectly */
+  max-width: 90%;
+  padding: 14px 16px;
+  font-size: 1.2rem;
+  margin: 6px 0;
+  border-radius: 10px;
+  border: 2px solid var(--gold-dark);
+}
+
+#registration-section button {
+  background: var(--gold-dark);
+  color: var(--bg-black);
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+#registration-section button:hover {
+  background: var(--gold-light);
+}
+
+/* ================================
+   CLASS CARDS GRID
+================================ */
+#classes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+  gap: 30px;
+  padding: 20px;
+  justify-content: center;
+}
+
+.class-container {
+  background: rgba(0,0,0,0.85);
+  border: 2px solid var(--gold-dark);
+  border-radius: 16px;
+  padding: 26px;
+  text-align: left;
+  box-shadow: 0 0 15px rgba(197,155,90,0.15);
+  transition: all 0.4s ease;
+}
+
+.class-container:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 0 22px rgba(197,155,90,0.45);
+}
+
+.class-location {
+  font-size: 26px;
+  color: var(--gold-dark);
+  margin-bottom: 6px;
+}
+
+.class-date {
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+ul {
+  padding-left: 16px;
+  font-size: 18px;
+  list-style: disc;
+}
+
+ul li::marker {
+  color: var(--gold-dark);
+}
+
+/* ================================
+   TOGGLE SWITCHES (RESTORED)
+================================ */
+.spaces-toggle-wrapper {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 14px;
+  gap: 12px;
+}
+
+.spaces-toggle-wrapper span {
+  font-size: 18px;
+  font-weight: bold;
+  color: var(--gold-dark);
+}
+
+.lux-toggle {
+  position: relative;
+  width: 46px;
+  height: 26px;
+  border-radius: 30px;
+  background: #555;
+  cursor: pointer;
+  transition: 0.3s;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+}
+
+.lux-toggle::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 4px;
+  left: 4px;
+  border-radius: 50%;
+  background: white;
+  transition: 0.3s;
+}
+
+.lux-toggle.active {
+  background: var(--gold-dark);
+}
+
+.lux-toggle.active::after {
+  left: 24px;
+}
+
+/* ================================
+   REMOVE CLASS HIDING BUG
+================================ */
+main#classes {
+  opacity: 1 !important;
+}
+
+/* ================================
+   SPARKLE CANVAS
+================================ */
+#sparkleCanvas {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* ================================
+   MOBILE REFINEMENTS
+================================ */
+@media (max-width: 480px) {
+  .spaces-toggle-wrapper {
+    flex-direction: row;
+  }
+}
