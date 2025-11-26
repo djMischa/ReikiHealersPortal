@@ -103,7 +103,7 @@ try {
     // Normalize incoming users/registrations so comparisons are consistent
     normalizeFetchedData();
 
-    renderRegistrationForm();
+    // renderRegistrationForm();
     renderClasses();
   } catch (err) {
     console.error('Initialization failed:', err);
@@ -570,7 +570,13 @@ async function submitSingleClass(classId, status) {
   return json;
 }
 
-init();
+document.addEventListener("DOMContentLoaded", () => {
+  renderRegistrationForm();   // ✅ shows WHATSAPP FIELD IMMEDIATELY
+  init();                     // ✅ classes load after in background
+});
+
+
+
 // Auto-logout when tab or browser is closed
 window.addEventListener("beforeunload", () => {
   sessionStorage.removeItem("rc_currentUser");
