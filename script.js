@@ -148,7 +148,7 @@ function renderRegistrationForm() {
   // Main initial UI: whatsapp input + image placeholder area (you can replace image with actual <img>)
   wrapper.innerHTML = `
     <div style="max-width: 420px; margin: 20px auto; text-align:center;">
-      <h1 id="site-title" style="margin-bottom:12px;">Reiki Collective</h1>
+ 
       <input id="regWhatsApp" type="tel" inputmode="numeric" placeholder="Enter your WhatsApp number"
              style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
       <button id="whatsappSubmit" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#ffffff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
@@ -163,11 +163,7 @@ function renderRegistrationForm() {
         <button id="fullRegister" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#ffffff; border:none; border-radius:8px; cursor:pointer;">Register</button>
       </div>
 
-      <div id="photoArea" style="margin-top:18px;">
-        <!-- Placeholder photo -->
-        <div style="width:120px; height:120px; margin:0 auto; border-radius:8px; background:#efefef; display:flex;align-items:center;justify-content:center;color:#888;">Photo</div>
-      </div>
-    </div>
+      
   `;
 
   document.getElementById("whatsappSubmit").addEventListener("click", handleWhatsAppSubmit);
