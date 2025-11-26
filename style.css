@@ -138,6 +138,8 @@ html, body {
   border: 2px solid var(--gold-dark);
   border-radius: 16px;
   padding: 26px;
+   margin-bottom: 40px;
+
   text-align: left;
   box-shadow: 0 0 15px rgba(197,155,90,0.15);
   transition: all 0.4s ease;
