@@ -221,7 +221,7 @@ async function handleWhatsAppSubmit() {
       // cache for faster return
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
       msgBox.innerHTML = `
-  <div style="text-align:center;font-size:26px;font-weight:600;letter-spacing:1px;color:#ffffff;">
+  <div style="text-align:center;font-size:26px;font-weight:600;letter-spacing:1px;color:#c59b5a;">
     WELCOME ${user.firstName.toUpperCase()}
   </div>
   <div style="margin-top:6px;text-align:center;font-size:15px;letter-spacing:0.8px;color:#ffffff;opacity:0.85;">
@@ -306,7 +306,7 @@ async function handleFullRegistration() {
       userRegistered = true;
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
       msgBox.innerHTML = `
-  <div style="text-align:center;font-size:26px;font-weight:600;letter-spacing:1px;color:#ffffff;">
+  <div style="text-align:center;font-size:26px;font-weight:600;letter-spacing:1px;color:#c59b5a;">
     WELCOME ${firstName.toUpperCase()}
   </div>
   <div style="margin-top:6px;text-align:center;font-size:15px;letter-spacing:0.8px;color:#ffffff;opacity:0.85;">
