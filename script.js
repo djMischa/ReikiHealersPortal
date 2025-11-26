@@ -308,10 +308,10 @@ async function handleFullRegistration() {
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
       msgBox.innerHTML = `
   <div style="text-align:center;">
-    <span style="color:#d4af37;font-weight:600;letter-spacing:2px;">
+    <span style="color:#d4af37;font-weight:500;letter-spacing:2px;">
       ★ WELCOME ${user.firstName.toUpperCase()} ★
     </span>
-    <div style="margin-top:6px;font-size:15px;letter-spacing:1px;color:#ffffff;opacity:1;">
+    <div style="margin-top:6px;font-size:18px;letter-spacing:1px;color:#ffffff;opacity:1;">
       PLEASE SELECT THE SESSIONS YOU'D LIKE TO RESERVE
     </div>
   </div>
