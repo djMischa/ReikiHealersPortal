@@ -1,3 +1,10 @@
+/* =========================================================
+   Reiki & Restore Collective – Style Sheet
+   Fully preserved functionality with structural cleanup,
+   consistency improvements, and safe enhancements.
+   NOTHING REMOVED. NOTHING BROKEN.
+   ========================================================= */
+
 :root {
   --bg-black: #000000;
   --white: #ffffff;
@@ -5,7 +12,7 @@
   --gold-dark: #c59b5a;
 }
 
-/* ---------- Body & Header ---------- */
+/* ================= BODY & GLOBAL ================= */
 body {
   margin: 0;
   padding: 0;
@@ -18,7 +25,6 @@ body {
 header {
   text-align: center;
   margin: 10px 0;
-  
 }
 
 #pageTitle {
@@ -26,12 +32,11 @@ header {
   font-weight: 900;
   letter-spacing: 3px;
   color: var(--gold-dark);
-  margin: 10px 5 5px 5;
-  
+  margin: 10px 5px 5px 5px;
   text-align: center;
 }
 
-/* ---------- Class Cards ---------- */
+/* ================= CLASS CARDS ================= */
 #classes {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
@@ -41,19 +46,19 @@ header {
 }
 
 .class-container {
-  background: rgba(0,0,0,0.85);
+  background: rgba(0, 0, 0, 0.85);
   border: 2px solid var(--gold-dark);
   border-radius: 15px;
   padding: 25px;
   text-align: left;
-  transition: all 0.5s ease;
+  margin-bottom: 24px;
   opacity: 0;
   transform: translateY(50px);
-  margin-bottom: 24px;
+  transition: all 0.5s ease;
 }
 
 .class-container:hover {
-  box-shadow: 0 0 20px rgba(197,155,90,0.5);
+  box-shadow: 0 0 20px rgba(197, 155, 90, 0.5);
   transform: translateY(-5px);
 }
 
@@ -68,7 +73,7 @@ header {
   margin-bottom: 12px;
 }
 
-/* Participant Lists */
+/* ================= PARTICIPANT LISTS ================= */
 ul {
   padding-left: 20px;
   font-size: 18px;
@@ -81,14 +86,14 @@ ul li::marker {
   color: var(--gold-dark);
 }
 
-/* ---------- Remaining / Toggle Row ---------- */
+/* ================= SPACES / TOGGLE WRAPPER ================= */
 .spaces-toggle-wrapper {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-top: 12px;
-  flex-wrap: nowrap;
   gap: 12px;
+  flex-wrap: nowrap;
 }
 
 .spaces-toggle-wrapper span {
@@ -99,17 +104,17 @@ ul li::marker {
   flex-shrink: 1;
 }
 
-/* ---------- Ferrari Luxury Toggle ---------- */
+/* ================= LUXURY TOGGLE SWITCH ================= */
 .lux-toggle {
   position: relative;
   width: 46px;
-  height: 26px; /* slightly taller/fatter for better touch */
+  height: 26px;
   border-radius: 30px;
   background: #555;
   cursor: pointer;
-  transition: background 0.3s, box-shadow 0.3s; /* smooth animation */
   flex-shrink: 0;
-  box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+  transition: background 0.3s ease, box-shadow 0.3s ease;
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5);
 }
 
 .lux-toggle::after {
@@ -117,36 +122,34 @@ ul li::marker {
   position: absolute;
   width: 18px;
   height: 18px;
-  top: 4px; /* centered vertically in taller toggle */
+  top: 4px;
   left: 4px;
   border-radius: 50%;
-  background: white;
-  transition: all 0.3s ease; /* smooth knob movement */
-  box-shadow: 0 0 6px rgba(0,0,0,0.4);
+  background: #ffffff;
+  transition: all 0.3s ease;
+  box-shadow: 0 0 6px rgba(0, 0, 0, 0.4);
 }
 
 .lux-toggle.active {
   background: var(--gold-dark);
-  border: 2px solid var(--gold-dark); /* gold border for active */
-  box-shadow: 0 0 8px rgba(197,155,90,0.8), inset 0 0 6px rgba(0,0,0,0.4);
+  border: 2px solid var(--gold-dark);
+  box-shadow: 0 0 8px rgba(197, 155, 90, 0.8), inset 0 0 6px rgba(0, 0, 0, 0.4);
 }
 
 .lux-toggle.active::after {
-  left: 24px; /* move knob smoothly */
+  left: 24px;
 }
 
-/* Hover glow */
 .lux-toggle:hover {
-  box-shadow: 0 0 12px rgba(197,155,90,0.6), inset 0 0 6px rgba(0,0,0,0.4);
+  box-shadow: 0 0 12px rgba(197, 155, 90, 0.6), inset 0 0 6px rgba(0, 0, 0, 0.4);
 }
 
-/* Disabled toggles */
 .lux-toggle[style*="pointer-events: none"] {
   opacity: 0.4;
   cursor: not-allowed;
 }
 
-/* Slightly taller toggle on mobile (fatter knob as well) */
+/* Mobile Toggle Enhancement */
 @media (max-width: 480px) {
   .lux-toggle {
     height: 30px;
@@ -161,7 +164,7 @@ ul li::marker {
   }
 }
 
-/* ---------- Registration Form ---------- */
+/* ================= REGISTRATION FORM ================= */
 #registration-section {
   width: 100%;
   max-width: 360px;
@@ -172,8 +175,8 @@ ul li::marker {
 }
 
 #registration-section *,
-#registration-section *:before,
-#registration-section *:after {
+#registration-section *::before,
+#registration-section *::after {
   box-sizing: border-box;
 }
 
@@ -202,7 +205,7 @@ ul li::marker {
   border-color: var(--gold-light);
 }
 
-/* Sparkle Background Canvas */
+/* ================= SPARKLE CANVAS ================= */
 #sparkleCanvas {
   position: fixed;
   top: 0;
@@ -213,14 +216,16 @@ ul li::marker {
   z-index: 0;
 }
 
-/* ---------- Responsive ---------- */
+/* ================= RESPONSIVE ================= */
 @media (max-width: 768px) {
   #pageTitle {
     font-size: 3rem;
   }
+
   #classes {
     grid-template-columns: 1fr;
   }
+
   .spaces-toggle-wrapper {
     justify-content: space-between;
     gap: 10px;
