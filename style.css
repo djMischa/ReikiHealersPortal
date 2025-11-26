@@ -12,53 +12,63 @@ html, body {
 }
 
 /* ---------- CINEMATIC HEADER ---------- */
-/* ===== CINEMATIC HERO BANNER ===== */
+/* ================================
+   CINEMATIC HERO BANNER
+================================ */
+
 .hero-banner {
   position: relative;
-  height: 70vh;
-  min-height: 420px;
+  width: 100%;
+  height: 28vh;
+  min-height: 280px;
+  max-height: 420px;
   display: flex;
   align-items: center;
   justify-content: center;
+
   background-image: url('https://chiroyoga.ca/wp-content/uploads/2025/11/reiki1a-2.jpg');
   background-size: cover;
-  background-position: center;
+  background-position: center center;
   background-repeat: no-repeat;
-  overflow: hidden;
 }
 
-/* Gradient overlay */
+/* Dark luxury overlay */
 .hero-overlay {
   position: absolute;
   inset: 0;
   background: linear-gradient(
     to bottom,
-    rgba(0,0,0,0.75) 0%,
-    rgba(0,0,0,0.4) 40%,
-    rgba(0,0,0,0.1) 70%,
-    rgba(0,0,0,0) 100%
+    rgba(0,0,0,0.65),
+    rgba(0,0,0,0.4),
+    rgba(0,0,0,0)
   );
   z-index: 1;
 }
 
-/* Title styling */
-#pageTitle {
+/* Content layer */
+.hero-content {
   position: relative;
   z-index: 2;
-  font-size: 4rem;
-  font-weight: 400;
-  letter-spacing: 4px;
-  color: #ffffff;
   text-align: center;
-  animation: fadeInTitle 1.6s ease forwards;
-  opacity: 0;
 }
 
-/* Fade animation */
-@keyframes fadeInTitle {
+/* Page Title */
+#pageTitle {
+  font-size: 4rem;
+  letter-spacing: 4px;
+  color: #ffffff;
+  font-weight: 400;
+  margin: 0;
+  padding: 0 20px;
+  opacity: 0;
+  animation: titleFade 1.8s ease forwards;
+}
+
+/* Fade in animation */
+@keyframes titleFade {
   from {
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(25px);
   }
   to {
     opacity: 1;
@@ -66,18 +76,22 @@ html, body {
   }
 }
 
-/* MOBILE IMAGE */
+/* ================================
+   MOBILE VERSION
+================================ */
 @media (max-width: 768px) {
   .hero-banner {
-    height: 60vh;
+    height: 32vh;
+    min-height: 260px;
     background-image: url('https://chiroyoga.ca/wp-content/uploads/2025/11/Reiki2b.jpg');
   }
 
   #pageTitle {
     font-size: 2.6rem;
-    padding: 0 20px;
+    letter-spacing: 3px;
   }
 }
+
 
 
 /* ---------- REGISTRATION SECTION ---------- */
