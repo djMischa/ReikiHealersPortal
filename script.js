@@ -221,7 +221,7 @@ async function handleWhatsAppSubmit() {
       // cache for faster return
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
       msgBox.innerHTML = `
-  <div style="text-align:center;font-size:30px;font-weight:500;letter-spacing:1px;color:#c59b5a;">
+  <div style="text-align:center;font-size:36px;font-weight:500;letter-spacing:1px;color:#c59b5a;">
     <span style="color:#d4af37;">✦</span> WELCOME ${user.firstName.toUpperCase()} <span style="color:#d4af37;">✦</span>
 
   </div>
