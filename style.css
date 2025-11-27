@@ -109,11 +109,16 @@ html, body {
     background-image: url('https://chiroyoga.ca/wp-content/uploads/2025/11/Reiki2b.jpg');
   }
 
+  .hero-banner::before {
+    background-image: url('https://chiroyoga.ca/wp-content/uploads/2025/11/Reiki2b.jpg');
+  }
+
   #pageTitle {
     font-size: 2.6rem;
     letter-spacing: 3px;
   }
 }
+
 
 /* ================================
    REGISTRATION SECTION (WHATSAPP)
