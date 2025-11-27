@@ -87,8 +87,8 @@ html, body {
    REGISTRATION SECTION (WHATSAPP)
 ================================ */
 #registration-section {
-  width: 100%;
-  max-width: 260px;
+  width: 90%;
+  max-width: 280px;
   margin: 25px auto 15px;
   text-align: center;
 }
@@ -101,7 +101,7 @@ html, body {
 
 #registration-section input,
 #registration-section button {
-  width: 260px; /* match perfectly */
+  width: 280px; /* match perfectly */
   max-width: 90%;
   padding: 14px 16px;
   font-size: 1.2rem;
