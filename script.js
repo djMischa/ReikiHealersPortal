@@ -582,5 +582,13 @@ window.addEventListener("beforeunload", () => {
   sessionStorage.removeItem("rc_currentUser");
 });
 
+// Luxury Spa Parallax Effect
+window.addEventListener('scroll', () => {
+  const banner = document.querySelector('.hero-banner');
+  if (!banner) return;
+  const offset = window.scrollY * 0.25;
+  banner.style.setProperty('--parallax-offset', offset + 'px');
+});
+
 
 // https://script.google.com/macros/s/AKfycbyX9-uupk8uxGjqE07pNFIq7RGQVESx2xtlpdNZh_5vS3iwlgo7Njdrvg1GpenB55Zj/exec
