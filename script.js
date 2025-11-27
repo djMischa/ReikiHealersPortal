@@ -391,7 +391,7 @@ function renderClasses() {
       standbyTitle.textContent = "ON STANDBY";
       standbyTitle.style.marginTop = "10px";
       standbyTitle.style.fontWeight = "bold";
-      standbyTitle.style.fontSize = "26px";
+      standbyTitle.style.fontSize = "18px";
       standbyTitle.style.color = "#c59b5a";
 
       const standbyUl = document.createElement("ul");
