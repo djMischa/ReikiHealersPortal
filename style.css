@@ -101,13 +101,14 @@ html, body {
 
 #registration-section input,
 #registration-section button {
-  width: 260px; /* match perfectly */
+  width: 250px; /* match perfectly */
   max-width: 90%;
   padding: 14px 16px;
   font-size: 1.2rem;
   margin: 6px 0;
   border-radius: 10px;
   border: 2px solid var(--gold-dark);
+   box-sizing: border-box; /* ✅ THIS FIXES IT */
 }
 
 #registration-section button {
