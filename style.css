@@ -34,11 +34,40 @@ html, body {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden; /* REQUIRED for parallax layer */
+
   background-image: url('https://chiroyoga.ca/wp-content/uploads/2025/11/reiki1a-2.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
 }
+/* Parallax image layer */
+.hero-banner::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image: inherit;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  transform: translateY(var(--parallax-offset, 0px));
+  will-change: transform;
+  z-index: 0;
+}
+
+/* Keep overlay and content above parallax */
+.hero-overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+}
+
+
 
 .hero-overlay {
   position: absolute;
