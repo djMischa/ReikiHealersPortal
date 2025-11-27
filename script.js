@@ -226,7 +226,7 @@ async function handleWhatsAppSubmit() {
 
   </div>
   <div style="margin-top:6px;text-align:center;font-size:18px;letter-spacing:0.8px;color:#ffffff;opacity:1;">
-    PLEASE SELECT THE SESSIONS YOU’D LIKE TO ATTEND
+    PLEASE SELECT THE SESSIONS YOU WOULD LIKE TO ATTEND
   </div>
 `;
 
