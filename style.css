@@ -303,6 +303,51 @@ ul li::marker {
   left: 24px;
 }
 
+/* ---------- Healer name lock (luxury blur) ---------- */
+.healer-name {
+  display: inline-block;
+  transition: filter 400ms ease, opacity 400ms ease;
+  filter: none;
+  color: var(--white);
+  position: relative;
+}
+
+/* locked state shown to guests/unapproved users */
+.healer-name.locked {
+  filter: blur(6px);
+  opacity: 0.95;
+  pointer-events: none;
+  user-select: none;
+}
+
+/* small badge overlay telling user to login (luxury subtle) */
+.healer-name.locked::after {
+  content: "LOGIN TO REVEAL";
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%,-50%);
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: var(--gold-dark);
+  text-shadow: 0 1px 6px rgba(0,0,0,0.6);
+  background: rgba(0,0,0,0.0);
+  padding: 0 6px;
+  border-radius: 4px;
+  pointer-events: none;
+  opacity: 0.95;
+}
+
+/* reveal animation when unlocked */
+.healer-name.revealed {
+  filter: none;
+  opacity: 1;
+}
+
+
+
+
+
 /* ================================
    REMOVE CLASS HIDING BUG
 ================================ */
