@@ -426,15 +426,19 @@ main#classes {
     flex-direction: row;
   }
 
-   .seed-of-life-footer {
+  .seed-of-life-footer {
   display: block;
-  width: 240px;         /* perfect luxury size */
-  max-width: 70vw;      /* mobile responsive */
-  margin: 80px auto 40px auto;
+  margin: 60px auto 50px auto;   /* ensures true centering */
+  
+  /* Luxury sizing */
+  width: min(180px, 40vw);       /* perfect on desktop + mobile */
+  height: auto;
+
   opacity: 0;
-  transform: translateY(20px);
+  transform: translateY(18px);
   transition: opacity 900ms ease, transform 900ms ease;
-  filter: drop-shadow(0 0 12px rgba(255, 215, 130, 0.20));
+
+  filter: drop-shadow(0 0 10px rgba(255, 215, 130, 0.18));
 }
 
 /* reveal animation */
@@ -442,6 +446,7 @@ main#classes {
   opacity: 1;
   transform: translateY(0);
 }
+
 
    
 }
