@@ -175,14 +175,14 @@ html, body {
   gap: 50px;
   padding: 20px;
   justify-content: center;
-} */
+} 
 #classes {
   display: grid;
-  grid-template-columns: 1fr; /* mobile default */
+  grid-template-columns: 1fr; /* mobile default 
   gap: 50px;
   padding: 20px;
   max-width: 900px;
-  margin: 0 auto; /* centers the whole grid */
+  margin: 0 auto; /* centers the whole grid 
 }
 @media (min-width: 900px) {
   #classes {
@@ -192,6 +192,25 @@ html, body {
   .class-container {
     max-width: 380px;
     margin: 0 auto;
+  }
+} */
+#classes {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 40px;
+  padding: 20px;
+  justify-items: center;
+}
+
+/* Desktop */
+@media (min-width: 900px) {
+  #classes {
+    grid-template-columns: repeat(2, 380px);
+    justify-content: center;
+  }
+
+  .class-container {
+    width: 380px;
   }
 }
 
