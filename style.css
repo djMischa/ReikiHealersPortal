@@ -178,17 +178,23 @@ html, body {
 } */
 #classes {
   display: grid;
-  grid-template-columns: 1fr;
+  grid-template-columns: 1fr; /* mobile default */
   gap: 50px;
   padding: 20px;
-  max-width: 920px;
-  margin: 0 auto;
+  max-width: 900px;
+  margin: 0 auto; /* centers the whole grid */
 }
 @media (min-width: 900px) {
   #classes {
     grid-template-columns: repeat(2, 1fr);
   }
+
+  .class-container {
+    max-width: 380px;
+    margin: 0 auto;
+  }
 }
+
 
 
 
