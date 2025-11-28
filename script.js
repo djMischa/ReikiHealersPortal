@@ -183,75 +183,72 @@ async function handleWhatsAppSubmit() {
   submitBtn.disabled = true;
 
   try {
-    // Normalize once for lookup
     const { normalized, fallback } = normalizeWhatsapp(rawWhatsApp);
 
-    // Fetch users (small dataset)
     const usersResponse = await fetch(`${API_BASE}?type=users`);
     const users = usersResponse.ok ? await usersResponse.json() : [];
 
     if (!Array.isArray(users)) throw new Error('Users API did not return array');
 
-    // Normalize users locally for comparison safety
     const normUsers = users.map(u => {
       const copy = Object.assign({}, u);
-      copy.whatsapp = copy.whatsapp === undefined || copy.whatsapp === null ? '' : String(copy.whatsapp);
-      copy.normalizedWhatsapp = cleanNumber(copy.normalizedWhatsapp || copy.whatsapp || '');
+      copy.whatsapp = String(copy.whatsapp || '');
+      copy.normalizedWhatsapp = cleanNumber(copy.normalizedWhatsapp || copy.whatsapp);
       return copy;
     });
 
-    // Try to find user by normalizedWhatsapp or fallback
     const user = normUsers.find(u => {
-      if (!u) return false;
       const uNorm = u.normalizedWhatsapp;
       const uRaw = cleanNumber(u.whatsapp);
-      return (uNorm && uNorm === normalized) || (uRaw && (uRaw === normalized || uRaw === fallback));
+      return (uNorm === normalized || uRaw === normalized || uRaw === fallback);
     });
 
     if (user) {
-      // ensure we store normalizedWhatsapp on currentUser
-      const uNorm = normalizeWhatsapp(user.whatsapp || user.normalizedWhatsapp || "");
-      currentUser = {
-        ...user,
-        normalizedWhatsapp: uNorm.normalized || user.normalizedWhatsapp || uNorm.fallback
-      };
-      currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp);
 
+      const regApproved = user.regStat === true || user.regStat === "TRUE";
+
+      currentUser = user;
       userRegistered = true;
-      // cache for faster return
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
-      msgBox.innerHTML = `
-  <div style="text-align:center;font-size:30px;font-weight:500;letter-spacing:1px;color:#c59b5a;">
-    <span style="color:#d4af37;">✦</span> WELCOME ${user.firstName.toUpperCase()} <span style="color:#d4af37;">✦</span>
 
-  </div>
-  <div style="margin-top:6px;text-align:center;font-size:18px;letter-spacing:0.8px;color:#ffffff;opacity:1;">
-    PLEASE SELECT THE HEALING SESSIONS YOU WOULD LOVE TO PARTICIPATE IN
-  </div>
-`;
+      if (regApproved) {
+        msgBox.innerHTML = `
+          <div style="text-align:center;font-size:30px;color:#c59b5a;">
+            ✦ WELCOME ${user.firstName.toUpperCase()} ✦
+          </div>
+          <div style="font-size:18px;color:#ffffff;">
+            PLEASE SELECT THE HEALING SESSIONS YOU WOULD LIKE TO ATTEND
+          </div>
+        `;
+      } else {
+        msgBox.innerHTML = `
+          <div style="text-align:center;font-size:28px;color:#c59b5a;">
+            ✦ WELCOME ${user.firstName.toUpperCase()} ✦
+          </div>
+          <div style="font-size:17px;color:#ffffff;">
+            WE ARE HAVING DIFFICULTIES WITH YOUR LOGIN AND ADMIN HAS BEEN NOTIFIED.
+          </div>
+        `;
+        userRegistered = false; // LOCK ACCESS
+      }
 
     } else {
-      // Not found
       document.getElementById("extraFields").style.display = "block";
-      msgBox.style.fontSize = "26px";
-      msgBox.style.color = "#ffffff";
       msgBox.textContent = "Please complete your registration.";
+      msgBox.style.color = "#ffffff";
     }
 
     whatsappInput.style.display = "none";
     submitBtn.style.display = "none";
-
-    // Re-render classes now that userRegistered/currentUser may be set
     renderClasses();
 
   } catch (err) {
-    console.error("WhatsApp submit error:", err);
+    console.error(err);
+    msgBox.textContent = "Error contacting server.";
     msgBox.style.color = "red";
-    msgBox.textContent = "Error contacting server. Try again.";
-    whatsappInput.disabled = false;
-    submitBtn.disabled = false;
   }
 }
+
 
 // --------------------
 // Handle full registration (CREATE user)
@@ -272,7 +269,6 @@ async function handleFullRegistration() {
   }
 
   try {
-    // Send new user to Users tab (include normalizedWhatsapp)
     const resText = await fetch(API_BASE, {
       method: "POST",
       body: new URLSearchParams({
@@ -282,50 +278,38 @@ async function handleFullRegistration() {
         email,
         whatsapp,
         normalizedWhatsapp: whatsapp,
-        ack: true
+        regStat: false, // ✅ NEW USER DEFAULT FALSE
+        notifyAdmin: true // ✅ Trigger email
       })
     }).then(r => r.text());
 
-    let result;
-    try {
-      result = JSON.parse(resText);
-    } catch (e) {
-      console.error("Failed to parse JSON from server:", resText);
-      msgBox.textContent = `Error: Unexpected response from server.`;
-      msgBox.style.color = "red";
-      return;
-    }
+    const result = JSON.parse(resText);
 
     if (result.success) {
-      currentUser = {
-        firstName,
-        lastName,
-        email,
-        whatsapp,
-        normalizedWhatsapp: cleanNumber(whatsapp)
-      };
-      userRegistered = true;
-      sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
-       msgBox.style.fontSize = "26px";
-      msgBox.textContent = `Welcome to the Reiki Collective, ${firstName} PLEASE SELECT THE SESSIONS YOU’D LIKE TO ATTEND`;
+
+      msgBox.style.fontSize = "24px";
       msgBox.style.color = "#c59b5a";
+      msgBox.innerHTML = `
+        WELCOME TO THE COLLECTIVE ${firstName.toUpperCase()}<br>
+        YOU WILL BE NOTIFIED SHORTLY WHEN YOUR ACCOUNT IS ACTIVE.
+      `;
 
-
-
-      // Hide extra fields
+      userRegistered = false; // LOCK NEW USER
       document.getElementById("extraFields").style.display = "none";
+      renderClasses();
 
-      renderClasses(); // Now toggles are active
     } else {
-      msgBox.textContent = `Error: ${result.message || "Unknown error"}`;
+      msgBox.textContent = result.message || "Registration error.";
       msgBox.style.color = "red";
     }
+
   } catch (err) {
-    console.error("Registration request failed:", err);
-    msgBox.textContent = "Error: Could not connect to server.";
+    console.error(err);
+    msgBox.textContent = "Connection error.";
     msgBox.style.color = "red";
   }
 }
+
 
 // --------------------
 // Format class time for display (unchanged)
