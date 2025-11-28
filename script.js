@@ -277,9 +277,7 @@ async function handleFullRegistration() {
         lastName,
         email,
         whatsapp,
-        normalizedWhatsapp: whatsapp,
-        regStat: false, // ✅ NEW USER DEFAULT FALSE
-        notifyAdmin: true // ✅ Trigger email
+        normalizedWhatsapp: whatsapp
       })
     }).then(r => r.text());
 
@@ -287,28 +285,41 @@ async function handleFullRegistration() {
 
     if (result.success) {
 
+      currentUser = {
+        firstName,
+        lastName,
+        email,
+        whatsapp,
+        normalizedWhatsapp: cleanNumber(whatsapp),
+        regStat: false
+      };
+
+      userRegistered = true;
+      sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+
       msgBox.style.fontSize = "24px";
-      msgBox.style.color = "#c59b5a";
+      msgBox.style.color = "#ffffff";
       msgBox.innerHTML = `
-        WELCOME TO THE COLLECTIVE ${firstName.toUpperCase()}<br>
-        YOU WILL BE NOTIFIED SHORTLY WHEN YOUR ACCOUNT IS ACTIVE.
+        Welcome to the Collective ${firstName}.  
+        Your registration is pending approval.  
+        You will be notified shortly.
       `;
 
-      userRegistered = false; // LOCK NEW USER
       document.getElementById("extraFields").style.display = "none";
       renderClasses();
 
     } else {
-      msgBox.textContent = result.message || "Registration error.";
+      msgBox.textContent = `Error: ${result.message || "Unknown error"}`;
       msgBox.style.color = "red";
     }
 
   } catch (err) {
-    console.error(err);
-    msgBox.textContent = "Connection error.";
+    console.error("Registration failed:", err);
+    msgBox.textContent = "Error: Could not connect to server.";
     msgBox.style.color = "red";
   }
 }
+
 
 
 // --------------------
