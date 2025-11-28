@@ -425,4 +425,23 @@ main#classes {
   .spaces-toggle-wrapper {
     flex-direction: row;
   }
+
+   .seed-of-life-footer {
+  display: block;
+  width: 240px;         /* perfect luxury size */
+  max-width: 70vw;      /* mobile responsive */
+  margin: 80px auto 40px auto;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 900ms ease, transform 900ms ease;
+  filter: drop-shadow(0 0 12px rgba(255, 215, 130, 0.20));
+}
+
+/* reveal animation */
+.seed-of-life-footer.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+   
 }
