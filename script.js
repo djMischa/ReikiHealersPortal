@@ -211,6 +211,10 @@ async function handleWhatsAppSubmit() {
       userRegistered = true;
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
 
+revealHealerNamesIfApproved();
+  renderClasses();
+
+      
       if (regApproved) {
         msgBox.innerHTML = `
           <div style="text-align:center;font-size:30px;color:#c59b5a;">
@@ -240,13 +244,22 @@ async function handleWhatsAppSubmit() {
 
     whatsappInput.style.display = "none";
     submitBtn.style.display = "none";
-    renderClasses();
+   // renderClasses();
 
   } catch (err) {
     console.error(err);
     msgBox.textContent = "Error contacting server.";
     msgBox.style.color = "red";
   }
+}
+
+function revealHealerNamesIfApproved() {
+  const isApproved = (currentUser && (currentUser.regStat === true || String(currentUser.regStat).toLowerCase() === "true"));
+  if (!isApproved) return;
+  document.querySelectorAll('.healer-name.locked').forEach(el => {
+    el.classList.remove('locked');
+    el.classList.add('revealed');
+  });
 }
 
 
@@ -383,11 +396,41 @@ function renderClasses() {
 
     // Participants list
     const ul = document.createElement("ul");
-    participants.forEach(p => {
+
+    
+  /*  participants.forEach(p => {
       const li = document.createElement("li");
       li.textContent = p.fullName;
       ul.appendChild(li);
-    });
+    }); */
+
+    participants.forEach(p => {
+  const li = document.createElement("li");
+
+  // create a span for the healer name so we can blur/reveal it
+  const nameSpan = document.createElement("span");
+  nameSpan.className = "healer-name";
+
+  // Determine if the name should be locked:
+  // - if no userRegistered (guest) -> lock
+  // - if userRegistered but currentUser.regStat explicitly false -> lock
+  // - else reveal
+  const isApproved = (currentUser && (currentUser.regStat === true || String(currentUser.regStat).toLowerCase() === "true"));
+
+  if (!isApproved) {
+    nameSpan.classList.add("locked");
+  } else {
+    nameSpan.classList.add("revealed");
+  }
+
+  nameSpan.textContent = p.fullName || "";
+  li.appendChild(nameSpan);
+  ul.appendChild(li);
+});
+
+
+
+    
     div.appendChild(ul);
 
     // Standby list
@@ -530,8 +573,12 @@ function renderClasses() {
       div.style.opacity = "1";
       div.style.transform = "translateY(0)";
     }, i * 150);
-  });
+    });
+
+  // ✅ REVEAL HEALER NAMES AFTER ALL HTML HAS BEEN RENDERED
+  revealHealerNamesIfApproved();
 }
+
 
 // helper: determine whether a registration row belongs to a given class object
 function isRegistrationForClass(reg, cls) {
