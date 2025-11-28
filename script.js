@@ -1,5 +1,5 @@
 // ---------- config ----------
-const API_BASE = "https://script.google.com/macros/s/AKfycbzf_2JwbcMbk0RCc3X5ur80TeJoWMSBsGFhWRqS1Id4fNibnzt6gd5N47UXiZngFCXx/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbw7BkGSH2pIhjYxjiQ_CvlgN1cvSR0VRl6Dc3uPiS9YiD1EkA1oBfzG7EvvZEck-xBq/exec";
 
 let classesData = [];
 let registrationsData = [];
@@ -596,4 +596,4 @@ window.addEventListener('scroll', () => {
 });
 
 
-// https://script.google.com/macros/s/AKfycbzf_2JwbcMbk0RCc3X5ur80TeJoWMSBsGFhWRqS1Id4fNibnzt6gd5N47UXiZngFCXx/exec
+// https://script.google.com/macros/s/AKfycbw7BkGSH2pIhjYxjiQ_CvlgN1cvSR0VRl6Dc3uPiS9YiD1EkA1oBfzG7EvvZEck-xBq/exec
