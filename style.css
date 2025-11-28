@@ -205,12 +205,12 @@ html, body {
 /* Desktop */
 @media (min-width: 700px) {
   #classes {
-    grid-template-columns: repeat(4, 380px);
+    grid-template-columns: repeat(4, 300px);
     justify-content: center;
   }
 
   .class-container {
-    width: 380px;
+    width: 300px;
   }
 }
 
