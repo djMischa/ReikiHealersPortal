@@ -298,7 +298,7 @@ async function handleFullRegistration() {
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
 
       msgBox.style.fontSize = "20px";
-      msgBox.style.color = "#7FFF00";
+      msgBox.style.color = "#c59b5a";
       msgBox.innerHTML = `
         Welcome to the Collective ${firstName}.  
         Your registration is pending approval.  
