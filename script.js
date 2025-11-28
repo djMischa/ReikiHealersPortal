@@ -595,7 +595,7 @@ if (standbyParticipants.length) {
   
   // --- Seed of Life luxury footer image ---
 const seed = document.createElement("img");
-seed.src = "https://chiroyoga.ca/wp-content/uploads/2025/11/seedoflife.jpg";
+seed.src = "https://chiroyoga.ca/wp-content/uploads/2025/11/seed.jpg";
 seed.alt = "Seed of Life — Sacred Geometry";
 seed.className = "seed-of-life-footer";
 container.appendChild(seed);
