@@ -434,24 +434,38 @@ function renderClasses() {
     div.appendChild(ul);
 
     // Standby list
-    if (standbyParticipants.length) {
-      const standbyTitle = document.createElement("div");
-      standbyTitle.textContent = "ON STANDBY";
-      standbyTitle.style.marginTop = "10px";
-      standbyTitle.style.fontWeight = "bold";
-      standbyTitle.style.fontSize = "18px";
-      standbyTitle.style.color = "#c59b5a";
+if (standbyParticipants.length) {
+  const standbyTitle = document.createElement("div");
+  standbyTitle.textContent = "ON STANDBY";
+  standbyTitle.style.marginTop = "10px";
+  standbyTitle.style.fontWeight = "bold";
+  standbyTitle.style.fontSize = "18px";
+  standbyTitle.style.color = "#c59b5a";
 
-      const standbyUl = document.createElement("ul");
-      standbyParticipants.forEach(p => {
-        const li = document.createElement("li");
-        li.textContent = p.fullName;
-        standbyUl.appendChild(li);
-      });
+  const standbyUl = document.createElement("ul");
 
-      div.appendChild(standbyTitle);
-      div.appendChild(standbyUl);
+  standbyParticipants.forEach(p => {
+    const li = document.createElement("li");
+    const span = document.createElement("span");
+    span.className = "healer-name";
+
+    const isApproved = (currentUser && (currentUser.regStat === true || String(currentUser.regStat).toLowerCase() === "true"));
+
+    if (!isApproved) {
+      span.classList.add("locked");
+    } else {
+      span.classList.add("revealed");
     }
+
+    span.textContent = p.fullName || "";
+    li.appendChild(span);
+    standbyUl.appendChild(li);
+  });
+
+  div.appendChild(standbyTitle);
+  div.appendChild(standbyUl);
+}
+
 
     // Remaining / toggle
     const remaining = (Number(cls.capacity) || 0) - participants.length;
