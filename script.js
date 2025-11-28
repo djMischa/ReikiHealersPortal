@@ -221,7 +221,7 @@ revealHealerNamesIfApproved();
             ✦ WELCOME ${user.firstName.toUpperCase()} ✦
           </div>
           <div style="font-size:18px;color:#ffffff;">
-            PLEASE SELECT THE HEALING SESSIONS YOU WOULD LOVE TO PARTICIPATE IN
+            PLEASE SELECT THE HEALING SESSIONS YOU FEEL CALLED TO SHARE YOUR REIKI PRESENCE WITH
           </div>
         `;
       } else {
@@ -230,7 +230,7 @@ revealHealerNamesIfApproved();
             ✦ WELCOME ${user.firstName.toUpperCase()} ✦
           </div>
           <div style="font-size:17px;color:#7FFF00;">
-            SORRY! WE ARE HAVING DIFFICULTIES WITH YOUR LOGIN - ADMIN HAS BEEN NOTIFIED
+            SORRY! WE ARE HAVING DIFFICULTIES LOGGING YOU IN - ADMIN HAS BEEN NOTIFIED
           </div>
         `;
         userRegistered = false; // LOCK ACCESS
