@@ -203,7 +203,7 @@ html, body {
 }
 
 /* Desktop */
-@media (min-width: 900px) {
+@media (min-width: 700px) {
   #classes {
     grid-template-columns: repeat(4, 380px);
     justify-content: center;
