@@ -314,8 +314,8 @@ ul li::marker {
 
 /* ---------- LOCKED STATE ---------- */
 .healer-name.locked {
-  filter: blur(1px);
-  opacity: 0.55;
+  filter: blur(2px);
+  opacity: 0.7;
   color: #d6cbb7;
   pointer-events: none;
   user-select: none;
