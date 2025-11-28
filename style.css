@@ -309,15 +309,3 @@ main#classes {
     flex-direction: row;
   }
 }
-/* Desktop layout - force 2 centered cards */
-@media (min-width: 900px) {
-  #classes {
-    grid-template-columns: repeat(2, 420px); /* exactly 2 cards */
-    justify-content: center;
-  }
-}
-
-/* Prevent cards from stretching too wide */
-.class-container {
-  max-width: 420px;
-}
