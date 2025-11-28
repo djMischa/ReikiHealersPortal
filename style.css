@@ -87,15 +87,21 @@ html, body {
 }
 
 #pageTitle {
+  font-family: 'Bebas Neue', sans-serif;
   font-size: 4rem;
-  letter-spacing: 4px;
-  color: var(--white);
+  letter-spacing: 6px;
+  color: #ffffff;
   font-weight: 400;
   margin: 0;
   padding: 0 20px;
   opacity: 0;
   animation: titleFade 1.6s ease forwards;
+
+  text-shadow:
+    0 4px 12px rgba(0,0,0,0.55),
+    0 0 18px rgba(212,175,55,0.85);
 }
+
 
 @keyframes titleFade {
   from { opacity: 0; transform: translateY(25px); }
