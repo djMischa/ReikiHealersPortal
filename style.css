@@ -306,42 +306,53 @@ ul li::marker {
 /* ---------- Healer name lock (luxury blur) ---------- */
 .healer-name {
   display: inline-block;
-  transition: filter 400ms ease, opacity 400ms ease;
-  filter: none;
-  color: var(--white);
+  transition: all 0.5s cubic-bezier(.4,0,.2,1);
   position: relative;
+  color: var(--white);
 }
 
-/* locked state shown to guests/unapproved users */
+/* locked state – subtle luxury concealment */
 .healer-name.locked {
-  filter: blur(6px);
-  opacity: 0.95;
+  filter: blur(2.5px);
+  opacity: 0.6;
+  color: #d6cbb7;
+  text-shadow: none;
   pointer-events: none;
   user-select: none;
 }
 
-/* small badge overlay telling user to login (luxury subtle) */
+/* Elegant frosted overlay + soft shimmer */
 .healer-name.locked::after {
-  content: "LOGIN TO REVEAL";
+  content: "";
   position: absolute;
-  left: 50%;
-  top: 50%;
-  transform: translate(-50%,-50%);
-  font-size: 11px;
-  letter-spacing: 1.5px;
-  color: var(--gold-dark);
-  text-shadow: 0 1px 6px rgba(0,0,0,0.6);
-  background: rgba(0,0,0,0.0);
-  padding: 0 6px;
-  border-radius: 4px;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    rgba(197,155,90,0.10),
+    rgba(255,255,255,0.04),
+    rgba(197,155,90,0.10)
+  );
+  mix-blend-mode: overlay;
   pointer-events: none;
-  opacity: 0.95;
 }
 
-/* reveal animation when unlocked */
+/* Optional subtle hint text (more premium than bold label) */
+.healer-name.locked::before {
+  content: "LOGIN TO REVEAL";
+  position: absolute;
+  bottom: -14px;
+  right: 0;
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--gold-dark);
+  opacity: 0.6;
+}
+
+/* revealed state */
 .healer-name.revealed {
   filter: none;
   opacity: 1;
+  color: #ffffff;
 }
 
 
