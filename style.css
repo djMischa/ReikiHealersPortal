@@ -332,7 +332,7 @@ ul li::marker {
     rgba(255,255,255,0.04),
     rgba(197,155,90,0.10)
   );
-  backdrop-filter: blur(1px);
+  backdrop-filter: blur(2px);
   pointer-events: none;
 }
 
@@ -353,7 +353,7 @@ ul li::marker {
   filter: none;
   opacity: 1;
   color: #ffffff;
-  animation: luxuryReveal 1s ease forwards;
+  animation: luxuryReveal 2s ease forwards;
 }
 
 /* Dissolving gold lock 
