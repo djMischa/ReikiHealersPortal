@@ -205,7 +205,7 @@ html, body {
 /* Desktop */
 @media (min-width: 900px) {
   #classes {
-    grid-template-columns: repeat(2, 380px);
+    grid-template-columns: repeat(4, 380px);
     justify-content: center;
   }
 
