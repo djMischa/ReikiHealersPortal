@@ -297,8 +297,8 @@ async function handleFullRegistration() {
       userRegistered = true;
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
 
-      msgBox.style.fontSize = "24px";
-      msgBox.style.color = "#ffffff";
+      msgBox.style.fontSize = "20px";
+      msgBox.style.color = "#7FFF00";
       msgBox.innerHTML = `
         Welcome to the Collective ${firstName}.  
         Your registration is pending approval.  
@@ -306,7 +306,16 @@ async function handleFullRegistration() {
       `;
 
       document.getElementById("extraFields").style.display = "none";
-      renderClasses();
+
+      // ❌ REMOVE THIS LINE
+      // renderClasses();
+
+      // ✅ Explicitly keep class toggles locked
+      document.querySelectorAll(".class-toggle").forEach(toggle => {
+        toggle.checked = false;
+        toggle.disabled = true;
+        toggle.classList.add("locked");
+      });
 
     } else {
       msgBox.textContent = `Error: ${result.message || "Unknown error"}`;
@@ -319,6 +328,7 @@ async function handleFullRegistration() {
     msgBox.style.color = "red";
   }
 }
+
 
 
 
