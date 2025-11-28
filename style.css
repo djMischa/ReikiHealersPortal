@@ -314,7 +314,7 @@ ul li::marker {
 
 /* ---------- LOCKED STATE ---------- */
 .healer-name.locked {
-  filter: blur(2px);
+  filter: blur(1px);
   opacity: 0.55;
   color: #d6cbb7;
   pointer-events: none;
@@ -356,11 +356,11 @@ ul li::marker {
   animation: luxuryReveal 1s ease forwards;
 }
 
-/* Dissolving gold lock */
+/* Dissolving gold lock 
 .healer-name.revealed::before {
   content: "🔓";
   animation: lockDissolve 1s ease forwards;
-}
+}*/
 
 /* Reveal glass fade */
 @keyframes luxuryReveal {
@@ -380,7 +380,7 @@ ul li::marker {
   }
 }
 
-/* Lock dissolving effect */
+/* Lock dissolving effect 
 @keyframes lockDissolve {
   0% {
     opacity: 1;
@@ -394,7 +394,7 @@ ul li::marker {
     opacity: 0;
     transform: translateY(-50%) scale(2);
   }
-}
+}*/
 
 
 
