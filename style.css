@@ -169,13 +169,28 @@ html, body {
 /* ================================
    CLASS CARDS GRID
 ================================ */
-#classes {
+/* #classes {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
   gap: 50px;
   padding: 20px;
   justify-content: center;
+} */
+#classes {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 50px;
+  padding: 20px;
+  max-width: 920px;
+  margin: 0 auto;
 }
+@media (min-width: 900px) {
+  #classes {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+
 
 .class-container {
   background: rgba(0,0,0,0.85);
