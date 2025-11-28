@@ -336,7 +336,7 @@ ul li::marker {
   pointer-events: none;
 }
 
-/* Gold lock icon */
+/* Gold lock icon 
 .healer-name.locked::before {
   content: "🔒";
   position: absolute;
@@ -346,7 +346,7 @@ ul li::marker {
   font-size: 14px;
   color: var(--gold-dark);
   opacity: 0.8;
-}
+}*/
 
 /* ---------- REVEAL ANIMATION ---------- */
 .healer-name.revealed {
