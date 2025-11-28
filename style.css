@@ -424,39 +424,5 @@ main#classes {
 @media (max-width: 480px) {
   .spaces-toggle-wrapper {
     flex-direction: row;
-  }
-
-  #seedFooter {
-  text-align: center;
-  margin-top: 70px;
-}
-
-.seed-of-life-footer {
-  display: block;
-  margin: 40px auto;          /* center horizontally */
-  width: clamp(160px, 40vw, 420px);  /* responsive size */
-  max-width: 100%;
-  height: auto;
-
-  /* Ensure other CSS cannot override alignment or size */
-  position: relative !important;
-  left: 0 !important;
-  right: 0 !important;
-  transform: none !important;
-  padding: 0 !important;
-}
-
-.seed-of-life-footer.visible {
-  opacity: 1;
-  transition: opacity 0.6s ease;
-}
-
-.seed-of-life-footer {
-  opacity: 0;
-}
-
-
-
-
-   
+  } 
 }
