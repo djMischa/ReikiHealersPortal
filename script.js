@@ -595,10 +595,16 @@ if (standbyParticipants.length) {
   
   // --- Seed of Life luxury footer image ---
 const seed = document.createElement("img");
-seed.src = "https://chiroyoga.ca/wp-content/uploads/2025/11/seed-of-life-symbol-sacred-geometry-geometric-mystic-mandala-of-alchemy-esoteric-flower-of-life-gold-luxury-design-divine-meditative-amulet-isolated-on-black-background-vector-2.jpg";
+seed.src = "https://chiroyoga.ca/wp-content/uploads/2025/11/seedoflife.jpg";
 seed.alt = "Seed of Life — Sacred Geometry";
 seed.className = "seed-of-life-footer";
 container.appendChild(seed);
+
+setTimeout(() => {
+  document.querySelector(".seed-of-life-footer")?.classList.add("visible");
+}, 200);
+
+
   
 }
 
