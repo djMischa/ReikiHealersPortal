@@ -217,7 +217,7 @@ async function handleWhatsAppSubmit() {
             ✦ WELCOME ${user.firstName.toUpperCase()} ✦
           </div>
           <div style="font-size:18px;color:#ffffff;">
-            PLEASE SELECT THE HEALING SESSIONS YOU WOULD LIKE TO ATTEND
+            PLEASE SELECT THE HEALING SESSIONS YOU WOULD LOVE TO PARTICIPATE IN
           </div>
         `;
       } else {
