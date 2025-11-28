@@ -225,8 +225,8 @@ async function handleWhatsAppSubmit() {
           <div style="text-align:center;font-size:28px;color:#c59b5a;">
             ✦ WELCOME ${user.firstName.toUpperCase()} ✦
           </div>
-          <div style="font-size:17px;color:#ffffff;">
-            WE ARE HAVING DIFFICULTIES WITH YOUR LOGIN AND ADMIN HAS BEEN NOTIFIED.
+          <div style="font-size:17px;color:#7FFF00;">
+            SORRY! WE ARE HAVING DIFFICULTIES WITH YOUR LOGIN - ADMIN HAS BEEN NOTIFIED
           </div>
         `;
         userRegistered = false; // LOCK ACCESS
