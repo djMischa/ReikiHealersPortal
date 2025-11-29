@@ -136,6 +136,9 @@ function normalizeFetchedData() {
   if (currentUser) {
     currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp || currentUser.whatsapp || '');
   }
+    // after rendering classes
+  ensureFooterImage();
+
 }
 
 // --------------------
@@ -592,7 +595,9 @@ if (standbyParticipants.length) {
   // ✅ REVEAL HEALER NAMES AFTER ALL HTML HAS BEEN RENDERED
   revealHealerNamesIfApproved();
 
-  
+    // after rendering classes
+  ensureFooterImage();
+
 
 
 
@@ -661,6 +666,92 @@ window.addEventListener('scroll', () => {
   const offset = window.scrollY * 0.25;
   banner.style.setProperty('--parallax-offset', offset + 'px');
 });
+
+
+// --------------------
+// Footer seed image (JS-inserted responsive)
+// --------------------
+function ensureFooterImage() {
+  // remove any old instance
+  const old = document.querySelector(".footer-image-wrapper");
+  if (old) old.remove();
+
+  const container = document.getElementById("classes") || document.body;
+  // wrapper sits right after the class cards container
+  const wrapper = document.createElement("div");
+  wrapper.className = "footer-image-wrapper";
+  // inline styles on wrapper to avoid CSS conflicts
+  Object.assign(wrapper.style, {
+    width: "100%",
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    overflow: "hidden",
+    padding: "-15px -15px",      // breathing room
+    boxSizing: "border-box",
+    marginTop: "0px"
+  });
+
+  const img = document.createElement("img");
+  img.src = "https://chiroyoga.ca/wp-content/uploads/2025/11/seed-2.jpg";
+  img.alt = "Seed of Life — Gold";
+  img.className = "seed-of-life-footer";
+
+  // base styles (mobile-first)
+  Object.assign(img.style, {
+    display: "block",
+    width: "100%",         // mobile default
+    maxWidth: "420px",     // prevents oversized image on phones
+    height: "auto",
+    objectFit: "contain",
+    margin: "0 auto"
+  });
+
+  wrapper.appendChild(img);
+
+  // append after classes container so it appears after last class card
+  if (container && container.parentNode) {
+    // insert after container
+    container.parentNode.insertBefore(wrapper, container.nextSibling);
+  } else {
+    document.body.appendChild(wrapper);
+  }
+
+  // adjust sizing for desktop vs mobile on load and resize
+  function adjustFooterSizing() {
+    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+
+    if (vw >= 1100) {
+      // Desktop: center and shrink to ~30% visual
+      img.style.width = "30%";
+      img.style.maxWidth = "760px";
+    } else if (vw >= 768) {
+      // Tablet / small desktop
+      img.style.width = "40%";
+      img.style.maxWidth = "720px";
+    } else {
+      // Mobile
+      img.style.width = "100%";
+      img.style.maxWidth = "420px";
+    }
+
+    // ensure wrapper doesn't cause horizontal overflow
+    wrapper.style.width = "100%";
+    wrapper.style.overflow = "hidden";
+  }
+
+  // run initially
+  adjustFooterSizing();
+
+  // debounce resize
+  let resizeTimer = null;
+  window.addEventListener("resize", () => {
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+      adjustFooterSizing();
+    }, 120);
+  }, { passive: true });
+}
 
 
 // https://script.google.com/macros/s/AKfycby7J953H6mwTlpGw7dCwORhmq4eS47OREQvmJ3Ov_O_9VLfFyMQGylbTlhtb6uRASg8/exec
