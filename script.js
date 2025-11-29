@@ -230,7 +230,7 @@ revealHealerNamesIfApproved();
             ✦ WELCOME ${user.firstName.toUpperCase()} ✦
           </div>
           <div style="font-size:17px;color:#7FFF00;">
-            SORRY! WE ARE HAVING DIFFICULTIES LOGGING YOU IN - ADMIN HAS BEEN NOTIFIED
+            SORRY! WE ARE HAVING DIFFICULTIES LOGGING YOU IN AT THE MOMENT, ADMIN HAS BEEN NOTIFIED
           </div>
         `;
         userRegistered = false; // LOCK ACCESS
