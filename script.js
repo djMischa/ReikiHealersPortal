@@ -10,83 +10,76 @@ document.addEventListener("DOMContentLoaded", () => {
   document.body.classList.add("copy-protect");
 });
 
-  function enableCopyProtection(userNumber = null) {
+  
+
+// Keep track of listeners so we can remove them
+let copyBlockListeners = [];
+
+function enableCopyProtection(userNumber = null) {
   const normalized = cleanNumber(userNumber || "");
 
-  console.log("DEBUG — checking admin bypass:", {
+console.log("DEBUG — checking admin bypass:", {
     userNumber,
     normalized,
     ADMIN_WHATSAPP_NORM
   });
 
-  // ================================
-  // 🔓 ADMIN BYPASS
-  // ================================
+  
+  // ADMIN BYPASS
   if (normalized && normalized === ADMIN_WHATSAPP_NORM) {
-    console.log("Copy protection DISABLED for ADMIN:", normalized);
+    console.log("ADMIN detected — disabling ALL copy protection");
 
-    // Remove CSS lock and enable full copy
+    disableAllCopyProtectionJS();   // <-- crucial line
     document.body.classList.remove("copy-protect");
     document.body.classList.add("copy-allowed");
-
-    // Remove JS event-blocking
-    document.oncontextmenu = null;
-    document.onselectstart = null;
-    document.oncopy = null;
-    document.oncut = null;
-    document.onpaste = null;
-    document.onkeydown = null;
-
-    document.documentElement.style.webkitUserSelect = "text";
-    document.documentElement.style.webkitTouchCallout = "default";
-    document.body.style.userSelect = "text";
-    document.body.style.webkitUserSelect = "text";
-    document.body.style.msUserSelect = "text";
-    document.body.style.MozUserSelect = "text";
-
-    return; // Exit completely — admin is free
+    return;
   }
-
-  // ================================
-  // 🔒 NORMAL USER — ENABLE PROTECTION
-  // ================================
 
   document.body.classList.remove("copy-allowed");
   document.body.classList.add("copy-protect");
 
-  // Disable right-click menu
-  document.addEventListener('contextmenu', e => e.preventDefault());
+  // ---------- ADD LISTENERS & STORE THEM ----------
+  const add = (event, handler) => {
+    document.addEventListener(event, handler);
+    copyBlockListeners.push({ event, handler });
+  };
 
-  // Disable text selection
-  document.addEventListener('selectstart', e => e.preventDefault());
-
-  // Block keyboard shortcuts
-  document.addEventListener('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && ['c', 'x', 'v', 'a'].includes(e.key.toLowerCase())) {
-      e.preventDefault();
+  add('contextmenu', e => e.preventDefault());
+  add('selectstart', e => e.preventDefault());
+  add('copy', e => e.preventDefault());
+  add('cut', e => e.preventDefault());
+  add('paste', e => e.preventDefault());
+  add('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && ['c','x','v','a'].includes(e.key.toLowerCase())) {
+        e.preventDefault();
     }
-
-    // Disable Print Screen key
     if (e.key === "PrintScreen") {
-      e.preventDefault();
+        e.preventDefault();
     }
   });
 
-  // Block actual copy/cut/paste events
-  document.addEventListener('copy', e => e.preventDefault());
-  document.addEventListener('cut', e => e.preventDefault());
-  document.addEventListener('paste', e => e.preventDefault());
-
-  // Disable iPhone long-press callout
+  // Disable long-press on mobile
   document.documentElement.style.webkitUserSelect = "none";
   document.documentElement.style.webkitTouchCallout = "none";
-
-  // Disable Android long-press
   document.body.style.userSelect = "none";
-  document.body.style.webkitUserSelect = "none";
-  document.body.style.msUserSelect = "none";
-  document.body.style.MozUserSelect = "none";
 }
+
+// --------- NEW FUNCTION: remove JS blocking ---------
+function disableAllCopyProtectionJS() {
+  console.log("Removing copy-block JS listeners…");
+
+  for (const { event, handler } of copyBlockListeners) {
+    document.removeEventListener(event, handler);
+  }
+
+  copyBlockListeners = [];
+
+  // restore normal behavior
+  document.documentElement.style.webkitUserSelect = "";
+  document.documentElement.style.webkitTouchCallout = "";
+  document.body.style.userSelect = "";
+}
+
 
 
 // 🚫 Always activate copy-protection immediately
