@@ -6,6 +6,15 @@ let registrationsData = [];
 let currentUser = null; // Logged-in user's data (should include normalizedWhatsapp)
 let userRegistered = false; // Tracks if user submitted WhatsApp or registered
 
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("service-worker.js");
+  });
+}
+
+
+
 // --------------------
 // Normalize phone numbers (robust)
 // returns { normalized, fallback }
