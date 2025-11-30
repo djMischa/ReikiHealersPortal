@@ -29,6 +29,20 @@ window.addEventListener('beforeinstallprompt', (e) => {
   });
 });
 
+function isIos() {
+  return /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
+}
+
+function isSafari() {
+  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+}
+
+window.addEventListener('load', () => {
+  if (isIos() && isSafari()) {
+    const iosBanner = document.getElementById('ios-banner');
+    iosBanner.style.display = 'block';
+  }
+});
 
 
 // --------------------
