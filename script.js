@@ -689,7 +689,7 @@ function ensureFooterImage() {
     overflow: "hidden",
     padding: "-15px -15px",      // breathing room
     boxSizing: "border-box",
-    marginTop: "0px"
+    marginTop: "-5px"
   });
 
   const img = document.createElement("img");
