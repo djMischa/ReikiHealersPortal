@@ -117,6 +117,9 @@ try {
   }
 } catch (e) { /* ignore */ }
 
+    // after you've restored currentUser in init()
+enableCopyProtection(currentUser ? currentUser.normalizedWhatsapp : null);
+
 
   // Basic parallel fetch for now
   try {
@@ -201,6 +204,7 @@ function renderRegistrationForm() {
 // --------------------
 // Handle WhatsApp submit (LOGIN lookup)
 // --------------------
+// put ADMIN_WHATSAPP constant near the top of script.js (see step 3)
 async function handleWhatsAppSubmit() {
   const whatsappInput = document.getElementById("regWhatsApp");
   const submitBtn = document.getElementById("whatsappSubmit");
@@ -238,40 +242,22 @@ async function handleWhatsAppSubmit() {
     });
 
     if (user) {
-
-      const regApproved = user.regStat === true || user.regStat === "TRUE";
-
+      // compute a normalized whatsapp for comparisons reliably
+      user.normalizedWhatsapp = cleanNumber(user.normalizedWhatsapp || user.whatsapp || "");
       currentUser = user;
       userRegistered = true;
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
 
-revealHealerNamesIfApproved();
-  renderClasses();
+      // Render classes first (builds DOM), then reveal names if approved
+      renderClasses();
+      revealHealerNamesIfApproved();
 
-      
+      // Enable or disable copy protection depending on admin status
+      enableCopyProtection(currentUser.normalizedWhatsapp);
+
+      const regApproved = (user.regStat === true || String(user.regStat).toLowerCase() === "true");
+
       if (regApproved) {
-
-        if (regApproved) {
-
-    // If this user is the admin, allow copying
-    if (user.whatsapp === adminWhatsApp) {
-        disableCopyProtection();   // <-- NEW
-    }
-
-    // your existing code...
-}
-function disableCopyProtection() {
-    // Remove all event listeners by cloning document
-    const newDoc = document.cloneNode(true);
-    document.replaceWith(newDoc);
-
-    // Re-enable selection
-    newDoc.documentElement.style.webkitUserSelect = "text";
-    newDoc.documentElement.style.webkitTouchCallout = "default";
-}
-
-        
-        
         msgBox.innerHTML = `
           <div style="text-align:center;font-size:30px;color:#c59b5a;">
             ✦ WELCOME ${user.firstName.toUpperCase()} ✦
@@ -281,6 +267,7 @@ function disableCopyProtection() {
           </div>
         `;
       } else {
+        // Not approved — keep cards locked (already handled because getUserApprovalStatus blocks updates)
         msgBox.innerHTML = `
           <div style="text-align:center;font-size:28px;color:#c59b5a;">
             ✦ WELCOME ${user.firstName.toUpperCase()} ✦
@@ -289,25 +276,34 @@ function disableCopyProtection() {
             SORRY! WE ARE HAVING DIFFICULTIES LOGGING YOU IN AT THE MOMENT, ADMIN HAS BEEN NOTIFIED
           </div>
         `;
-        userRegistered = false; // LOCK ACCESS
+        userRegistered = false; // explicitly lock booking toggles
+        // Re-render to ensure toggles are disabled
+        renderClasses();
       }
 
     } else {
+      // Not found -> show register fields
       document.getElementById("extraFields").style.display = "block";
-      msgBox.textContent = "Please complete your registration.";
+      msgBox.style.fontSize = "26px";
       msgBox.style.color = "#ffffff";
+      msgBox.textContent = "Please complete your registration.";
+      // Keep copy protection in default state (locked) for guests
+      enableCopyProtection(null);
     }
 
+    // Hide entry controls once we've shown the appropriate message/UI
     whatsappInput.style.display = "none";
     submitBtn.style.display = "none";
-   // renderClasses();
 
   } catch (err) {
-    console.error(err);
+    console.error("WhatsApp submit error:", err);
     msgBox.textContent = "Error contacting server.";
     msgBox.style.color = "red";
+    whatsappInput.disabled = false;
+    submitBtn.disabled = false;
   }
 }
+
 
 function revealHealerNamesIfApproved() {
   const isApproved = (currentUser && (currentUser.regStat === true || String(currentUser.regStat).toLowerCase() === "true"));
