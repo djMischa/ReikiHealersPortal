@@ -70,9 +70,17 @@ let currentUser = null; // Logged-in user's data (should include normalizedWhats
 let userRegistered = false; // Tracks if user submitted WhatsApp or registered
 
 
+// if ("serviceWorker" in navigator) {
+//   window.addEventListener("load", () => {
+//     navigator.serviceWorker.register("service-worker.js");
+//   });
+// }
 if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("service-worker.js");
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    for (let reg of regs) {
+      console.log("Unregistering service worker:", reg);
+      reg.unregister();
+    }
   });
 }
 
