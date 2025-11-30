@@ -22,20 +22,6 @@ html, body {
    
 }
 
-:root {
-  color-scheme: dark;
-}
-
-body {
-  background: #000 !important;
-  color: #fff !important;
-}
-
-#install-banner {
-  display: none;
-}
-
-
 /* ================================
    CINEMATIC HERO BANNER
 ================================ */
