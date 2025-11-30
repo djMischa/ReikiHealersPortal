@@ -31,6 +31,7 @@ body {
 }
 
 
+
 /* ================================
    CINEMATIC HERO BANNER
 ================================ */
@@ -133,6 +134,29 @@ body {
     letter-spacing: 3px;
   }
 }
+
+/* Copy protection (non-destructive) */
+body.copy-protect,
+body.copy-protect * {
+  -webkit-user-select: none !important; /* iOS Safari / mobile */
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none !important; /* disable long-press menu on iOS */
+  -webkit-user-drag: none !important;
+}
+
+/* Exception: when admin logs in, allow selection/copy */
+body.copy-allowed,
+body.copy-allowed * {
+  -webkit-user-select: text !important;
+  -moz-user-select: text !important;
+  -ms-user-select: text !important;
+  user-select: text !important;
+  -webkit-touch-callout: default !important;
+}
+
+
 
 
 /* ================================
