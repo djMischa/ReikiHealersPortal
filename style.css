@@ -22,6 +22,17 @@ html, body {
    
 }
 
+:root {
+  color-scheme: dark;
+}
+
+body {
+  background: #000 !important;
+  color: #fff !important;
+}
+
+
+
 /* ================================
    CINEMATIC HERO BANNER
 ================================ */
