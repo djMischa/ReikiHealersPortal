@@ -9,6 +9,14 @@ function enableCopyProtection(userNumber = null) {
 
   // --- ADMIN BYPASS ---
   const normalized = cleanNumber(userNumber || "");
+
+  console.log("DEBUG — checking admin bypass:", {
+  userNumber,
+  normalized,
+  ADMIN_WHATSAPP_NORM
+});
+
+  
   if (normalized && normalized === ADMIN_WHATSAPP_NORM) {
     console.log("Copy protection DISABLED for ADMIN:", normalized);
     return; // exit early, skip all blocking
