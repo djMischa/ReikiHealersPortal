@@ -1,6 +1,28 @@
 // ---------- config ----------
 const API_BASE = "https://script.google.com/macros/s/AKfycbw3DShI4sz55maOOUc77nUlHMSzi_FavI1Dj-WObXYuH2P47ZzqJkwlg5CV4xbRvpVh/exec";
 
+const adminWhatsApp = "1925196419";
+
+function enableCopyProtection() {
+    // Disable context menu
+    document.addEventListener('contextmenu', e => e.preventDefault());
+
+    // Disable text selection
+    document.addEventListener('selectstart', e => e.preventDefault());
+
+    // Block keyboard copy, cut, paste
+    document.addEventListener('copy', e => e.preventDefault());
+    document.addEventListener('cut', e => e.preventDefault());
+    document.addEventListener('paste', e => e.preventDefault());
+
+    // Disable long press / callout on iOS
+    document.documentElement.style.webkitUserSelect = "none";
+    document.documentElement.style.webkitTouchCallout = "none";
+}
+// 🚫 Always enable protection immediately on load
+enableCopyProtection();
+
+
 let classesData = [];
 let registrationsData = [];
 let currentUser = null; // Logged-in user's data (should include normalizedWhatsapp)
@@ -228,6 +250,28 @@ revealHealerNamesIfApproved();
 
       
       if (regApproved) {
+
+        if (regApproved) {
+
+    // If this user is the admin, allow copying
+    if (user.whatsapp === adminWhatsApp) {
+        disableCopyProtection();   // <-- NEW
+    }
+
+    // your existing code...
+}
+function disableCopyProtection() {
+    // Remove all event listeners by cloning document
+    const newDoc = document.cloneNode(true);
+    document.replaceWith(newDoc);
+
+    // Re-enable selection
+    newDoc.documentElement.style.webkitUserSelect = "text";
+    newDoc.documentElement.style.webkitTouchCallout = "default";
+}
+
+        
+        
         msgBox.innerHTML = `
           <div style="text-align:center;font-size:30px;color:#c59b5a;">
             ✦ WELCOME ${user.firstName.toUpperCase()} ✦
