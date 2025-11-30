@@ -696,9 +696,9 @@ function ensureFooterImage() {
     justifyContent: "center",
     alignItems: "center",
     overflow: "hidden",
-    padding: "-15px -15px",      // breathing room
+    padding: "0px 0px",      // breathing room
     boxSizing: "border-box",
-    marginTop: "-5px"
+    marginTop: "-20px"
   });
 
   const img = document.createElement("img");
