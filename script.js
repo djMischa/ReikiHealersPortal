@@ -5,62 +5,92 @@ const API_BASE = "https://script.google.com/macros/s/AKfycbw3DShI4sz55maOOUc77nU
 const ADMIN_WHATSAPP = "1925196419"; // your admin WhatsApp number (digits only)
 const ADMIN_WHATSAPP_NORM = cleanNumber(ADMIN_WHATSAPP);
 
-function enableCopyProtection(userNumber = null) {
+// Default: block copy/paste for everyone
+document.addEventListener("DOMContentLoaded", () => {
+  document.body.classList.add("copy-protect");
+});
 
-  // --- ADMIN BYPASS ---
+  function enableCopyProtection(userNumber = null) {
   const normalized = cleanNumber(userNumber || "");
 
   console.log("DEBUG — checking admin bypass:", {
-  userNumber,
-  normalized,
-  ADMIN_WHATSAPP_NORM
-});
+    userNumber,
+    normalized,
+    ADMIN_WHATSAPP_NORM
+  });
 
-  
+  // ================================
+  // 🔓 ADMIN BYPASS
+  // ================================
   if (normalized && normalized === ADMIN_WHATSAPP_NORM) {
     console.log("Copy protection DISABLED for ADMIN:", normalized);
-    return; // exit early, skip all blocking
+
+    // Remove CSS lock and enable full copy
+    document.body.classList.remove("copy-protect");
+    document.body.classList.add("copy-allowed");
+
+    // Remove JS event-blocking
+    document.oncontextmenu = null;
+    document.onselectstart = null;
+    document.oncopy = null;
+    document.oncut = null;
+    document.onpaste = null;
+    document.onkeydown = null;
+
+    document.documentElement.style.webkitUserSelect = "text";
+    document.documentElement.style.webkitTouchCallout = "default";
+    document.body.style.userSelect = "text";
+    document.body.style.webkitUserSelect = "text";
+    document.body.style.msUserSelect = "text";
+    document.body.style.MozUserSelect = "text";
+
+    return; // Exit completely — admin is free
   }
-  // ---------------------
 
-    
-    // Disable right-click menu
-    document.addEventListener('contextmenu', e => e.preventDefault());
+  // ================================
+  // 🔒 NORMAL USER — ENABLE PROTECTION
+  // ================================
 
-    // Disable text selection
-    document.addEventListener('selectstart', e => e.preventDefault());
+  document.body.classList.remove("copy-allowed");
+  document.body.classList.add("copy-protect");
 
-    // Block keyboard shortcuts
-    document.addEventListener('keydown', e => {
-        // CTRL / CMD + C, X, V
-        if ((e.ctrlKey || e.metaKey) && ['c', 'x', 'v', 'a'].includes(e.key.toLowerCase())) {
-            e.preventDefault();
-        }
+  // Disable right-click menu
+  document.addEventListener('contextmenu', e => e.preventDefault());
 
-        // Disable Print Screen key
-        if (e.key === "PrintScreen") {
-            e.preventDefault();
-        }
-    });
+  // Disable text selection
+  document.addEventListener('selectstart', e => e.preventDefault());
 
-    // Block actual copy/cut/paste events
-    document.addEventListener('copy', e => e.preventDefault());
-    document.addEventListener('cut', e => e.preventDefault());
-    document.addEventListener('paste', e => e.preventDefault());
+  // Block keyboard shortcuts
+  document.addEventListener('keydown', e => {
+    if ((e.ctrlKey || e.metaKey) && ['c', 'x', 'v', 'a'].includes(e.key.toLowerCase())) {
+      e.preventDefault();
+    }
 
-    // Disable iPhone long-press callout & copy handles
-    document.documentElement.style.webkitUserSelect = "none";
-    document.documentElement.style.webkitTouchCallout = "none";
-    
-    // Disable Android long-press text selection
-    document.body.style.userSelect = "none";
-    document.body.style.webkitUserSelect = "none";
-    document.body.style.msUserSelect = "none";
-    document.body.style.MozUserSelect = "none";
+    // Disable Print Screen key
+    if (e.key === "PrintScreen") {
+      e.preventDefault();
+    }
+  });
+
+  // Block actual copy/cut/paste events
+  document.addEventListener('copy', e => e.preventDefault());
+  document.addEventListener('cut', e => e.preventDefault());
+  document.addEventListener('paste', e => e.preventDefault());
+
+  // Disable iPhone long-press callout
+  document.documentElement.style.webkitUserSelect = "none";
+  document.documentElement.style.webkitTouchCallout = "none";
+
+  // Disable Android long-press
+  document.body.style.userSelect = "none";
+  document.body.style.webkitUserSelect = "none";
+  document.body.style.msUserSelect = "none";
+  document.body.style.MozUserSelect = "none";
 }
 
+
 // 🚫 Always activate copy-protection immediately
-enableCopyProtection();
+// enableCopyProtection();
 
 
 
