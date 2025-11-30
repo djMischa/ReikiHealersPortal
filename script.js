@@ -761,9 +761,7 @@ function ensureFooterImage() {
     }, 120);
   }, { passive: true });
 }
-.footer-image-wrapper {
-  margin-bottom: 80px !important; /* adjust higher/lower as needed */
-}
+
 
 
 // https://script.google.com/macros/s/AKfycby7J953H6mwTlpGw7dCwORhmq4eS47OREQvmJ3Ov_O_9VLfFyMQGylbTlhtb6uRASg8/exec
