@@ -12,6 +12,22 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("service-worker.js");
   });
 }
+let deferredPrompt;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+
+  const installBanner = document.getElementById('install-banner');
+  installBanner.style.display = 'block';
+
+  document.getElementById('install-btn').addEventListener('click', async () => {
+    installBanner.style.display = 'none';
+    deferredPrompt.prompt();
+    const choice = await deferredPrompt.userChoice;
+    deferredPrompt = null;
+  });
+});
 
 
 
