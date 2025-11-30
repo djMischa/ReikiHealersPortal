@@ -138,14 +138,14 @@ body {
 /* seed of life BREATHE */
 /* Seed of Life Breathing Animation */
 .seed-of-life-footer {
-  animation: breathe 6s ease-in-out infinite;
+  animation: breathe 5s ease-in-out infinite;
   transform-origin: center center;
 }
 
 @keyframes breathe {
   0%   { transform: scale(1); }
-  40%  { transform: scale(1.05); }
-  60%  { transform: scale(1.05); }
+  40%  { transform: scale(1.08); }
+  60%  { transform: scale(1.08); }
   100% { transform: scale(1); }
 }
 
