@@ -12,58 +12,7 @@ if ("serviceWorker" in navigator) {
     navigator.serviceWorker.register("service-worker.js");
   });
 }
-let deferredPrompt = null;
 
-window.addEventListener("beforeinstallprompt", (e) => {
-  console.log("PWA install prompt fired");
-
-  // Prevent Chrome from auto-showing the prompt
-  e.preventDefault();
-
-  // Store event for triggering later
-  deferredPrompt = e;
-
-  // Show your custom banner ONCE
-  const banner = document.getElementById("install-banner");
-  if (banner) banner.style.display = "block";
-});
-
-// User clicks "Install"
-async function triggerInstall() {
-  if (!deferredPrompt) {
-    console.log("No deferredPrompt available");
-    return;
-  }
-
-  // Show the real Chrome prompt
-  deferredPrompt.prompt();
-
-  const result = await deferredPrompt.userChoice;
-  console.log("User choice:", result.outcome);
-
-  // Clear so Chrome can show its native button again later
-  deferredPrompt = null;
-
-  // Hide banner
-  const banner = document.getElementById("install-banner");
-  if (banner) banner.style.display = "none";
-}
-
-
-function isIos() {
-  return /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase());
-}
-
-function isSafari() {
-  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
-}
-
-window.addEventListener('load', () => {
-  if (isIos() && isSafari()) {
-    const iosBanner = document.getElementById('ios-banner');
-    iosBanner.style.display = 'block';
-  }
-});
 
 
 // --------------------
