@@ -761,9 +761,7 @@ function ensureFooterImage() {
     }, 120);
   }, { passive: true });
 }
-.footer-image-wrapper {
-  margin-bottom: 80px !important; /* adjust higher/lower as needed */
-}
+
 
 
 
