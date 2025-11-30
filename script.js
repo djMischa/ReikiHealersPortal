@@ -1,26 +1,59 @@
 // ---------- config ----------
 const API_BASE = "https://script.google.com/macros/s/AKfycbw3DShI4sz55maOOUc77nUlHMSzi_FavI1Dj-WObXYuH2P47ZzqJkwlg5CV4xbRvpVh/exec";
 
-const adminWhatsApp = "1925196419";
+// at top of script.js (define admin WhatsApp and normalized version)
+const ADMIN_WHATSAPP = "1925196419"; // your admin WhatsApp number (digits only)
+const ADMIN_WHATSAPP_NORM = cleanNumber(ADMIN_WHATSAPP);
 
-function enableCopyProtection() {
-    // Disable context menu
+function enableCopyProtection(userNumber = null) {
+
+  // --- ADMIN BYPASS ---
+  const normalized = cleanNumber(userNumber || "");
+  if (normalized && normalized === ADMIN_WHATSAPP_NORM) {
+    console.log("Copy protection DISABLED for ADMIN:", normalized);
+    return; // exit early, skip all blocking
+  }
+  // ---------------------
+
+    
+    // Disable right-click menu
     document.addEventListener('contextmenu', e => e.preventDefault());
 
     // Disable text selection
     document.addEventListener('selectstart', e => e.preventDefault());
 
-    // Block keyboard copy, cut, paste
+    // Block keyboard shortcuts
+    document.addEventListener('keydown', e => {
+        // CTRL / CMD + C, X, V
+        if ((e.ctrlKey || e.metaKey) && ['c', 'x', 'v', 'a'].includes(e.key.toLowerCase())) {
+            e.preventDefault();
+        }
+
+        // Disable Print Screen key
+        if (e.key === "PrintScreen") {
+            e.preventDefault();
+        }
+    });
+
+    // Block actual copy/cut/paste events
     document.addEventListener('copy', e => e.preventDefault());
     document.addEventListener('cut', e => e.preventDefault());
     document.addEventListener('paste', e => e.preventDefault());
 
-    // Disable long press / callout on iOS
+    // Disable iPhone long-press callout & copy handles
     document.documentElement.style.webkitUserSelect = "none";
     document.documentElement.style.webkitTouchCallout = "none";
+    
+    // Disable Android long-press text selection
+    document.body.style.userSelect = "none";
+    document.body.style.webkitUserSelect = "none";
+    document.body.style.msUserSelect = "none";
+    document.body.style.MozUserSelect = "none";
 }
-// 🚫 Always enable protection immediately on load
+
+// 🚫 Always activate copy-protection immediately
 enableCopyProtection();
+
 
 
 let classesData = [];
@@ -253,7 +286,12 @@ async function handleWhatsAppSubmit() {
       revealHealerNamesIfApproved();
 
       // Enable or disable copy protection depending on admin status
-      enableCopyProtection(currentUser.normalizedWhatsapp);
+      whatsappInput.style.display = "none";
+submitBtn.style.display = "none";
+
+// NOW call it
+enableCopyProtection(currentUser.normalizedWhatsapp);
+
 
       const regApproved = (user.regStat === true || String(user.regStat).toLowerCase() === "true");
 
