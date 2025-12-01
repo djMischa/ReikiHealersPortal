@@ -39,7 +39,7 @@ body.pwa-standalone .hero-banner {
 /* Optional fine-tune if still too high or too low */
 @supports (padding: max(0px)) {
   body.pwa-standalone .hero-banner {
-    padding-top: max(env(safe-area-inset-top), 12px);
+    padding-top: max(env(safe-area-inset-top), 16px);
     /* ↑ change 12px to exactly how much lower you want it */
   }
 }
