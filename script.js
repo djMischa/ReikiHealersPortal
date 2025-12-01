@@ -5,6 +5,23 @@ const API_BASE = "https://script.google.com/macros/s/AKfycbw3DShI4sz55maOOUc77nU
 const ADMIN_WHATSAPP = "1925196419"; // your admin WhatsApp number (digits only)
 const ADMIN_WHATSAPP_NORM = cleanNumber(ADMIN_WHATSAPP);
 
+
+// Detect if running in standalone (PWA) mode
+function detectPWAStandalone() {
+  const isStandalone =
+    window.matchMedia("(display-mode: standalone)").matches ||
+    window.navigator.standalone === true; // iOS Safari
+    
+  if (isStandalone) {
+    document.body.classList.add("pwa-standalone");
+  }
+}
+
+detectPWAStandalone();
+
+
+
+
 // Default: block copy/paste for everyone
 document.addEventListener("DOMContentLoaded", () => {
   document.body.classList.add("copy-protect");
