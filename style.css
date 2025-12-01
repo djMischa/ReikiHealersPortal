@@ -31,13 +31,12 @@ body {
 }
 
 
-/* Detect when running standalone as a PWA on iOS & Android */
+/* Apply only when running as a PWA and device supports safe-areas */
 @supports (padding: env(safe-area-inset-top)) {
 
-  /* For the installed PWA only — NOT the normal browser */
-  body.pwa-standalone .hero-header {
-    padding-top: 0 !important;           /* remove normal padding */
-    margin-top: calc(-1 * env(safe-area-inset-top));  /* pull hero up */
+  body.pwa-standalone .hero-banner {
+    padding-top: 0 !important;
+    margin-top: calc(-1 * env(safe-area-inset-top));
   }
 }
 
