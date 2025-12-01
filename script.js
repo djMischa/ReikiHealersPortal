@@ -6,18 +6,19 @@ const ADMIN_WHATSAPP = "1925196419"; // your admin WhatsApp number (digits only)
 const ADMIN_WHATSAPP_NORM = cleanNumber(ADMIN_WHATSAPP);
 
 
-// Detect if running in standalone (PWA) mode
+// Detect when running as an installed PWA
 function detectPWAStandalone() {
   const isStandalone =
     window.matchMedia("(display-mode: standalone)").matches ||
-    window.navigator.standalone === true; // iOS Safari
-    
+    window.navigator.standalone === true; // iOS
+
   if (isStandalone) {
     document.body.classList.add("pwa-standalone");
   }
 }
 
 detectPWAStandalone();
+
 
 
 
