@@ -31,14 +31,19 @@ body {
 }
 
 
-/* Apply only when running as a PWA and device supports safe-areas */
-@supports (padding: env(safe-area-inset-top)) {
+/* Only inside PWA mode */
+body.pwa-standalone .hero-banner {
+    padding-top: env(safe-area-inset-top); /* main fix */
+}
 
+/* Optional fine-tune if still too high or too low */
+@supports (padding: max(0px)) {
   body.pwa-standalone .hero-banner {
-    padding-top: 0 !important;
-    margin-top: calc(-1 * env(safe-area-inset-top));
+    padding-top: max(env(safe-area-inset-top), 12px);
+    /* ↑ change 12px to exactly how much lower you want it */
   }
 }
+
 
 
 
