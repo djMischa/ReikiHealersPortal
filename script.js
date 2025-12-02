@@ -1,5 +1,5 @@
 // ---------- config ----------
-const API_BASE = "https://script.google.com/macros/s/AKfycbw3DShI4sz55maOOUc77nUlHMSzi_FavI1Dj-WObXYuH2P47ZzqJkwlg5CV4xbRvpVh/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbzKcSu-vP9nlk4h15EZjthBa5rFDXdOeURUR3qpVFgHqSvfUMN2UD0LA0V1iPSXJsUj/exec";
 
 // at top of script.js (define admin WhatsApp and normalized version)
 const ADMIN_WHATSAPP = "1925196419"; // your admin WhatsApp number (digits only)
@@ -882,4 +882,5 @@ function ensureFooterImage() {
 
 
 
-// https://script.google.com/macros/s/AKfycby7J953H6mwTlpGw7dCwORhmq4eS47OREQvmJ3Ov_O_9VLfFyMQGylbTlhtb6uRASg8/exec
+// https://script.google.com/macros/s/AKfycbzKcSu-vP9nlk4h15EZjthBa5rFDXdOeURUR3qpVFgHqSvfUMN2UD0LA0V1iPSXJsUj/exec
+
