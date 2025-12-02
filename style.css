@@ -468,17 +468,21 @@ ul li::marker {
 }*/
 
 /* --- WATERMARK OVERLAY (subtle gold text) --- */
-#screenWatermark {
+/* ----------------------------------------------------
+   FULL-SCREEN DIAGONAL WATERMARK (Ultra-Subtle Gold)
+---------------------------------------------------- */
+#wmPattern {
     position: fixed;
-    bottom: 10px;
-    right: 10px;
-    font-size: 14px;
-    color: rgba(197, 155, 90, 0.22); /* subtle gold */
-    pointer-events: none;
-    z-index: 99999;
-    font-weight: 600;
-    mix-blend-mode: lighten;
+    inset: 0;
+    pointer-events: none;         /* ensures no UI blocking */
+    z-index: 999999;
+    opacity: 0.10;                /* subtle but screenshot-visible */
+    background-repeat: repeat;
+    background-size: 260px 260px; /* tile size */
+    mix-blend-mode: lighten;      /* makes gold blend beautifully */
+    transform: rotate(-18deg);    /* diagonal direction */
 }
+
 
 
 
