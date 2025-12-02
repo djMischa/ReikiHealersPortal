@@ -9,22 +9,23 @@ function setWatermarkRepeated(text) {
     const wm = document.getElementById("wmPattern");
     if (!wm) return;
 
-    const encoded = text.replace(/"/g, "'");  
+    const svg = `
+    <svg xmlns="http://www.w3.org/2000/svg" width="240" height="240">
+        <text x="50%" y="50%"
+              text-anchor="middle"
+              dominant-baseline="middle"
+              fill="rgba(197,155,90,0.12)"
+              font-size="30"
+              font-family="Arial">${text}</text>
+    </svg>`;
 
-    wm.style.backgroundImage =
-        `url("data:image/svg+xml;utf8,
-        <svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'>
-            <text x='50%' y='50%' 
-                  text-anchor='middle'
-                  dominant-baseline='middle'
-                  fill='rgba(197,155,90,0.12)'
-                  font-size='32'
-                  font-family='Arial'
-                  opacity='0.55'>
-                ${encoded}
-            </text>
-        </svg>")`;
+    const encoded = encodeURIComponent(svg)
+        .replace(/'/g, "%27")
+        .replace(/"/g, "%22");
+
+    wm.style.backgroundImage = `url("data:image/svg+xml,${encoded}")`;
 }
+
 
 
 // Detect when running as an installed PWA
@@ -375,7 +376,8 @@ async function handleWhatsAppSubmit() {
 };
 
 // ⭐ Add this
-setWatermarkRepeated(currentUser.fullName);
+setWatermarkRepeated(`${user.firstName} ${user.lastName || ""}`.trim());
+
 
       
 userRegistered = true;
