@@ -5,6 +5,27 @@ const API_BASE = "https://script.google.com/macros/s/AKfycbw3DShI4sz55maOOUc77nU
 const ADMIN_WHATSAPP = "1925196419"; // your admin WhatsApp number (digits only)
 const ADMIN_WHATSAPP_NORM = cleanNumber(ADMIN_WHATSAPP);
 
+function setWatermarkRepeated(text) {
+    const wm = document.getElementById("wmPattern");
+    if (!wm) return;
+
+    const encoded = text.replace(/"/g, "'");  
+
+    wm.style.backgroundImage =
+        `url("data:image/svg+xml;utf8,
+        <svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'>
+            <text x='50%' y='50%' 
+                  text-anchor='middle'
+                  dominant-baseline='middle'
+                  fill='rgba(197,155,90,0.12)'
+                  font-size='32'
+                  font-family='Arial'
+                  opacity='0.55'>
+                ${encoded}
+            </text>
+        </svg>")`;
+}
+
 
 // Detect when running as an installed PWA
 function detectPWAStandalone() {
@@ -354,7 +375,8 @@ async function handleWhatsAppSubmit() {
 };
 
 // ⭐ Add this
-enableWatermark(currentUser.fullName);
+setWatermarkRepeated(currentUser.fullName);
+
       
 userRegistered = true;
 sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
