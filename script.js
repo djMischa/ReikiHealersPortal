@@ -1,8 +1,8 @@
 // ---------- config ----------
 const API_BASE = "https://script.google.com/macros/s/AKfycbzKcSu-vP9nlk4h15EZjthBa5rFDXdOeURUR3qpVFgHqSvfUMN2UD0LA0V1iPSXJsUj/exec";
 
-// at top of script.js (define admin WhatsApp and normalized version)
-const ADMIN_WHATSAPP = "1925196419"; // your admin WhatsApp number (digits only)
+// Admin WhatsApp
+const ADMIN_WHATSAPP = "1925196419"; // admin WhatsApp
 const ADMIN_WHATSAPP_NORM = cleanNumber(ADMIN_WHATSAPP);
 
 // Default: block copy/paste for everyone
@@ -10,26 +10,15 @@ document.addEventListener("DOMContentLoaded", () => {
   document.body.classList.add("copy-protect");
 });
 
-  
-
-// Keep track of listeners so we can remove them
+// Keep track of listeners
 let copyBlockListeners = [];
 
 function enableCopyProtection(userNumber = null) {
   const normalized = cleanNumber(userNumber || "");
 
-console.log("DEBUG — checking admin bypass:", {
-    userNumber,
-    normalized,
-    ADMIN_WHATSAPP_NORM
-  });
-
-  
   // ADMIN BYPASS
   if (normalized && normalized === ADMIN_WHATSAPP_NORM) {
-    console.log("ADMIN detected — disabling ALL copy protection");
-
-    disableAllCopyProtectionJS();   // <-- crucial line
+    disableAllCopyProtectionJS();
     document.body.classList.remove("copy-protect");
     document.body.classList.add("copy-allowed");
     return;
@@ -38,7 +27,6 @@ console.log("DEBUG — checking admin bypass:", {
   document.body.classList.remove("copy-allowed");
   document.body.classList.add("copy-protect");
 
-  // ---------- ADD LISTENERS & STORE THEM ----------
   const add = (event, handler) => {
     document.addEventListener(event, handler);
     copyBlockListeners.push({ event, handler });
@@ -50,118 +38,81 @@ console.log("DEBUG — checking admin bypass:", {
   add('cut', e => e.preventDefault());
   add('paste', e => e.preventDefault());
   add('keydown', e => {
-    if ((e.ctrlKey || e.metaKey) && ['c','x','v','a'].includes(e.key.toLowerCase())) {
-        e.preventDefault();
-    }
-    if (e.key === "PrintScreen") {
-        e.preventDefault();
-    }
+    if ((e.ctrlKey || e.metaKey) && ['c','x','v','a'].includes(e.key.toLowerCase())) e.preventDefault();
+    if (e.key === "PrintScreen") e.preventDefault();
   });
 
-  // Disable long-press on mobile
   document.documentElement.style.webkitUserSelect = "none";
   document.documentElement.style.webkitTouchCallout = "none";
   document.body.style.userSelect = "none";
 }
 
-// --------- NEW FUNCTION: remove JS blocking ---------
 function disableAllCopyProtectionJS() {
-  console.log("Removing copy-block JS listeners…");
-
   for (const { event, handler } of copyBlockListeners) {
     document.removeEventListener(event, handler);
   }
-
   copyBlockListeners = [];
-
-  // restore normal behavior
   document.documentElement.style.webkitUserSelect = "";
   document.documentElement.style.webkitTouchCallout = "";
   document.body.style.userSelect = "";
 }
 
-
-
-// 🚫 Always activate copy-protection immediately
-// enableCopyProtection();
-
-
-
+// --------------------
 let classesData = [];
 let registrationsData = [];
-let currentUser = null; // Logged-in user's data (should include normalizedWhatsapp)
-let userRegistered = false; // Tracks if user submitted WhatsApp or registered
+let currentUser = null;
+let userRegistered = false;
 
-
-// if ("serviceWorker" in navigator) {
-//   window.addEventListener("load", () => {
-//     navigator.serviceWorker.register("service-worker.js");
-//   });
-// }
+// Service Worker cleanup
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
-    for (let reg of regs) {
-      console.log("Unregistering service worker:", reg);
-      reg.unregister();
-    }
+    for (let reg of regs) reg.unregister();
   });
 }
 
-
-
 // --------------------
-// Normalize phone numbers (robust)
-// returns { normalized, fallback }
-// normalized: digits-only, trimmed leading country 1 (if US)
-// fallback: last 10 digits for legacy matching
+// Helpers
 // --------------------
 function normalizeWhatsapp(raw) {
   if (!raw) return { normalized: "", fallback: "" };
-  const s = String(raw);
-  let digits = s.replace(/\D/g, "");
-  // remove leading zeros
-  digits = digits.replace(/^0+/, "");
-  // If US-style leading '1' and 11 digits, strip
+  let digits = String(raw).replace(/\D/g, "").replace(/^0+/, "");
   if (digits.length === 11 && digits.startsWith("1")) digits = digits.slice(1);
   const normalized = digits;
   const fallback = digits.length >= 10 ? digits.slice(-10) : digits;
   return { normalized, fallback };
 }
 
-// small helper: coerce any incoming value to digits-only string
 function cleanNumber(v) {
   if (v === undefined || v === null) return "";
   return String(v).replace(/\D/g, "");
 }
 
-// convert an ISO date (or Date) to your manual classId format, e.g. Nov2524
 function formatClassIdFromDate(d) {
   try {
     const date = (d instanceof Date) ? d : new Date(d);
     if (Number.isNaN(date.getTime())) return "";
-    const month = date.toLocaleString('en-US', { month: 'short' }); // e.g. "Nov"
-    const day = String(date.getDate()).padStart(2, '0'); // 01..31
-    const yr = String(date.getFullYear()).slice(-2); // last 2 digits
+    const month = date.toLocaleString('en-US', { month: 'short' });
+    const day = String(date.getDate()).padStart(2, '0');
+    const yr = String(date.getFullYear()).slice(-2);
     return `${month}${day}${yr}`;
-  } catch (e) {
-    return "";
-  }
+  } catch (e) { return ""; }
 }
 
-// small utility: show a transient message
 function showToast(msg, isError = false) {
   let box = document.getElementById("toast-box");
   if (!box) {
     box = document.createElement("div");
     box.id = "toast-box";
-    box.style.position = "fixed";
-    box.style.left = "50%";
-    box.style.top = "20px";
-    box.style.transform = "translateX(-50%)";
-    box.style.padding = "10px 18px";
-    box.style.borderRadius = "8px";
-    box.style.zIndex = 9999;
-    box.style.fontWeight = "700";
+    Object.assign(box.style, {
+      position: "fixed",
+      left: "50%",
+      top: "20px",
+      transform: "translateX(-50%)",
+      padding: "10px 18px",
+      borderRadius: "8px",
+      zIndex: 9999,
+      fontWeight: "700"
+    });
     document.body.appendChild(box);
   }
   box.textContent = msg;
@@ -175,41 +126,29 @@ function showToast(msg, isError = false) {
 // Initialization
 // --------------------
 async function init() {
-  // Try to load cached currentUser from sessionStorage (clears when tab/browser closes)
-try {
-  const cached = sessionStorage.getItem("rc_currentUser");
-  if (cached && cached !== "null" && cached !== "") {
-    currentUser = JSON.parse(cached);
-    if (currentUser) {
-      currentUser.normalizedWhatsapp = cleanNumber(
-        currentUser.normalizedWhatsapp || currentUser.whatsapp || ""
-      );
-      userRegistered = true;
+  try {
+    const cached = sessionStorage.getItem("rc_currentUser");
+    if (cached && cached !== "null" && cached !== "") {
+      currentUser = JSON.parse(cached);
+      if (currentUser) {
+        currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp || currentUser.whatsapp || "");
+        userRegistered = true;
+      }
     }
-  }
-} catch (e) { /* ignore */ }
+  } catch (e) { }
 
-    // after you've restored currentUser in init()
-enableCopyProtection(currentUser ? currentUser.normalizedWhatsapp : null);
+  enableCopyProtection(currentUser ? currentUser.normalizedWhatsapp : null);
 
-
-  // Basic parallel fetch for now
   try {
     const [classesResp, regsResp] = await Promise.all([
       fetch(`${API_BASE}?type=classes`),
       fetch(`${API_BASE}?type=registrations`)
     ]);
 
-    const rawClasses = classesResp.ok ? await classesResp.json() : [];
-    const rawRegs = regsResp.ok ? await regsResp.json() : [];
+    classesData = Array.isArray(classesResp.ok ? await classesResp.json() : []) ? await classesResp.json() : [];
+    registrationsData = Array.isArray(regsResp.ok ? await regsResp.json() : []) ? await regsResp.json() : [];
 
-    classesData = Array.isArray(rawClasses) ? rawClasses : [];
-    registrationsData = Array.isArray(rawRegs) ? rawRegs : [];
-
-    // Normalize incoming users/registrations so comparisons are consistent
     normalizeFetchedData();
-
-    // renderRegistrationForm();
     renderClasses();
   } catch (err) {
     console.error('Initialization failed:', err);
@@ -217,34 +156,24 @@ enableCopyProtection(currentUser ? currentUser.normalizedWhatsapp : null);
   }
 }
 
-// Ensure fetched registrations and classes have consistent types and normalized numbers
 function normalizeFetchedData() {
-  // normalize registrations
-  registrationsData = registrationsData.map(r => {
-    const copy = Object.assign({}, r);
-    // ensure classId is string
-    copy.classId = copy.classId === undefined || copy.classId === null ? '' : String(copy.classId);
-    copy.whatsapp = copy.whatsapp === undefined || copy.whatsapp === null ? '' : String(copy.whatsapp);
-    // normalizedWhatsapp may be stored as number in sheets; coerce
-    copy.normalizedWhatsapp = cleanNumber(copy.normalizedWhatsapp || copy.whatsapp || '');
-    return copy;
-  });
+  registrationsData = registrationsData.map(r => ({
+    ...r,
+    classId: String(r.classId || ''),
+    whatsapp: String(r.whatsapp || ''),
+    normalizedWhatsapp: cleanNumber(r.normalizedWhatsapp || r.whatsapp || '')
+  }));
 
-  // normalize classes (ensure id is string)
-  classesData = classesData.map(c => {
-    const copy = Object.assign({}, c);
-    copy.id = copy.id === undefined || copy.id === null ? '' : String(copy.id);
-    copy.capacity = Number(copy.capacity || 0);
-    return copy;
-  });
+  classesData = classesData.map(c => ({
+    ...c,
+    id: String(c.id || ''),
+    capacity: Number(c.capacity || 0)
+  }));
 
-  // If currentUser exists but normalizedWhatsapp is missing, try to compute it
   if (currentUser) {
     currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp || currentUser.whatsapp || '');
   }
-    // after rendering classes
   ensureFooterImage();
-
 }
 
 // --------------------
@@ -255,16 +184,16 @@ function renderRegistrationForm() {
   if (!wrapper) return;
 
   wrapper.innerHTML = `
-    <div style="max-width: 400px; margin: 20px auto; text-align:center;">
+    <div style="max-width:400px;margin:20px auto;text-align:center;">
       <input id="regWhatsApp" type="tel" inputmode="numeric" placeholder="Enter your WhatsApp number"
              style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
-      <button id="whatsappSubmit" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#ffffff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
+      <button id="whatsappSubmit" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
       <div id="regMessage" style="margin-top:10px; font-weight:bold;"></div>
       <div id="extraFields" style="margin-top:12px; display:none;">
         <input id="regFirstName" type="text" placeholder="First Name" style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
         <input id="regLastName" type="text" placeholder="Last Name" style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
         <input id="regEmail" type="email" placeholder="Email" style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
-        <button id="fullRegister" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#ffffff; border:none; border-radius:8px; cursor:pointer;">Register</button>
+        <button id="fullRegister" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Register</button>
       </div>
     </div>
   `;
@@ -274,9 +203,46 @@ function renderRegistrationForm() {
 }
 
 // --------------------
-// Handle WhatsApp submit (LOGIN lookup)
+// PASSWORD HELPERS
 // --------------------
-// put ADMIN_WHATSAPP constant near the top of script.js (see step 3)
+function renderPasswordField(placeholderText, onSubmit) {
+  const wrapper = document.getElementById("registration-section");
+  if (!wrapper) return;
+
+  wrapper.innerHTML = `
+    <div style="max-width:400px;margin:20px auto;text-align:center;">
+      <input id="pwdField" type="password" placeholder="${placeholderText}"
+             style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
+      <button id="pwdSubmit" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
+      <div id="regMessage" style="margin-top:10px; font-weight:bold;"></div>
+    </div>
+  `;
+
+  document.getElementById("pwdSubmit").addEventListener("click", () => {
+    const pwd = document.getElementById("pwdField").value.trim();
+    onSubmit(pwd);
+  });
+}
+
+function renderWelcomeMessage() {
+  const wrapper = document.getElementById("registration-section");
+  if (!wrapper || !currentUser) return;
+
+  wrapper.innerHTML = `
+    <div style="text-align:center;font-size:30px;color:#c59b5a;">
+      ✦ WELCOME ${currentUser.firstName.toUpperCase()} ✦
+    </div>
+    <div style="font-size:18px;color:#ffffff;">
+      PLEASE SELECT THE HEALING SESSIONS YOU FEEL CALLED TO SHARE YOUR REIKI PRESENCE WITH
+    </div>
+  `;
+
+  renderClasses();
+}
+
+// --------------------
+// Handle WhatsApp submit
+// --------------------
 async function handleWhatsAppSubmit() {
   const whatsappInput = document.getElementById("regWhatsApp");
   const submitBtn = document.getElementById("whatsappSubmit");
@@ -300,12 +266,11 @@ async function handleWhatsAppSubmit() {
 
     if (!Array.isArray(users)) throw new Error('Users API did not return array');
 
-    const normUsers = users.map(u => {
-      const copy = Object.assign({}, u);
-      copy.whatsapp = String(copy.whatsapp || '');
-      copy.normalizedWhatsapp = cleanNumber(copy.normalizedWhatsapp || copy.whatsapp);
-      return copy;
-    });
+    const normUsers = users.map(u => ({
+      ...u,
+      whatsapp: String(u.whatsapp || ''),
+      normalizedWhatsapp: cleanNumber(u.normalizedWhatsapp || u.whatsapp)
+    }));
 
     const user = normUsers.find(u => {
       const uNorm = u.normalizedWhatsapp;
@@ -314,37 +279,52 @@ async function handleWhatsAppSubmit() {
     });
 
     if (user) {
-      // compute a normalized whatsapp for comparisons reliably
       user.normalizedWhatsapp = cleanNumber(user.normalizedWhatsapp || user.whatsapp || "");
       currentUser = user;
       userRegistered = true;
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
 
-      // Render classes first (builds DOM), then reveal names if approved
       renderClasses();
       revealHealerNamesIfApproved();
-
-      // Enable or disable copy protection depending on admin status
-      whatsappInput.style.display = "none";
-submitBtn.style.display = "none";
-
-// NOW call it
-enableCopyProtection(currentUser.normalizedWhatsapp);
-
+      enableCopyProtection(currentUser.normalizedWhatsapp);
 
       const regApproved = (user.regStat === true || String(user.regStat).toLowerCase() === "true");
 
       if (regApproved) {
-        msgBox.innerHTML = `
-          <div style="text-align:center;font-size:30px;color:#c59b5a;">
-            ✦ WELCOME ${user.firstName.toUpperCase()} ✦
-          </div>
-          <div style="font-size:18px;color:#ffffff;">
-            PLEASE SELECT THE HEALING SESSIONS YOU FEEL CALLED TO SHARE YOUR REIKI PRESENCE WITH
-          </div>
-        `;
+        if (!user.password || user.password === "") {
+          renderPasswordField("Please create your password", async (pwd) => {
+            if (!pwd) return;
+            const res = await fetch(API_BASE, {
+              method: "POST",
+              body: new URLSearchParams({
+                action: "setPassword",
+                normalizedWhatsapp: currentUser.normalizedWhatsapp,
+                password: pwd
+              })
+            });
+            const json = await res.json();
+            if (json.success) {
+              currentUser.password = pwd;
+              userRegistered = true;
+              renderWelcomeMessage();
+              revealHealerNamesIfApproved();
+            } else {
+              showToast("Error saving password. Try again.", true);
+            }
+          });
+        } else {
+          renderPasswordField("Enter your password", async (pwd) => {
+            if (pwd === currentUser.password) {
+              userRegistered = true;
+              renderWelcomeMessage();
+              revealHealerNamesIfApproved();
+            } else {
+              showToast("Incorrect password. Please try again.", true);
+            }
+          });
+        }
       } else {
-        // Not approved — keep cards locked (already handled because getUserApprovalStatus blocks updates)
+        // User2 flow
         msgBox.innerHTML = `
           <div style="text-align:center;font-size:28px;color:#c59b5a;">
             ✦ WELCOME ${user.firstName.toUpperCase()} ✦
@@ -353,8 +333,7 @@ enableCopyProtection(currentUser.normalizedWhatsapp);
             SORRY! WE ARE HAVING DIFFICULTIES LOGGING YOU IN AT THE MOMENT, ADMIN HAS BEEN NOTIFIED
           </div>
         `;
-        userRegistered = false; // explicitly lock booking toggles
-        // Re-render to ensure toggles are disabled
+        userRegistered = false;
         renderClasses();
       }
 
@@ -364,11 +343,9 @@ enableCopyProtection(currentUser.normalizedWhatsapp);
       msgBox.style.fontSize = "26px";
       msgBox.style.color = "#ffffff";
       msgBox.textContent = "Please complete your registration.";
-      // Keep copy protection in default state (locked) for guests
       enableCopyProtection(null);
     }
 
-    // Hide entry controls once we've shown the appropriate message/UI
     whatsappInput.style.display = "none";
     submitBtn.style.display = "none";
 
@@ -379,16 +356,6 @@ enableCopyProtection(currentUser.normalizedWhatsapp);
     whatsappInput.disabled = false;
     submitBtn.disabled = false;
   }
-}
-
-
-function revealHealerNamesIfApproved() {
-  const isApproved = (currentUser && (currentUser.regStat === true || String(currentUser.regStat).toLowerCase() === "true"));
-  if (!isApproved) return;
-  document.querySelectorAll('.healer-name.locked').forEach(el => {
-    el.classList.remove('locked');
-    el.classList.add('revealed');
-  });
 }
 
 
