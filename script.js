@@ -101,7 +101,7 @@ function disableAllCopyProtectionJS() {
 
 
 // 🚫 Always activate copy-protection immediately
-// enableCopyProtection();
+// ;
 
 
 
@@ -123,6 +123,16 @@ if ("serviceWorker" in navigator) {
       reg.unregister();
     }
   });
+}
+
+// --- ENABLE WATERMARK FOR LOGGED-IN USER ---
+function enableWatermark(fullName) {
+    const wm = document.getElementById("screenWatermark");
+
+    if (!wm) return;
+
+    // Set watermark text
+    wm.textContent = fullName || "";
 }
 
 
@@ -334,9 +344,21 @@ async function handleWhatsAppSubmit() {
     if (user) {
       // compute a normalized whatsapp for comparisons reliably
       user.normalizedWhatsapp = cleanNumber(user.normalizedWhatsapp || user.whatsapp || "");
-      currentUser = user;
-      userRegistered = true;
-      sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+      
+      // WE GRAB FIRSTNAME, LASTNAME, ETC. 
+      currentUser = {
+  ...user,
+  firstName: user.firstName || "",
+  lastName: user.lastName || "",
+  fullName: `${user.firstName || ""} ${user.lastName || ""}`.trim()
+};
+
+// ⭐ Add this
+enableWatermark(currentUser.fullName);
+      
+userRegistered = true;
+sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+
 
       // Render classes first (builds DOM), then reveal names if approved
       renderClasses();
@@ -348,6 +370,17 @@ submitBtn.style.display = "none";
 
 // NOW call it
 enableCopyProtection(currentUser.normalizedWhatsapp);
+
+      // --- ENABLE WATERMARK FOR LOGGED-IN USER ---
+function enableWatermark(fullName) {
+    const wm = document.getElementById("screenWatermark");
+
+    if (!wm) return;
+
+    // Set watermark text
+    wm.textContent = fullName || "";
+}
+
 
 
       const regApproved = (user.regStat === true || String(user.regStat).toLowerCase() === "true");
