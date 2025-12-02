@@ -145,8 +145,11 @@ async function init() {
       fetch(`${API_BASE}?type=registrations`)
     ]);
 
-    classesData = Array.isArray(classesResp.ok ? await classesResp.json() : []) ? await classesResp.json() : [];
-    registrationsData = Array.isArray(regsResp.ok ? await regsResp.json() : []) ? await regsResp.json() : [];
+    const classesJson = classesResp.ok ? await classesResp.json() : [];
+    const regsJson = regsResp.ok ? await regsResp.json() : [];
+
+    classesData = Array.isArray(classesJson) ? classesJson : [];
+    registrationsData = Array.isArray(regsJson) ? regsJson : [];
 
     normalizeFetchedData();
     renderClasses();
@@ -203,7 +206,7 @@ function renderRegistrationForm() {
 }
 
 // --------------------
-// PASSWORD HELPERS
+// Password Helpers
 // --------------------
 function renderPasswordField(placeholderText, onSubmit) {
   const wrapper = document.getElementById("registration-section");
@@ -224,24 +227,8 @@ function renderPasswordField(placeholderText, onSubmit) {
   });
 }
 
-function renderWelcomeMessage() {
-  const wrapper = document.getElementById("registration-section");
-  if (!wrapper || !currentUser) return;
-
-  wrapper.innerHTML = `
-    <div style="text-align:center;font-size:30px;color:#c59b5a;">
-      ✦ WELCOME ${currentUser.firstName.toUpperCase()} ✦
-    </div>
-    <div style="font-size:18px;color:#ffffff;">
-      PLEASE SELECT THE HEALING SESSIONS YOU FEEL CALLED TO SHARE YOUR REIKI PRESENCE WITH
-    </div>
-  `;
-
-  renderClasses();
-}
-
 // --------------------
-// Handle WhatsApp submit
+// Registration Handlers
 // --------------------
 async function handleWhatsAppSubmit() {
   const whatsappInput = document.getElementById("regWhatsApp");
@@ -280,7 +267,6 @@ async function handleWhatsAppSubmit() {
     });
 
     if (user) {
-      user.normalizedWhatsapp = cleanNumber(user.normalizedWhatsapp || user.whatsapp || "");
       currentUser = user;
       userRegistered = true;
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
@@ -288,7 +274,6 @@ async function handleWhatsAppSubmit() {
       const regApproved = (user.regStat === true || String(user.regStat).toLowerCase() === "true");
 
       if (regApproved) {
-        // PASSWORD LOGIC
         if (!user.password || user.password === "") {
           renderPasswordField("Please create your password", async (pwd) => {
             if (!pwd) return;
@@ -305,7 +290,6 @@ async function handleWhatsAppSubmit() {
               if (json.success) {
                 currentUser.password = pwd;
                 renderWelcomeMessage();
-                revealHealerNamesIfApproved();
               } else {
                 showToast("Error saving password. Try again.", true);
               }
@@ -315,18 +299,15 @@ async function handleWhatsAppSubmit() {
             }
           });
         } else {
-          // returning user1
           renderPasswordField("Enter your password", (pwd) => {
             if (pwd === currentUser.password) {
               renderWelcomeMessage();
-              revealHealerNamesIfApproved();
             } else {
               showToast("Incorrect password. Please try again.", true);
             }
           });
         }
       } else {
-        // User2 / User4 flow
         msgBox.innerHTML = `
           <div style="text-align:center;font-size:28px;color:#c59b5a;">
             ✦ WELCOME ${user.firstName.toUpperCase()} ✦
@@ -340,7 +321,6 @@ async function handleWhatsAppSubmit() {
       }
 
     } else {
-      // Not found -> show register fields
       document.getElementById("extraFields").style.display = "block";
       msgBox.style.fontSize = "26px";
       msgBox.style.color = "#ffffff";
@@ -357,6 +337,75 @@ async function handleWhatsAppSubmit() {
     msgBox.style.color = "red";
     whatsappInput.disabled = false;
     submitBtn.disabled = false;
+  }
+}
+
+async function handleFullRegistration() {
+  const firstName = document.getElementById("regFirstName").value.trim();
+  const lastName = document.getElementById("regLastName").value.trim();
+  const email = document.getElementById("regEmail").value.trim();
+  const rawWhatsApp = document.getElementById("regWhatsApp").value.trim();
+  const { normalized, fallback } = normalizeWhatsapp(rawWhatsApp);
+  const whatsapp = normalized || fallback || rawWhatsApp.replace(/\D/g, "");
+  const msgBox = document.getElementById("regMessage");
+
+  if (!firstName || !lastName || !email) {
+    msgBox.textContent = "Please complete all fields.";
+    msgBox.style.color = "red";
+    return;
+  }
+
+  try {
+    const res = await fetch(API_BASE, {
+      method: "POST",
+      body: new URLSearchParams({
+        action: "createUser",
+        firstName,
+        lastName,
+        email,
+        whatsapp,
+        normalizedWhatsapp: whatsapp
+      })
+    });
+
+    const result = await res.json();
+
+    if (result.success) {
+      currentUser = {
+        firstName,
+        lastName,
+        email,
+        whatsapp,
+        normalizedWhatsapp: cleanNumber(whatsapp),
+        regStat: false
+      };
+      userRegistered = true;
+      sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+
+      msgBox.style.fontSize = "20px";
+      msgBox.style.color = "#c59b5a";
+      msgBox.innerHTML = `
+        Welcome to the Collective ${firstName}.  
+        Your registration is pending approval.  
+        You will be notified shortly.
+      `;
+
+      document.getElementById("extraFields").style.display = "none";
+
+      document.querySelectorAll(".class-toggle").forEach(toggle => {
+        toggle.checked = false;
+        toggle.disabled = true;
+        toggle.classList.add("locked");
+      });
+
+    } else {
+      msgBox.textContent = `Error: ${result.message || "Unknown error"}`;
+      msgBox.style.color = "red";
+    }
+  } catch (err) {
+    console.error("Registration failed:", err);
+    msgBox.textContent = "Error: Could not connect to server.";
+    msgBox.style.color = "red";
   }
 }
 
