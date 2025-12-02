@@ -1,5 +1,5 @@
 /* ================================
-   REIKI & RESTORE – STABLE LUXURY UI
+   REIKI & RESTORE â€“ STABLE LUXURY UI
    Full Corrected Stylesheet
 ================================ */
 
@@ -40,7 +40,7 @@ body.pwa-standalone .hero-banner {
 @supports (padding: max(0px)) {
   body.pwa-standalone .hero-banner {
     padding-top: max(env(safe-area-inset-top), 16px);
-    /* ↑ change 12px to exactly how much lower you want it */
+    /* â†‘ change 12px to exactly how much lower you want it */
   }
 }
 
@@ -175,7 +175,7 @@ body.copy-allowed * {
 
 
 /* ================================
-   Seed of Life — Double Breath + Glow + Rotation
+   Seed of Life â€” Double Breath + Glow + Rotation
    ================================ */
 /* Seed of Life Breathing Animation */
 .seed-of-life-footer {
@@ -222,7 +222,7 @@ body.copy-allowed * {
   margin: 6px 0;
   border-radius: 10px;
   border: 2px solid var(--gold-dark);
-   box-sizing: border-box; /* ✅ THIS FIXES IT */
+   box-sizing: border-box; /* âœ… THIS FIXES IT */
 }
 
 #registration-section button {
@@ -409,7 +409,7 @@ ul li::marker {
 
 /* Gold lock icon 
 .healer-name.locked::before {
-  content: "🔒";
+  content: "ðŸ”’";
   position: absolute;
   right: -22px;
   top: 50%;
@@ -429,7 +429,7 @@ ul li::marker {
 
 /* Dissolving gold lock 
 .healer-name.revealed::before {
-  content: "🔓";
+  content: "ðŸ”“";
   animation: lockDissolve 1s ease forwards;
 }*/
 
@@ -466,30 +466,6 @@ ul li::marker {
     transform: translateY(-50%) scale(2);
   }
 }*/
-
-/* --- WATERMARK OVERLAY (subtle gold text) --- */
-/* ----------------------------------------------------
-   FULL-SCREEN DIAGONAL WATERMARK (Ultra-Subtle Gold)
----------------------------------------------------- */
-/* FULL-SCREEN DIAGONAL WATERMARK (iPhone-safe version) */
-#wmPattern {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-
-    pointer-events: none;
-    z-index: 100000000;
-
-    opacity: 0.1;
-    mix-blend-mode: lighten;
-
-    background-repeat: repeat;
-    background-size: 240px 240px;
-    transform: rotate(-18deg);
-}
-
 
 
 
