@@ -1,5 +1,5 @@
 // ---------- config ----------
-const API_BASE = "https://script.google.com/macros/s/AKfycbzamT6_Bf95OUlSw49NM9vkxLVoX6xu5V3IaIwiXk6uig4R3uwQ3io4G-7PvS7iMYY4/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbwJw8h-EyZWnO9fAmIMMCZ6vFTs46Pyjo8f93iPGuQgrDF5WRn6xiU-8sfUA8UE6x0_/exec";
 
 // Admin WhatsApp
 const ADMIN_WHATSAPP = "1925196419"; // admin WhatsApp
