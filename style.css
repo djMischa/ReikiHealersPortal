@@ -467,6 +467,18 @@ ul li::marker {
   }
 }*/
 
+/* --- WATERMARK OVERLAY (subtle gold text) --- */
+#screenWatermark {
+    position: fixed;
+    bottom: 10px;
+    right: 10px;
+    font-size: 14px;
+    color: rgba(197, 155, 90, 0.22); /* subtle gold */
+    pointer-events: none;
+    z-index: 99999;
+    font-weight: 600;
+    mix-blend-mode: lighten;
+}
 
 
 
