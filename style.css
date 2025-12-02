@@ -471,17 +471,25 @@ ul li::marker {
 /* ----------------------------------------------------
    FULL-SCREEN DIAGONAL WATERMARK (Ultra-Subtle Gold)
 ---------------------------------------------------- */
+/* FULL-SCREEN DIAGONAL WATERMARK (iPhone-safe version) */
 #wmPattern {
     position: fixed;
-    inset: 0;
-    pointer-events: none;         /* ensures no UI blocking */
-    z-index: 999999;
-    opacity: 0.10;                /* subtle but screenshot-visible */
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+
+    pointer-events: none;
+    z-index: 100000000;
+
+    opacity: 0.1;
+    mix-blend-mode: lighten;
+
     background-repeat: repeat;
-    background-size: 260px 260px; /* tile size */
-    mix-blend-mode: lighten;      /* makes gold blend beautifully */
-    transform: rotate(-18deg);    /* diagonal direction */
+    background-size: 240px 240px;
+    transform: rotate(-18deg);
 }
+
 
 
 
