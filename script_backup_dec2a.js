@@ -1,5 +1,5 @@
 // ---------- config ----------
-const API_BASE = "https://script.google.com/macros/s/AKfycbzKcSu-vP9nlk4h15EZjthBa5rFDXdOeURUR3qpVFgHqSvfUMN2UD0LA0V1iPSXJsUj/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbzamT6_Bf95OUlSw49NM9vkxLVoX6xu5V3IaIwiXk6uig4R3uwQ3io4G-7PvS7iMYY4/exec";
 
 // at top of script.js (define admin WhatsApp and normalized version)
 const ADMIN_WHATSAPP = "1925196419"; // your admin WhatsApp number (digits only)
