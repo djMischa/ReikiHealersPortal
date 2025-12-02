@@ -375,8 +375,7 @@ async function handleWhatsAppSubmit() {
   fullName: `${user.firstName || ""} ${user.lastName || ""}`.trim()
 };
 
-// ⭐ Add this
-setWatermarkRepeated(`${user.firstName} ${user.lastName || ""}`.trim());
+
 
 
       
@@ -409,6 +408,10 @@ function enableWatermark(fullName) {
 
       const regApproved = (user.regStat === true || String(user.regStat).toLowerCase() === "true");
 
+        // ⭐ Add this
+setWatermarkRepeated(`${user.firstName} ${user.lastName || ""}`.trim());
+
+        
       if (regApproved) {
         msgBox.innerHTML = `
           <div style="text-align:center;font-size:30px;color:#c59b5a;">
