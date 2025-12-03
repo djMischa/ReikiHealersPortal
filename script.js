@@ -12,13 +12,19 @@ document.addEventListener("DOMContentLoaded", () => {
 let copyBlockListeners = [];
 
 function enableCopyProtection(userNumber = null) {
-  const normalized = cleanNumber(userNumber || "");
+  let normalized = cleanNumber(userNumber || "");
+
+  // If currentUser exists and no number passed, use it
+  if (!normalized && currentUser && currentUser.normalizedWhatsapp) {
+    normalized = cleanNumber(currentUser.normalizedWhatsapp);
+  }
 
   // ADMIN BYPASS
   if (normalized && normalized === ADMIN_WHATSAPP_NORM) {
     disableAllCopyProtectionJS();
     document.body.classList.remove("copy-protect");
     document.body.classList.add("copy-allowed");
+    console.log("✅ Admin copy/paste bypass active");
     return;
   }
 
