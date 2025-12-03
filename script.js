@@ -256,7 +256,7 @@ function renderPasswordField(placeholderText, onSubmit) {
                width:100%;
                height:100%;
                font-size:18px;
-               padding:12px 40px 12px 12px;
+               padding:12px 44px 12px 12px; /* right padding increased to make room for monkey */
                border:2px solid #c59b5a;
                border-radius:8px;
                box-sizing:border-box;
@@ -265,7 +265,7 @@ function renderPasswordField(placeholderText, onSubmit) {
       <span id="togglePwd" 
             style="
               position:absolute;
-              right:12px;
+              right:16px; /* move slightly left from edge */
               top:50%;
               transform:translateY(-50%);
               cursor:pointer;
@@ -285,10 +285,10 @@ function renderPasswordField(placeholderText, onSubmit) {
   toggle.addEventListener("click", () => {
     if (pwdField.type === "password") {
       pwdField.type = "text";
-      toggle.textContent = "🙊";
+      toggle.textContent = "🙊"; // password visible
     } else {
       pwdField.type = "password";
-      toggle.textContent = "🙈";
+      toggle.textContent = "🙈"; // password hidden
     }
   });
 
@@ -297,6 +297,7 @@ function renderPasswordField(placeholderText, onSubmit) {
     onSubmit(pwd);
   });
 }
+
 
 
 
