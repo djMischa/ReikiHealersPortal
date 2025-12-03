@@ -250,12 +250,13 @@ function renderPasswordField(placeholderText, onSubmit) {
   if (!wrapper) return;
 
   wrapper.innerHTML = `
-    <div class="pwd-wrapper" style="position:relative; max-width:400px; margin:20px auto;">
+    <div class="pwd-wrapper" style="position:relative; max-width:400px; margin:20px auto; height:48px;">
       <input id="pwdField" type="password" placeholder="${placeholderText}"
              style="
                width:100%;
+               height:100%;
                font-size:18px;
-               padding:12px 40px 12px 12px; /* top/right/bottom/left */
+               padding:12px 40px 12px 12px;
                border:2px solid #c59b5a;
                border-radius:8px;
                box-sizing:border-box;
@@ -272,10 +273,10 @@ function renderPasswordField(placeholderText, onSubmit) {
               color:#c59b5a;
               user-select:none;
             ">🙈</span>
-      <button id="pwdSubmit" 
-              style="width:100%; padding:12px; margin-top:10px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
-      <div id="regMessage" style="margin-top:10px; font-weight:bold;"></div>
     </div>
+    <button id="pwdSubmit" 
+            style="width:100%; padding:12px; margin-top:10px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
+    <div id="regMessage" style="margin-top:10px; font-weight:bold;"></div>
   `;
 
   const pwdField = document.getElementById("pwdField");
@@ -284,10 +285,10 @@ function renderPasswordField(placeholderText, onSubmit) {
   toggle.addEventListener("click", () => {
     if (pwdField.type === "password") {
       pwdField.type = "text";
-      toggle.textContent = "🙊"; // monkey covering mouth = password visible
+      toggle.textContent = "🙊";
     } else {
       pwdField.type = "password";
-      toggle.textContent = "🙈"; // monkey covering eyes = password hidden
+      toggle.textContent = "🙈";
     }
   });
 
@@ -296,6 +297,7 @@ function renderPasswordField(placeholderText, onSubmit) {
     onSubmit(pwd);
   });
 }
+
 
 
 
