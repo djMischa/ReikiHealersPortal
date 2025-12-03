@@ -1,7 +1,5 @@
 // ---------- config ----------
 const API_BASE = "https://script.google.com/macros/s/AKfycbwJw8h-EyZWnO9fAmIMMCZ6vFTs46Pyjo8f93iPGuQgrDF5WRn6xiU-8sfUA8UE6x0_/exec";
-
-// Admin WhatsApp
 const ADMIN_WHATSAPP = "1925196419"; // admin WhatsApp
 const ADMIN_WHATSAPP_NORM = cleanNumber(ADMIN_WHATSAPP);
 
@@ -133,11 +131,20 @@ async function init() {
       if (currentUser) {
         currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp || currentUser.whatsapp || "");
         userRegistered = true;
-      }
-    }
-  } catch (e) { }
 
-  enableCopyProtection(currentUser ? currentUser.normalizedWhatsapp : null);
+        // ✅ Check admin copy/paste bypass on cached user
+        if (currentUser.normalizedWhatsapp === ADMIN_WHATSAPP_NORM) {
+          disableAllCopyProtectionJS();
+          document.body.classList.remove("copy-protect");
+          document.body.classList.add("copy-allowed");
+        } else {
+          enableCopyProtection(currentUser.normalizedWhatsapp);
+        }
+      }
+    } else {
+      enableCopyProtection(null);
+    }
+  } catch (e) { enableCopyProtection(null); }
 
   try {
     const [classesResp, regsResp] = await Promise.all([
@@ -145,8 +152,8 @@ async function init() {
       fetch(`${API_BASE}?type=registrations`)
     ]);
 
-    const classesJson = classesResp.ok ? await classesResp.json() : [];
-    const regsJson = regsResp.ok ? await regsResp.json() : [];
+    const classesJson = await classesResp.json();
+    const regsJson = await regsResp.json();
 
     classesData = Array.isArray(classesJson) ? classesJson : [];
     registrationsData = Array.isArray(regsJson) ? regsJson : [];
@@ -177,18 +184,18 @@ function normalizeFetchedData() {
     currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp || currentUser.whatsapp || '');
   }
   ensureFooterImage();
+  revealHealerNamesIfApproved();
 }
 
 // --------------------
-// reveal healer names helper
+// revealHealerNamesIfApproved fix
 // --------------------
 function revealHealerNamesIfApproved() {
-  if (!currentUser || !userRegistered) return;
-
-  const approved = (currentUser.regStat === true || String(currentUser.regStat).toLowerCase() === "true");
+  if (!currentUser) return;
+  const isApproved = currentUser.regStat === true || String(currentUser.regStat).toLowerCase() === "true";
 
   document.querySelectorAll(".healer-name").forEach(span => {
-    if (approved) {
+    if (isApproved) {
       span.classList.remove("locked");
       span.classList.add("revealed");
     } else {
@@ -197,6 +204,12 @@ function revealHealerNamesIfApproved() {
     }
   });
 }
+
+// --------------------
+// The rest of your script continues unchanged
+// Include registration form rendering, password field, class rendering, etc.
+// Make sure anywhere currentUser is set, you also call enableCopyProtection() or admin bypass as above
+
 
 // --------------------
 // Registration Form
