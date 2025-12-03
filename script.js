@@ -1,5 +1,6 @@
 // ---------- config ----------
-const API_BASE = "https://script.google.com/macros/s/AKfycbwJw8h-EyZWnO9fAmIMMCZ6vFTs46Pyjo8f93iPGuQgrDF5WRn6xiU-8sfUA8UE6x0_/exec";
+const API_BASE = "https://script.google.com/macros/s/AKfycbwiv1tm0Nr7pd6XB_DochUi3AsGbYJVYNMYbvtPXdCkzu5PoYB4TI1-D7GcC9pXeafJ/exec";
+const API_KEY = "3f0c8e19-8475-4d7a-a315-73be8d92cb04"; // replace with your secret
 const ADMIN_WHATSAPP = "1925196419"; // admin WhatsApp
 const ADMIN_WHATSAPP_NORM = cleanNumber(ADMIN_WHATSAPP);
 
@@ -153,8 +154,8 @@ async function init() {
 
   try {
     const [classesResp, regsResp] = await Promise.all([
-      fetch(`${API_BASE}?type=classes`),
-      fetch(`${API_BASE}?type=registrations`)
+      fetch(`${API_BASE}?type=classes&apiKey=${API_KEY}`),
+      fetch(`${API_BASE}?type=registrations&apiKey=${API_KEY}`)
     ]);
 
     const classesJson = await classesResp.json();
@@ -346,7 +347,7 @@ async function handleWhatsAppSubmit() {
   try {
     const { normalized, fallback } = normalizeWhatsapp(rawWhatsApp);
 
-    const usersResponse = await fetch(`${API_BASE}?type=users`);
+    const usersResponse = await fetch(`${API_BASE}?type=users&apiKey=${API_KEY}`);
     const users = usersResponse.ok ? await usersResponse.json() : [];
 
     if (!Array.isArray(users)) throw new Error('Users API did not return array');
@@ -384,7 +385,8 @@ async function handleWhatsAppSubmit() {
                 body: new URLSearchParams({
                   action: "setPassword",
                   normalizedWhatsapp: currentUser.normalizedWhatsapp,
-                  password: pwd
+                  password: pwd,
+                  apiKey: API_KEY
                 })
               });
 
@@ -488,7 +490,8 @@ async function handleFullRegistration() {
         lastName,
         email,
         whatsapp,
-        normalizedWhatsapp: whatsapp
+        normalizedWhatsapp: whatsapp,
+        apiKey: API_KEY
       })
     }).then(r => r.text());
 
@@ -837,7 +840,8 @@ async function submitSingleClass(classId, status) {
 
   const resp = await fetch(API_BASE, {
     method: "POST",
-    body: new URLSearchParams(payload)
+    body: new URLSearchParams(payload),
+    apiKey: API_KEY
   });
 
   if (!resp.ok) throw new Error("Network error");
