@@ -12,7 +12,8 @@ document.addEventListener("DOMContentLoaded", () => {
 let copyBlockListeners = [];
 
 function enableCopyProtection(userNumber = null) {
-  const normalized = cleanNumber(userNumber || "");
+  // Use currentUser if userNumber not provided
+  const normalized = cleanNumber(userNumber || (currentUser ? currentUser.normalizedWhatsapp : ""));
   console.log("DEBUG — checking admin bypass:", { userNumber, normalized, ADMIN_WHATSAPP_NORM });
 
   // ADMIN BYPASS
@@ -46,6 +47,7 @@ function enableCopyProtection(userNumber = null) {
   document.documentElement.style.webkitTouchCallout = "none";
   document.body.style.userSelect = "none";
 }
+
 
 
 function disableAllCopyProtectionJS() {
@@ -376,25 +378,23 @@ async function handleWhatsAppSubmit() {
           });
         } else {
           // returning user
-          renderPasswordField("Enter your password", (pwd) => {
-            if (pwd === currentUser.password) {
-              currentUser.regStat = true;
-              userRegistered = true;
-              sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+renderPasswordField("Enter your password", (pwd) => {
+  if (pwd === currentUser.password) {
+    currentUser.regStat = true;
+    userRegistered = true;
+    sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
 
-              // ✅ Enable copy protection (or ADMIN bypass) AFTER user is set
-              enableCopyProtection(currentUser.normalizedWhatsapp);
+    // ✅ Enable copy protection (or ADMIN bypass) AFTER user is set
+    enableCopyProtection();  // no argument — uses currentUser internally
 
+    renderWelcomeMessage();
+    renderClasses();
+    showToast("Welcome back!");
+  } else {
+    showToast("Incorrect password. Please try again.", true);
+  }
+});
 
-
-              
-              renderWelcomeMessage();
-              renderClasses();
-              showToast("Welcome back!");
-            } else {
-              showToast("Incorrect password. Please try again.", true);
-            }
-          });
         }
       } else {
         msgBox.innerHTML = `
