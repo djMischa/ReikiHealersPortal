@@ -252,7 +252,15 @@ function renderPasswordField(placeholderText, onSubmit) {
   wrapper.innerHTML = `
     <div class="pwd-wrapper" style="position:relative; max-width:400px; margin:20px auto;">
       <input id="pwdField" type="password" placeholder="${placeholderText}"
-             style="padding-right:40px; width:100%; font-size:18px; border:2px solid #c59b5a; border-radius:8px; box-sizing:border-box;">
+             style="
+               width:100%;
+               font-size:18px;
+               padding:12px 40px 12px 12px; /* top/right/bottom/left */
+               border:2px solid #c59b5a;
+               border-radius:8px;
+               box-sizing:border-box;
+               line-height:1.2;
+             ">
       <span id="togglePwd" 
             style="
               position:absolute;
@@ -288,6 +296,7 @@ function renderPasswordField(placeholderText, onSubmit) {
     onSubmit(pwd);
   });
 }
+
 
 
 
