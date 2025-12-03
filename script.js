@@ -265,8 +265,8 @@ function renderPasswordField(placeholderText, onSubmit) {
       <span id="togglePwd" 
             style="
               position:absolute;
-              right:16px; /* move slightly left from edge */
-              top:50%;
+              right:20px; /* move slightly left from edge */
+              top:60%;
               transform:translateY(-50%);
               cursor:pointer;
               font-size:20px;
