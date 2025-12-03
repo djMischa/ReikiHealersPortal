@@ -150,6 +150,21 @@ body.pwa-standalone .hero-banner {
   }
 }
 
+<span id="togglePwd" 
+      style="
+        position:absolute;
+        right:10px;
+        top:50%;
+        transform: translateY(-50%);
+        cursor:pointer;
+        font-size:18px;
+        color:#c59b5a;
+      ">👁️</span>
+
+
+
+
+
 /* Copy protection (non-destructive) */
 body.copy-protect,
 body.copy-protect * {
