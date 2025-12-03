@@ -150,16 +150,7 @@ body.pwa-standalone .hero-banner {
   }
 }
 
-<span id="togglePwd" 
-      style="
-        position:absolute;
-        right:14px; /* moved a few pixels left for better spacing */
-        top:50%;
-        transform: translateY(-50%);
-        cursor:pointer;
-        font-size:18px;
-        color:#c59b5a;
-      ">🙈</span>
+
 
 
 
