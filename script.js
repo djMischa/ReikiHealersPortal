@@ -371,7 +371,7 @@ async function handleWhatsAppSubmit() {
       if (regApproved) {
         // PASSWORD LOGIC
         if (!user.password || user.password === "") {
-          renderPasswordField("Please create your password", async (pwd) => {
+          renderPasswordField("Please create a password", async (pwd) => {
             if (!pwd) return;
             try {
               const res = await fetch(API_BASE, {
