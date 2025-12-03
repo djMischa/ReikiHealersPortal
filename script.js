@@ -259,17 +259,18 @@ function renderPasswordField(placeholderText, onSubmit) {
   `;
 
   const pwdField = document.getElementById("pwdField");
-  const toggle = document.getElementById("togglePwd");
+const toggle = document.getElementById("togglePwd");
 
-  toggle.addEventListener("click", () => {
-    if (pwdField.type === "password") {
-      pwdField.type = "text";
-      toggle.textContent = "🙊"; // monkey covering mouth
-    } else {
-      pwdField.type = "password";
-      toggle.textContent = "🙈"; // monkey covering eyes
-    }
-  });
+toggle.addEventListener("click", () => {
+  if (pwdField.type === "password") {
+    pwdField.type = "text";
+    toggle.textContent = "🙊"; // monkey covering mouth = password visible
+  } else {
+    pwdField.type = "password";
+    toggle.textContent = "🙈"; // monkey covering eyes = password hidden
+  }
+});
+
 
   document.getElementById("pwdSubmit").addEventListener("click", () => {
     const pwd = pwdField.value.trim();
