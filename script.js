@@ -250,33 +250,45 @@ function renderPasswordField(placeholderText, onSubmit) {
   if (!wrapper) return;
 
   wrapper.innerHTML = `
-    <div class="pwd-wrapper">
-      <input id="pwdField" type="password" placeholder="${placeholderText}">
-      <span id="togglePwd">🙈</span>
-      <button id="pwdSubmit">Submit</button>
-      <div id="regMessage"></div>
+    <div class="pwd-wrapper" style="position:relative; max-width:400px; margin:20px auto;">
+      <input id="pwdField" type="password" placeholder="${placeholderText}"
+             style="padding-right:40px; width:100%; font-size:18px; border:2px solid #c59b5a; border-radius:8px; box-sizing:border-box;">
+      <span id="togglePwd" 
+            style="
+              position:absolute;
+              right:12px;
+              top:50%;
+              transform:translateY(-50%);
+              cursor:pointer;
+              font-size:20px;
+              color:#c59b5a;
+              user-select:none;
+            ">🙈</span>
+      <button id="pwdSubmit" 
+              style="width:100%; padding:12px; margin-top:10px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
+      <div id="regMessage" style="margin-top:10px; font-weight:bold;"></div>
     </div>
   `;
 
   const pwdField = document.getElementById("pwdField");
-const toggle = document.getElementById("togglePwd");
+  const toggle = document.getElementById("togglePwd");
 
-toggle.addEventListener("click", () => {
-  if (pwdField.type === "password") {
-    pwdField.type = "text";
-    toggle.textContent = "🙊"; // monkey covering mouth = password visible
-  } else {
-    pwdField.type = "password";
-    toggle.textContent = "🙈"; // monkey covering eyes = password hidden
-  }
-});
-
+  toggle.addEventListener("click", () => {
+    if (pwdField.type === "password") {
+      pwdField.type = "text";
+      toggle.textContent = "🙊"; // monkey covering mouth = password visible
+    } else {
+      pwdField.type = "password";
+      toggle.textContent = "🙈"; // monkey covering eyes = password hidden
+    }
+  });
 
   document.getElementById("pwdSubmit").addEventListener("click", () => {
     const pwd = pwdField.value.trim();
     onSubmit(pwd);
   });
 }
+
 
 
 
