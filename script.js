@@ -663,9 +663,19 @@ if (standbyParticipants.length) {
     const wrapper = document.createElement("div");
     wrapper.className = "spaces-toggle-wrapper";
 
-    const remainText = document.createElement("span");
-    remainText.textContent = remaining > 0 ? `→ ${remaining} spaces remaining` : "CLASS FULL – JOIN STANDBY";
+   // const remainText = document.createElement("span");
+   // remainText.textContent = remaining > 0 ? `→ ${remaining} spaces remaining` : "CLASS FULL – JOIN STANDBY";
 
+    const remainText = document.createElement("span");
+    remainText.textContent = remaining > 0 
+    ? `→ ${remaining} space${remaining === 1 ? '' : 's'} remaining` 
+    : "CLASS FULL – JOIN STANDBY";
+
+
+
+
+
+    
     const toggle = document.createElement("div");
     toggle.className = "lux-toggle";
     toggle.dataset.classId = cls.id;
