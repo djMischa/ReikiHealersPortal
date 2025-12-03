@@ -347,11 +347,12 @@ async function handleWhatsAppSubmit() {
     if (!Array.isArray(users)) throw new Error('Users API did not return array');
 
     const normUsers = users.map(u => ({
-      ...u,
-      whatsapp: String(u.whatsapp || ''),
-      normalizedWhatsapp: cleanNumber(u.normalizedWhatsapp || u.whatsapp),
-      password: u.password || ""
-    }));
+  ...u,
+  whatsapp: String(u.whatsapp || ''),
+  normalizedWhatsapp: cleanNumber(u.normalizedWhatsapp || u.whatsapp),
+  password: u.password !== undefined && u.password !== null ? String(u.password) : ""
+}));
+
 
     const user = normUsers.find(u => {
       const uNorm = u.normalizedWhatsapp;
