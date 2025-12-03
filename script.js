@@ -255,7 +255,7 @@ function renderPasswordField(placeholderText, onSubmit) {
       <input type="hidden" name="username" value="${currentUser?.whatsapp || currentUser?.normalizedWhatsapp || ''}">
       
       <input id="pwdField" type="password" placeholder="${placeholderText}"
-             autocomplete="new-password"
+             autocomplete="${currentUser && currentUser.password ? 'current-password' : 'new-password'}"
              style="
                width:100%;
                height:100%;
