@@ -250,33 +250,33 @@ function renderPasswordField(placeholderText, onSubmit) {
   if (!wrapper) return;
 
   wrapper.innerHTML = `
-    <div style="max-width:400px;margin:20px auto;text-align:center;position:relative;">
-      <input id="pwdField" type="password" placeholder="${placeholderText}"
-             style="width:100%; padding:12px 40px 12px 12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
-      <span id="togglePwd" style="position:absolute; right:12px; top:26px; cursor:pointer; font-size:18px; color:#c59b5a;">👁️</span>
-      <button id="pwdSubmit" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
-      <div id="regMessage" style="margin-top:10px; font-weight:bold;"></div>
+    <div class="pwd-wrapper">
+      <input id="pwdField" type="password" placeholder="${placeholderText}">
+      <span id="togglePwd">🙈</span>
+      <button id="pwdSubmit">Submit</button>
+      <div id="regMessage"></div>
     </div>
   `;
 
-  const pwdInput = document.getElementById("pwdField");
+  const pwdField = document.getElementById("pwdField");
   const toggle = document.getElementById("togglePwd");
 
   toggle.addEventListener("click", () => {
-    if (pwdInput.type === "password") {
-      pwdInput.type = "text";
-      toggle.textContent = "🙈";
+    if (pwdField.type === "password") {
+      pwdField.type = "text";
+      toggle.textContent = "🙊"; // monkey covering mouth
     } else {
-      pwdInput.type = "password";
-      toggle.textContent = "👁️";
+      pwdField.type = "password";
+      toggle.textContent = "🙈"; // monkey covering eyes
     }
   });
 
   document.getElementById("pwdSubmit").addEventListener("click", () => {
-    const pwd = pwdInput.value.trim();
+    const pwd = pwdField.value.trim();
     onSubmit(pwd);
   });
 }
+
 
 
 function renderWelcomeMessage() {
