@@ -835,7 +835,8 @@ async function submitSingleClass(classId, status) {
     fullName: `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim(),
     whatsapp: currentUser.whatsapp || currentUser.normalizedWhatsapp || "",
     normalizedWhatsapp: currentUser.normalizedWhatsapp || normalizeWhatsapp(currentUser.whatsapp || "").normalized,
-    timestamp: new Date().toISOString()
+    timestamp: new Date().toISOString(),
+    apiKey: API_KEY  // ✅ add this line
   };
 
   const resp = await fetch(API_BASE, {
