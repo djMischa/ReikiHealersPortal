@@ -14,6 +14,13 @@ let copyBlockListeners = [];
 function enableCopyProtection(userNumber = null) {
   let normalized = cleanNumber(userNumber || "");
 
+console.log("DEBUG — checking admin bypass:", {
+    userNumber,
+    normalized,
+    ADMIN_WHATSAPP_NORM
+  });
+
+  
   // If currentUser exists and no number passed, use it
   if (!normalized && currentUser && currentUser.normalizedWhatsapp) {
     normalized = cleanNumber(currentUser.normalizedWhatsapp);
