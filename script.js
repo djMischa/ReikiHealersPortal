@@ -251,7 +251,11 @@ function renderPasswordField(placeholderText, onSubmit) {
 
   wrapper.innerHTML = `
     <div class="pwd-wrapper" style="position:relative; max-width:400px; margin:20px auto; height:48px;">
+      <!-- hidden username for iOS password manager -->
+      <input type="hidden" name="username" value="${currentUser?.whatsapp || currentUser?.normalizedWhatsapp || ''}">
+      
       <input id="pwdField" type="password" placeholder="${placeholderText}"
+             autocomplete="current-password"
              style="
                width:100%;
                height:100%;
@@ -297,6 +301,7 @@ function renderPasswordField(placeholderText, onSubmit) {
     onSubmit(pwd);
   });
 }
+
 
 
 
