@@ -12,26 +12,15 @@ document.addEventListener("DOMContentLoaded", () => {
 let copyBlockListeners = [];
 
 function enableCopyProtection(userNumber = null) {
-  let normalized = cleanNumber(userNumber || "");
-
-console.log("DEBUG — checking admin bypass:", {
-    userNumber,
-    normalized,
-    ADMIN_WHATSAPP_NORM
-  });
-
-  
-  // If currentUser exists and no number passed, use it
-  if (!normalized && currentUser && currentUser.normalizedWhatsapp) {
-    normalized = cleanNumber(currentUser.normalizedWhatsapp);
-  }
+  const normalized = cleanNumber(userNumber || "");
+  console.log("DEBUG — checking admin bypass:", { userNumber, normalized, ADMIN_WHATSAPP_NORM });
 
   // ADMIN BYPASS
   if (normalized && normalized === ADMIN_WHATSAPP_NORM) {
+    console.log("DEBUG — ADMIN detected, disabling copy protection");
     disableAllCopyProtectionJS();
     document.body.classList.remove("copy-protect");
     document.body.classList.add("copy-allowed");
-    console.log("✅ Admin copy/paste bypass active");
     return;
   }
 
@@ -57,6 +46,7 @@ console.log("DEBUG — checking admin bypass:", {
   document.documentElement.style.webkitTouchCallout = "none";
   document.body.style.userSelect = "none";
 }
+
 
 function disableAllCopyProtectionJS() {
   for (const { event, handler } of copyBlockListeners) {
@@ -391,6 +381,13 @@ async function handleWhatsAppSubmit() {
               currentUser.regStat = true;
               userRegistered = true;
               sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+
+              // ✅ Enable copy protection (or ADMIN bypass) AFTER user is set
+              enableCopyProtection(currentUser.normalizedWhatsapp);
+
+
+
+              
               renderWelcomeMessage();
               renderClasses();
               showToast("Welcome back!");
