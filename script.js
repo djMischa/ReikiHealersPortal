@@ -648,42 +648,42 @@ if (standbyParticipants.length) {
   const standbyUl = document.createElement("ul");
 
   standbyParticipants.forEach(p => {
-  const li = document.createElement("li");
-  const span = document.createElement("span");
-  span.className = "healer-name";
+    const li = document.createElement("li");
+    const span = document.createElement("span");
+    span.className = "healer-name";
 
-  const isApproved = (
-    currentUser &&
-    (currentUser.regStat === true || String(currentUser.regStat).toLowerCase() === "true")
-  );
-
-  if (!isApproved) {
-    span.classList.add("locked");
-  } else {
-    span.classList.add("revealed");
-  }
-
-  // Detect current user (Whatsapp OR name)
-  const isCurrentUser =
-    currentUser &&
-    (
-      p.normalizedWhatsapp === currentUser.normalizedWhatsapp ||
-      (
-        p.fullName &&
-        currentUser.fullName &&
-        p.fullName.trim().toLowerCase() === currentUser.fullName.trim().toLowerCase()
-      )
+    const isApproved = currentUser && (
+      currentUser.regStat === true ||
+      String(currentUser.regStat).toLowerCase() === "true"
     );
 
-  if (isCurrentUser) {
-    span.style.color = "#c59b5a"; 
-    span.style.fontWeight = "900";
-  }
+    // Lock / reveal logic
+    if (!isApproved) {
+      span.classList.add("locked");
+    } else {
+      span.classList.add("revealed");
+    }
 
-  span.textContent = p.fullName || "";
-  li.appendChild(span);
-  standbyUl.appendChild(li);
-});
+    // ⭐ SAFE gold highlight
+    if (
+      currentUser &&
+      p.normalizedWhatsapp &&
+      currentUser.normalizedWhatsapp &&
+      p.normalizedWhatsapp.trim() === currentUser.normalizedWhatsapp.trim()
+    ) {
+      span.style.color = "#c59b5a"; // gold
+      span.style.fontWeight = "900";
+    }
+
+    span.textContent = p.fullName || "";
+    li.appendChild(span);
+    standbyUl.appendChild(li);
+  });
+
+  div.appendChild(standbyTitle);
+  div.appendChild(standbyUl);
+}
+
 
 
 
