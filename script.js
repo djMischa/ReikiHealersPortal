@@ -621,7 +621,7 @@ function renderClasses() {
   if (currentUser && p.normalizedWhatsapp === currentUser.normalizedWhatsapp) {
     // nameSpan.style.color = "#FFD700"; // gold color
     nameSpan.style.color = "#c59b5a"; // gold color
-    nameSpan.style.fontWeight = "700"; // optional: make bold
+    nameSpan.style.fontWeight = "900"; // optional: make bold
   }    
 
 
