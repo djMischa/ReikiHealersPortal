@@ -533,7 +533,7 @@ async function handleFullRegistration() {
 
     if (possibleDuplicate) {
   msgBox.innerHTML = `
-    <div style="color:#FFD700; font-weight:bold;">
+    <div style="color:red; font-weight:bold; font-size:16px;">
       ⚠ Possible duplicate detected!<br>
       First Name: ${possibleDuplicate.firstName}<br>
       Last Name: ${possibleDuplicate.lastName}<br>
@@ -553,12 +553,13 @@ async function handleFullRegistration() {
   `;
 
   document.getElementById("reloadPageBtn").addEventListener("click", () => {
-    // store flag to focus input after reload
     sessionStorage.setItem("focusWhatsAppAfterReload", "1");
     window.location.reload();
   });
 
   return; // stop registration
+}
+
 }
 
 // --------------------
