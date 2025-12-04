@@ -533,7 +533,7 @@ async function handleFullRegistration() {
 
     if (possibleDuplicate) {
   msgBox.innerHTML = `
-    <div style="color:red; font-weight:bold; font-size:16px;">
+    <div style="color:red; font-weight:bold; font-size:20px;">
       ⚠ Possible duplicate detected!<br>
       First Name: ${possibleDuplicate.firstName}<br>
       Last Name: ${possibleDuplicate.lastName}<br>
@@ -548,7 +548,7 @@ async function handleFullRegistration() {
         border:none;
         border-radius:8px;
         cursor:pointer;
-      ">Enter correct WhatsApp to continue</button>
+      ">Re-Submit WhatsApp</button>
     </div>
   `;
 
