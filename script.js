@@ -660,6 +660,15 @@ if (standbyParticipants.length) {
       span.classList.add("revealed");
     }
 
+    // ✅ Highlight current user in gold
+  if (currentUser && p.normalizedWhatsapp === currentUser.normalizedWhatsapp) {
+    // span.style.color = "#FFD700"; // gold color
+    span.style.color = "#c59b5a"; // gold color
+    span.style.fontWeight = "900"; // optional: make bold
+  }    
+
+
+    
     span.textContent = p.fullName || "";
     li.appendChild(span);
     standbyUl.appendChild(li);
