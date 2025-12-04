@@ -547,7 +547,7 @@ async function handleFullRegistration() {
         border:none;
         border-radius:6px;
         cursor:pointer;
-      ">Enter correct WhatsApp to continue</button>
+      ">Re-Enter correct WhatsApp</button>
     </div>
   `;
 
