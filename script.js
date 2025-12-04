@@ -532,15 +532,38 @@ async function handleFullRegistration() {
     const possibleDuplicate = users.find(u => isPossibleDuplicate(inputData, u));
 
     if (possibleDuplicate) {
+      // Show warning with autofill button
       msgBox.innerHTML = `
         <div style="color:#FFD700; font-weight:bold;">
           ⚠ Possible duplicate detected!<br>
           First Name: ${possibleDuplicate.firstName}<br>
           Last Name: ${possibleDuplicate.lastName}<br>
           Email: ${possibleDuplicate.email}<br><br>
-          Please reload the page and enter the correct WhatsApp number to continue.
+          <button id="autofillBtn" style="
+            background:#c59b5a;
+            color:white;
+            border:none;
+            padding:5px 10px;
+            cursor:pointer;
+            font-weight:bold;
+          ">Use this account</button>
+          &nbsp;or reload the page to correct your WhatsApp number.
         </div>
       `;
+
+      document.getElementById("autofillBtn").onclick = () => {
+        // Autofill detected user
+        document.getElementById("regFirstName").value = possibleDuplicate.firstName;
+        document.getElementById("regLastName").value = possibleDuplicate.lastName;
+        document.getElementById("regEmail").value = possibleDuplicate.email;
+        document.getElementById("regWhatsApp").value = possibleDuplicate.whatsapp || possibleDuplicate.normalizedWhatsapp || "";
+
+        msgBox.innerHTML = `
+          ✅ User info loaded!  
+          Please confirm your WhatsApp number is correct and submit again.
+        `;
+      };
+
       return; // stop registration
     }
 
@@ -597,6 +620,7 @@ async function handleFullRegistration() {
     msgBox.style.color = "red";
   }
 }
+
 
 
 // --------------------
