@@ -150,7 +150,12 @@ body.pwa-standalone .hero-banner {
   }
 }
 
-
+/* CSS Grid for Class Cards */
+#classes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
 
 
 
