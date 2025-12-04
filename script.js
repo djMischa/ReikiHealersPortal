@@ -464,7 +464,46 @@ renderPasswordField("Enter your password", (pwd) => {
 }
 
 // --------------------
-// Handle full registration
+// Fuzzy duplicate detection helpers
+// --------------------
+function levenshtein(a, b) {
+  if (!a || !b) return Math.max(a?.length || 0, b?.length || 0);
+  const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]);
+  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+  for (let i = 1; i <= b.length; i++) {
+    for (let j = 1; j <= a.length; j++) {
+      matrix[i][j] = b[i - 1] === a[j - 1]
+        ? matrix[i - 1][j - 1]
+        : Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
+    }
+  }
+  return matrix[b.length][a.length];
+}
+
+function isPossibleDuplicate(input, existingUser) {
+  const fnInput = (input.firstName || "").toLowerCase();
+  const lnInput = (input.lastName || "").toLowerCase();
+  const emailInput = (input.email || "").toLowerCase();
+
+  const fnUser = (existingUser.firstName || "").toLowerCase();
+  const lnUser = (existingUser.lastName || "").toLowerCase();
+  const emailUser = (existingUser.email || "").toLowerCase();
+
+  const fnDistance = levenshtein(fnInput, fnUser);
+  const lnDistance = levenshtein(lnInput, lnUser);
+  const emailDistance = levenshtein(emailInput.split("@")[0], emailUser.split("@")[0]);
+
+  let score = 0;
+  if (fnDistance <= 2) score += 1;        // tolerate minor typo
+  if (lnDistance <= 1) score += 1;        // stricter for last name
+  if (emailDistance <= 2) score += 1;     // tolerate minor typo
+
+  return score >= 2; // 2+ fields matching = possible duplicate
+}
+
+// --------------------
+// Updated registration handler
 // --------------------
 async function handleFullRegistration() {
   const firstName = document.getElementById("regFirstName").value.trim();
@@ -482,6 +521,30 @@ async function handleFullRegistration() {
   }
 
   try {
+    // Fetch existing users
+    const usersResp = await fetch(`${API_BASE}?type=users&apiKey=${API_KEY}`);
+    const users = usersResp.ok ? await usersResp.json() : [];
+
+    if (!Array.isArray(users)) throw new Error("Users API did not return array");
+
+    // Check for possible duplicates
+    const inputData = { firstName, lastName, email };
+    const possibleDuplicate = users.find(u => isPossibleDuplicate(inputData, u));
+
+    if (possibleDuplicate) {
+      msgBox.innerHTML = `
+        <div style="color:#FFD700; font-weight:bold;">
+          ⚠ Possible duplicate detected!<br>
+          First Name: ${possibleDuplicate.firstName}<br>
+          Last Name: ${possibleDuplicate.lastName}<br>
+          Email: ${possibleDuplicate.email}<br><br>
+          Please reload the page and enter the correct WhatsApp number to continue.
+        </div>
+      `;
+      return; // stop registration
+    }
+
+    // If no duplicate, proceed with registration
     const resText = await fetch(API_BASE, {
       method: "POST",
       body: new URLSearchParams({
@@ -506,7 +569,6 @@ async function handleFullRegistration() {
         normalizedWhatsapp: cleanNumber(whatsapp),
         regStat: false
       };
-
       userRegistered = true;
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
 
@@ -519,13 +581,11 @@ async function handleFullRegistration() {
       `;
 
       document.getElementById("extraFields").style.display = "none";
-
       document.querySelectorAll(".class-toggle").forEach(toggle => {
         toggle.checked = false;
         toggle.disabled = true;
         toggle.classList.add("locked");
       });
-
     } else {
       msgBox.textContent = `Error: ${result.message || "Unknown error"}`;
       msgBox.style.color = "red";
@@ -537,6 +597,7 @@ async function handleFullRegistration() {
     msgBox.style.color = "red";
   }
 }
+
 
 // --------------------
 // Format class time for display
