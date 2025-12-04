@@ -652,29 +652,23 @@ if (standbyParticipants.length) {
     const span = document.createElement("span");
     span.className = "healer-name";
 
-    const isApproved = currentUser && (
-      currentUser.regStat === true ||
-      String(currentUser.regStat).toLowerCase() === "true"
-    );
+    const isApproved = (currentUser && (currentUser.regStat === true || String(currentUser.regStat).toLowerCase() === "true"));
 
-    // Lock / reveal logic
     if (!isApproved) {
       span.classList.add("locked");
     } else {
       span.classList.add("revealed");
     }
 
-    // ⭐ SAFE gold highlight
-    if (
-      currentUser &&
-      p.normalizedWhatsapp &&
-      currentUser.normalizedWhatsapp &&
-      p.normalizedWhatsapp.trim() === currentUser.normalizedWhatsapp.trim()
-    ) {
-      span.style.color = "#c59b5a"; // gold
-      span.style.fontWeight = "900";
-    }
+    // ✅ Highlight current user in gold
+  if (currentUser && p.normalizedWhatsapp === currentUser.normalizedWhatsapp) {
+    // span.style.color = "#FFD700"; // gold color
+    span.style.color = "#c59b5a"; // gold color
+    span.style.fontWeight = "900"; // optional: make bold
+  }    
 
+
+    
     span.textContent = p.fullName || "";
     li.appendChild(span);
     standbyUl.appendChild(li);
@@ -683,8 +677,6 @@ if (standbyParticipants.length) {
   div.appendChild(standbyTitle);
   div.appendChild(standbyUl);
 }
-
-
 
 
     // Remaining / toggle
@@ -986,4 +978,3 @@ function ensureFooterImage() {
 
 
 // https://script.google.com/macros/s/AKfycbzKcSu-vP9nlk4h15EZjthBa5rFDXdOeURUR3qpVFgHqSvfUMN2UD0LA0V1iPSXJsUj/exec
-
