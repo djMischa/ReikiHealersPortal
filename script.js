@@ -506,68 +506,54 @@ function isPossibleDuplicate(input, existingUser) {
 // Updated registration handler
 // --------------------
 async function handleFullRegistration() {
-  const firstName = document.getElementById("regFirstName").value.trim();
-  const lastName = document.getElementById("regLastName").value.trim();
-  const email = document.getElementById("regEmail").value.trim();
-  const rawWhatsApp = document.getElementById("regWhatsApp").value.trim();
-  const { normalized, fallback } = normalizeWhatsapp(rawWhatsApp);
-  const whatsapp = normalized || fallback || rawWhatsApp.replace(/\D/g, "");
+  const whatsappInput = document.getElementById("regWhatsApp");
+  const firstNameInput = document.getElementById("regFirstName");
+  const lastNameInput = document.getElementById("regLastName");
+  const emailInput = document.getElementById("regEmail");
   const msgBox = document.getElementById("regMessage");
 
-  if (!firstName || !lastName || !email) {
+  const rawWhatsApp = whatsappInput.value.trim();
+  const firstName = firstNameInput.value.trim();
+  const lastName = lastNameInput.value.trim();
+  const email = emailInput.value.trim();
+
+  if (!firstName || !lastName || !email || !rawWhatsApp) {
     msgBox.textContent = "Please complete all fields.";
     msgBox.style.color = "red";
     return;
   }
 
+  const { normalized, fallback } = normalizeWhatsapp(rawWhatsApp);
+  const whatsapp = normalized || fallback || rawWhatsApp.replace(/\D/g, "");
+
   try {
-    // Fetch existing users
-    const usersResp = await fetch(`${API_BASE}?type=users&apiKey=${API_KEY}`);
-    const users = usersResp.ok ? await usersResp.json() : [];
+    // 1️⃣ Check for possible duplicates in Users
+    const usersResponse = await fetch(`${API_BASE}?type=users&apiKey=${API_KEY}`);
+    const users = usersResponse.ok ? await usersResponse.json() : [];
 
-    if (!Array.isArray(users)) throw new Error("Users API did not return array");
+    const possible = users.find(u => {
+      const uNorm = cleanNumber(u.normalizedWhatsapp || u.whatsapp || "");
+      const uFallback = uNorm.slice(-8); // last 8 digits match
+      const wFallback = whatsapp.slice(-8);
+      return uFallback === wFallback; // partial match
+    });
 
-    // Check for possible duplicates
-    const inputData = { firstName, lastName, email };
-    const possibleDuplicate = users.find(u => isPossibleDuplicate(inputData, u));
+    if (possible) {
+      // Autofill first/last/email but leave WhatsApp as typed
+      firstNameInput.value = possible.firstName || "";
+      lastNameInput.value = possible.lastName || "";
+      emailInput.value = possible.email || "";
 
-    if (possibleDuplicate) {
-      // Show warning with autofill button
+      msgBox.style.color = "#c59b5a";
       msgBox.innerHTML = `
-        <div style="color:#FFD700; font-weight:bold;">
-          ⚠ Possible duplicate detected!<br>
-          First Name: ${possibleDuplicate.firstName}<br>
-          Last Name: ${possibleDuplicate.lastName}<br>
-          Email: ${possibleDuplicate.email}<br><br>
-          <button id="autofillBtn" style="
-            background:#c59b5a;
-            color:white;
-            border:none;
-            padding:5px 10px;
-            cursor:pointer;
-            font-weight:bold;
-          ">Use this account</button>
-          &nbsp;or reload the page to correct your WhatsApp number.
-        </div>
+        ⚠ Possible existing user detected!<br>
+        Please double-check your WhatsApp number before submitting.<br>
+        Current info loaded for convenience.
       `;
-
-      document.getElementById("autofillBtn").onclick = () => {
-        // Autofill detected user
-        document.getElementById("regFirstName").value = possibleDuplicate.firstName;
-        document.getElementById("regLastName").value = possibleDuplicate.lastName;
-        document.getElementById("regEmail").value = possibleDuplicate.email;
-        document.getElementById("regWhatsApp").value = possibleDuplicate.whatsapp || possibleDuplicate.normalizedWhatsapp || "";
-
-        msgBox.innerHTML = `
-          ✅ User info loaded!  
-          Please confirm your WhatsApp number is correct and submit again.
-        `;
-      };
-
-      return; // stop registration
+      return; // stop registration for user to confirm WhatsApp
     }
 
-    // If no duplicate, proceed with registration
+    // 2️⃣ No duplicates detected — proceed to create user
     const resText = await fetch(API_BASE, {
       method: "POST",
       body: new URLSearchParams({
@@ -598,8 +584,8 @@ async function handleFullRegistration() {
       msgBox.style.fontSize = "20px";
       msgBox.style.color = "#c59b5a";
       msgBox.innerHTML = `
-        Welcome to the Collective ${firstName}.  
-        Your registration is pending approval.  
+        Welcome to the Collective ${firstName}.<br>
+        Your registration is pending approval.<br>
         You will be notified shortly.
       `;
 
@@ -613,13 +599,13 @@ async function handleFullRegistration() {
       msgBox.textContent = `Error: ${result.message || "Unknown error"}`;
       msgBox.style.color = "red";
     }
-
   } catch (err) {
     console.error("Registration failed:", err);
     msgBox.textContent = "Error: Could not connect to server.";
     msgBox.style.color = "red";
   }
 }
+
 
 
 
