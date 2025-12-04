@@ -540,24 +540,39 @@ async function handleFullRegistration() {
       Email: ${possibleDuplicate.email}<br>
       Entered WhatsApp: ${rawWhatsApp}<br><br>
       <button id="reloadPageBtn" style="
-        padding:10px 18px;
+        width:100%;
+        padding:12px;
         font-weight:bold;
         background:#c59b5a;
         color:#fff;
         border:none;
-        border-radius:6px;
+        border-radius:8px;
         cursor:pointer;
-      ">Re-Enter correct WhatsApp</button>
+      ">Enter correct WhatsApp to continue</button>
     </div>
   `;
 
-  // Add event listener for reload button
   document.getElementById("reloadPageBtn").addEventListener("click", () => {
+    // store flag to focus input after reload
+    sessionStorage.setItem("focusWhatsAppAfterReload", "1");
     window.location.reload();
   });
 
   return; // stop registration
 }
+
+// --------------------
+// At the beginning of init() or DOMContentLoaded
+const focusFlag = sessionStorage.getItem("focusWhatsAppAfterReload");
+if (focusFlag === "1") {
+  const whatsappInput = document.getElementById("regWhatsApp");
+  if (whatsappInput) {
+    whatsappInput.focus();
+    whatsappInput.select(); // highlights existing text if any
+  }
+  sessionStorage.removeItem("focusWhatsAppAfterReload");
+}
+
 
 
     // If no duplicate, proceed with registration
