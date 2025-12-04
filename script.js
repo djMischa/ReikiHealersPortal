@@ -560,7 +560,7 @@ async function handleFullRegistration() {
   return; // stop registration
 }
 
-}
+
 
 // --------------------
 // At the beginning of init() or DOMContentLoaded
