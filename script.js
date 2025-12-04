@@ -648,35 +648,43 @@ if (standbyParticipants.length) {
   const standbyUl = document.createElement("ul");
 
   standbyParticipants.forEach(p => {
-    const li = document.createElement("li");
-    const span = document.createElement("span");
-    span.className = "healer-name";
+  const li = document.createElement("li");
+  const span = document.createElement("span");
+  span.className = "healer-name";
 
-    const isApproved = (currentUser && (currentUser.regStat === true || String(currentUser.regStat).toLowerCase() === "true"));
+  const isApproved = (
+    currentUser &&
+    (currentUser.regStat === true || String(currentUser.regStat).toLowerCase() === "true")
+  );
 
-    if (!isApproved) {
-      span.classList.add("locked");
-    } else {
-      span.classList.add("revealed");
-    }
+  if (!isApproved) {
+    span.classList.add("locked");
+  } else {
+    span.classList.add("revealed");
+  }
 
-    // ✅ Highlight current user in gold
-  if (currentUser && p.normalizedWhatsapp === currentUser.normalizedWhatsapp) {
-    // span.style.color = "#FFD700"; // gold color
-    span.style.color = "#c59b5a"; // gold color
-    span.style.fontWeight = "900"; // optional: make bold
-  }    
+  // Detect current user (Whatsapp OR name)
+  const isCurrentUser =
+    currentUser &&
+    (
+      p.normalizedWhatsapp === currentUser.normalizedWhatsapp ||
+      (
+        p.fullName &&
+        currentUser.fullName &&
+        p.fullName.trim().toLowerCase() === currentUser.fullName.trim().toLowerCase()
+      )
+    );
 
+  if (isCurrentUser) {
+    span.style.color = "#c59b5a"; 
+    span.style.fontWeight = "900";
+  }
 
-    
-    span.textContent = p.fullName || "";
-    li.appendChild(span);
-    standbyUl.appendChild(li);
-  });
+  span.textContent = p.fullName || "";
+  li.appendChild(span);
+  standbyUl.appendChild(li);
+});
 
-  div.appendChild(standbyTitle);
-  div.appendChild(standbyUl);
-}
 
 
     // Remaining / toggle
