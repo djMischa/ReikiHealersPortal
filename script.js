@@ -532,17 +532,33 @@ async function handleFullRegistration() {
     const possibleDuplicate = users.find(u => isPossibleDuplicate(inputData, u));
 
     if (possibleDuplicate) {
-      msgBox.innerHTML = `
-        <div style="color:#FFD700; font-weight:bold;">
-          ⚠ Possible duplicate detected!<br>
-          First Name: ${possibleDuplicate.firstName}<br>
-          Last Name: ${possibleDuplicate.lastName}<br>
-          Email: ${possibleDuplicate.email}<br><br>
-          Please reload the page and enter the correct WhatsApp number to continue.
-        </div>
-      `;
-      return; // stop registration
-    }
+  msgBox.innerHTML = `
+    <div style="color:#FFD700; font-weight:bold;">
+      ⚠ Possible duplicate detected!<br>
+      First Name: ${possibleDuplicate.firstName}<br>
+      Last Name: ${possibleDuplicate.lastName}<br>
+      Email: ${possibleDuplicate.email}<br>
+      Entered WhatsApp: ${rawWhatsApp}<br><br>
+      <button id="reloadPageBtn" style="
+        padding:10px 18px;
+        font-weight:bold;
+        background:#c59b5a;
+        color:#fff;
+        border:none;
+        border-radius:6px;
+        cursor:pointer;
+      ">Enter correct WhatsApp to continue</button>
+    </div>
+  `;
+
+  // Add event listener for reload button
+  document.getElementById("reloadPageBtn").addEventListener("click", () => {
+    window.location.reload();
+  });
+
+  return; // stop registration
+}
+
 
     // If no duplicate, proceed with registration
     const resText = await fetch(API_BASE, {
