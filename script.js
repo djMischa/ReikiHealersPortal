@@ -506,54 +506,45 @@ function isPossibleDuplicate(input, existingUser) {
 // Updated registration handler
 // --------------------
 async function handleFullRegistration() {
-  const whatsappInput = document.getElementById("regWhatsApp");
-  const firstNameInput = document.getElementById("regFirstName");
-  const lastNameInput = document.getElementById("regLastName");
-  const emailInput = document.getElementById("regEmail");
+  const firstName = document.getElementById("regFirstName").value.trim();
+  const lastName = document.getElementById("regLastName").value.trim();
+  const email = document.getElementById("regEmail").value.trim();
+  const rawWhatsApp = document.getElementById("regWhatsApp").value.trim();
+  const { normalized, fallback } = normalizeWhatsapp(rawWhatsApp);
+  const whatsapp = normalized || fallback || rawWhatsApp.replace(/\D/g, "");
   const msgBox = document.getElementById("regMessage");
 
-  const rawWhatsApp = whatsappInput.value.trim();
-  const firstName = firstNameInput.value.trim();
-  const lastName = lastNameInput.value.trim();
-  const email = emailInput.value.trim();
-
-  if (!firstName || !lastName || !email || !rawWhatsApp) {
+  if (!firstName || !lastName || !email) {
     msgBox.textContent = "Please complete all fields.";
     msgBox.style.color = "red";
     return;
   }
 
-  const { normalized, fallback } = normalizeWhatsapp(rawWhatsApp);
-  const whatsapp = normalized || fallback || rawWhatsApp.replace(/\D/g, "");
-
   try {
-    // 1️⃣ Check for possible duplicates in Users
-    const usersResponse = await fetch(`${API_BASE}?type=users&apiKey=${API_KEY}`);
-    const users = usersResponse.ok ? await usersResponse.json() : [];
+    // Fetch existing users
+    const usersResp = await fetch(`${API_BASE}?type=users&apiKey=${API_KEY}`);
+    const users = usersResp.ok ? await usersResp.json() : [];
 
-    const possible = users.find(u => {
-      const uNorm = cleanNumber(u.normalizedWhatsapp || u.whatsapp || "");
-      const uFallback = uNorm.slice(-8); // last 8 digits match
-      const wFallback = whatsapp.slice(-8);
-      return uFallback === wFallback; // partial match
-    });
+    if (!Array.isArray(users)) throw new Error("Users API did not return array");
 
-    if (possible) {
-      // Autofill first/last/email but leave WhatsApp as typed
-      firstNameInput.value = possible.firstName || "";
-      lastNameInput.value = possible.lastName || "";
-      emailInput.value = possible.email || "";
+    // Check for possible duplicates
+    const inputData = { firstName, lastName, email };
+    const possibleDuplicate = users.find(u => isPossibleDuplicate(inputData, u));
 
-      msgBox.style.color = "#c59b5a";
+    if (possibleDuplicate) {
       msgBox.innerHTML = `
-        ⚠ Possible existing user detected!<br>
-        Please double-check your WhatsApp number before submitting.<br>
-        Current info loaded for convenience.
+        <div style="color:#FFD700; font-weight:bold;">
+          ⚠ Possible duplicate detected!<br>
+          First Name: ${possibleDuplicate.firstName}<br>
+          Last Name: ${possibleDuplicate.lastName}<br>
+          Email: ${possibleDuplicate.email}<br><br>
+          Please reload the page and enter the correct WhatsApp number to continue.
+        </div>
       `;
-      return; // stop registration for user to confirm WhatsApp
+      return; // stop registration
     }
 
-    // 2️⃣ No duplicates detected — proceed to create user
+    // If no duplicate, proceed with registration
     const resText = await fetch(API_BASE, {
       method: "POST",
       body: new URLSearchParams({
@@ -584,8 +575,8 @@ async function handleFullRegistration() {
       msgBox.style.fontSize = "20px";
       msgBox.style.color = "#c59b5a";
       msgBox.innerHTML = `
-        Welcome to the Collective ${firstName}.<br>
-        Your registration is pending approval.<br>
+        Welcome to the Collective ${firstName}.  
+        Your registration is pending approval.  
         You will be notified shortly.
       `;
 
@@ -599,12 +590,14 @@ async function handleFullRegistration() {
       msgBox.textContent = `Error: ${result.message || "Unknown error"}`;
       msgBox.style.color = "red";
     }
+
   } catch (err) {
     console.error("Registration failed:", err);
     msgBox.textContent = "Error: Could not connect to server.";
     msgBox.style.color = "red";
   }
 }
+
 
 
 
