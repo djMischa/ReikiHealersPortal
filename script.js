@@ -523,23 +523,43 @@ renderPasswordField("Enter your password", (pwd) => {
 const similarUser = isSimilarWhatsApp(rawWhatsApp, normUsers);
 
 if (similarUser) {
-  // Show verify number UI
-  renderVerifyNumberUI(rawWhatsApp, 
+  // Show verify number UI and handle user actions.
+  renderVerifyNumberUI(rawWhatsApp,
+    // onCorrect: user edited the number and clicked Submit
     (correctedNumber) => {
-      // User corrected number, retry WhatsApp submit
-      document.getElementById("regWhatsApp").value = correctedNumber;
-      handleWhatsAppSubmit();
+      // Rebuild the normal registration UI prefilled with correctedNumber,
+      // then trigger the same submit flow so the corrected number is checked.
+      renderRegistrationForm(correctedNumber);
+
+      // Safety: small delay to ensure DOM listeners attached, then trigger submit.
+      setTimeout(() => {
+        const whatsappInputEl = document.getElementById("regWhatsApp");
+        const submitBtnEl = document.getElementById("whatsappSubmit");
+        if (whatsappInputEl) whatsappInputEl.value = correctedNumber;
+        if (submitBtnEl) {
+          // simulate a user click so the existing event listener runs
+          submitBtnEl.click();
+        } else {
+          // fallback: if the button is missing, call handler directly
+          handleWhatsAppSubmit();
+        }
+      }, 30);
     },
-   () => {
-  renderRegistrationForm(rawWhatsApp);
-  const msgBox = document.getElementById("regMessage");
-  msgBox.style.fontSize = "26px";
-  msgBox.style.color = "#ffffff";
-  document.getElementById("extraFields").style.display = "block";
-  enableCopyProtection(null);
-}
 
-
+    // onContinue: user wants to proceed with registration anyway
+    () => {
+      renderRegistrationForm(rawWhatsApp);
+      // show the extra fields and message exactly as normal registration flow
+      const msgBox = document.getElementById("regMessage");
+      document.getElementById("regWhatsApp").value = rawWhatsApp;
+      document.getElementById("extraFields").style.display = "block";
+      if (msgBox) {
+        msgBox.style.fontSize = "26px";
+        msgBox.style.color = "#ffffff";
+        msgBox.textContent = "Please complete your registration.";
+      }
+      enableCopyProtection(null);
+    }
   );
 } else {
   // No similar number, proceed to normal registration
@@ -551,6 +571,7 @@ if (similarUser) {
   msgBox.textContent = "Please complete your registration.";
   enableCopyProtection(null);
 }
+
 
     }
 
