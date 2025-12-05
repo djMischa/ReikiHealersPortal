@@ -4,21 +4,10 @@ const API_KEY = "3f0c8e19-8475-4d7a-a315-73be8d92cb04"; // replace with your sec
 const ADMIN_WHATSAPP = "1925196419"; // admin WhatsApp
 const ADMIN_WHATSAPP_NORM = cleanNumber(ADMIN_WHATSAPP);
 
-let originalRegistrationHTML = "";
-
 // Default: block copy/paste for everyone
 document.addEventListener("DOMContentLoaded", () => {
   document.body.classList.add("copy-protect");
-
-  // ------------------------
-  // STEP 2: Save original registration form HTML
-  // ------------------------
-  const wrapper = document.getElementById("registration-section");
-  if (wrapper) {
-    originalRegistrationHTML = wrapper.innerHTML;
-  }
 });
-
 
 // Keep track of listeners
 let copyBlockListeners = [];
@@ -546,98 +535,32 @@ async function handleFullRegistration() {
   const wrapper = document.getElementById("registration-section");
   if (!wrapper) return;
 
-  // Keep original registration form visible
-  const formDiv = document.createElement("div");
-  formDiv.innerHTML = originalRegistrationHTML;
+  wrapper.innerHTML = `
+    <div style="text-align:center; font-weight:bold; color:#ffffff; font-size:26px; margin-bottom:12px;">
+      ⚠ Possible duplicate detected!
+    </div>
+    <div style="text-align:center; color:#ffffff; font-size:18px; margin-bottom:12px;">
+      Please verify your WhatsApp
+    </div>
+    <input id="resubmitWhatsApp" type="tel" inputmode="numeric"
+           value="${rawWhatsApp}"
+           style="width:100%; padding:12px; font-size:26px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
+    <button id="reSubmitWhatsApp" 
+            style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer; margin-bottom:12px;">
+      Re-Submit WhatsApp
+    </button>
+    <div style="text-align:center; color:#ffffff; font-size:18px;">
+      or continue with registration
+    </div>
+  `;
 
-  // Clear wrapper and append warning + form
-  wrapper.innerHTML = "";
-
-  // WARNING MESSAGE
-  const warningDiv = document.createElement("div");
-  warningDiv.style.textAlign = "center";
-  warningDiv.style.color = "#ffffff";
-  warningDiv.style.fontSize = "26px";
-  warningDiv.style.fontWeight = "bold";
-  warningDiv.style.marginBottom = "12px";
-  warningDiv.textContent = "⚠ Possible duplicate detected!";
-  wrapper.appendChild(warningDiv);
-
-  const subText = document.createElement("div");
-  subText.style.textAlign = "center";
-  subText.style.color = "#ffffff";
-  subText.style.fontSize = "18px";
-  subText.style.marginBottom = "12px";
-  subText.textContent = "Please verify your WhatsApp";
-  wrapper.appendChild(subText);
-
-  // WHATSAPP FIELD (centered, editable)
-  const whatsappInput = document.createElement("input");
-  whatsappInput.id = "resubmitWhatsApp";
-  whatsappInput.type = "tel";
-  whatsappInput.inputMode = "numeric";
-  whatsappInput.value = rawWhatsApp; // user-entered number
-  whatsappInput.style.width = "100%";
-  whatsappInput.style.padding = "12px";
-  whatsappInput.style.fontSize = "26px";
-  whatsappInput.style.textAlign = "center";
-  whatsappInput.style.marginBottom = "12px";
-  whatsappInput.style.border = "2px solid #c59b5a";
-  whatsappInput.style.borderRadius = "8px";
-  wrapper.appendChild(whatsappInput);
-
-  // RESUBMIT BUTTON (updates WhatsApp field in form)
-  const reSubmitBtn = document.createElement("button");
-  reSubmitBtn.style.width = "100%";
-  reSubmitBtn.style.padding = "12px";
-  reSubmitBtn.style.fontWeight = "bold";
-  reSubmitBtn.style.background = "#c59b5a";
-  reSubmitBtn.style.color = "#fff";
-  reSubmitBtn.style.border = "none";
-  reSubmitBtn.style.borderRadius = "8px";
-  reSubmitBtn.style.cursor = "pointer";
-  reSubmitBtn.style.marginBottom = "12px";
-  reSubmitBtn.textContent = "Re-submit WhatsApp";
-  wrapper.appendChild(reSubmitBtn);
-
-  const continueText = document.createElement("div");
-  continueText.style.textAlign = "center";
-  continueText.style.color = "#ffffff";
-  continueText.style.fontSize = "18px";
-  continueText.style.marginBottom = "20px";
-  continueText.textContent = "or continue with registration";
-  wrapper.appendChild(continueText);
-
-  // APPEND ORIGINAL FORM (already prefilled)
-  wrapper.appendChild(formDiv);
-
-  // HANDLE RESUBMIT BUTTON: just update the WhatsApp field in the form
-  reSubmitBtn.addEventListener("click", () => {
-    const correctedWhatsApp = document.getElementById("resubmitWhatsApp").value.trim();
-    if (!correctedWhatsApp) return;
-
-    // Update the actual registration field
-    const regField = document.getElementById("regWhatsApp");
-    if (regField) regField.value = correctedWhatsApp;
-
-    // Optionally focus it
-    regField.focus();
-
-    // Remove the warning but keep the form
-    warningDiv.remove();
-    subText.remove();
-    whatsappInput.remove();
-    reSubmitBtn.remove();
-    continueText.remove();
+  // Click handler to reload page
+  document.getElementById("reSubmitWhatsApp").addEventListener("click", () => {
+    window.location.reload(); // reload to allow re-entering correct WhatsApp
   });
 
-  return; // stop normal registration until user acts
+  return; // stop current registration attempt until user interacts
 }
-
-
-
-
-
 
 
 
