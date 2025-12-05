@@ -548,18 +548,29 @@ if (similarUser) {
 
     // onContinue: user wants to proceed with registration anyway
     () => {
-      renderRegistrationForm(rawWhatsApp);
-      // show the extra fields and message exactly as normal registration flow
-      const msgBox = document.getElementById("regMessage");
-      document.getElementById("regWhatsApp").value = rawWhatsApp;
-      document.getElementById("extraFields").style.display = "block";
-      if (msgBox) {
-        msgBox.style.fontSize = "26px";
-        msgBox.style.color = "#ffffff";
-        msgBox.textContent = "Please complete your registration.";
-      }
-      enableCopyProtection(null);
-    }
+  // Hide the WhatsApp login UI (fixes leftover field + button)
+  const whatsappInput = document.getElementById("regWhatsApp");
+  const submitBtn = document.getElementById("whatsappSubmit");
+  if (whatsappInput) whatsappInput.style.display = "none";
+  if (submitBtn) submitBtn.style.display = "none";
+
+  renderRegistrationForm(rawWhatsApp);
+
+  // show the extra fields and message exactly as normal registration flow
+  const msgBox = document.getElementById("regMessage");
+
+  document.getElementById("regWhatsApp").value = rawWhatsApp;
+  document.getElementById("extraFields").style.display = "block";
+
+  if (msgBox) {
+    msgBox.style.fontSize = "26px";
+    msgBox.style.color = "#ffffff";
+    msgBox.textContent = "Please complete your registration.";
+  }
+
+  enableCopyProtection(null);
+}
+
   );
 } else {
   // No similar number, proceed to normal registration
