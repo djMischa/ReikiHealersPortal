@@ -220,14 +220,17 @@ function revealHealerNamesIfApproved() {
 // --------------------
 // Registration Form
 // --------------------
-function renderRegistrationForm() {
+function renderRegistrationForm(prefillNumber = "") {
+
   const wrapper = document.getElementById("registration-section");
   if (!wrapper) return;
 
   wrapper.innerHTML = `
     <div style="max-width:400px;margin:20px auto;text-align:center;">
       <input id="regWhatsApp" type="tel" inputmode="numeric" placeholder="Enter your WhatsApp number"
-             style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
+       value="${prefillNumber}"
+       style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
+
       <button id="whatsappSubmit" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
       <div id="regMessage" style="margin-top:10px; font-weight:bold;"></div>
       <div id="extraFields" style="margin-top:12px; display:none;">
@@ -525,15 +528,16 @@ if (similarUser) {
       handleWhatsAppSubmit();
     },
     () => {
-      // User chose to continue with registration
-      renderRegistrationForm();
-      document.getElementById("regWhatsApp").value = rawWhatsApp;
-      document.getElementById("extraFields").style.display = "block";
-      msgBox.style.fontSize = "26px";
-      msgBox.style.color = "#ffffff";
-      msgBox.textContent = "Please complete your registration.";
-      enableCopyProtection(null);
-    }
+  // User chose to continue with registration
+  renderRegistrationForm(rawWhatsApp); // Prefill number
+  const msgBox = document.getElementById("regMessage");
+  msgBox.style.fontSize = "26px";
+  msgBox.style.color = "#ffffff";
+  msgBox.textContent = "Please complete your registration.";
+  document.getElementById("extraFields").style.display = "block";
+  enableCopyProtection(null);
+}
+
   );
 } else {
   // No similar number, proceed to normal registration
