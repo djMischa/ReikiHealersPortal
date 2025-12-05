@@ -220,19 +220,19 @@ function revealHealerNamesIfApproved() {
 // --------------------
 // Registration Form
 // --------------------
-function renderRegistrationForm(prefillNumber = "") {
+function renderRegistrationForm(prefillNumber = "", hideTopInput = false) {
   const wrapper = document.getElementById("registration-section");
   if (!wrapper) return;
 
   wrapper.innerHTML = `
     <div style="max-width:400px;margin:20px auto;text-align:center;">
-      <div id="regTitle" style="font-size:26px; font-weight:bold; color:#ffffff; margin-bottom:12px;">
+      ${!hideTopInput ? `<div id="regTitle" style="font-size:26px; font-weight:bold; color:#ffffff; margin-bottom:12px;">
         Please complete your registration
-      </div>
-      <input id="regWhatsApp" type="tel" inputmode="numeric" placeholder="Enter your WhatsApp number"
+      </div>` : ''}
+      ${!hideTopInput ? `<input id="regWhatsApp" type="tel" inputmode="numeric" placeholder="Enter your WhatsApp number"
              value="${prefillNumber}"
-             style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
-      <button id="whatsappSubmit" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
+             style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">` : ''}
+      ${!hideTopInput ? `<button id="whatsappSubmit" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Submit</button>` : ''}
       <div id="regMessage" style="margin-top:10px; font-weight:bold;"></div>
       <div id="extraFields" style="margin-top:12px; display:none;">
         <input id="regFirstName" type="text" placeholder="First Name" style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
@@ -244,9 +244,12 @@ function renderRegistrationForm(prefillNumber = "") {
   `;
 
   // Attach listeners AFTER DOM is rendered
-  document.getElementById("whatsappSubmit").addEventListener("click", handleWhatsAppSubmit);
+  if (!hideTopInput) {
+    document.getElementById("whatsappSubmit")?.addEventListener("click", handleWhatsAppSubmit);
+  }
   document.getElementById("fullRegister")?.addEventListener("click", handleFullRegistration);
 }
+
 
 
 // --------------------
