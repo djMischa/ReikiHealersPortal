@@ -551,32 +551,32 @@ if (similarUser) {
 
     // onContinue: user wants to proceed with registration anyway
     () => {
-  // Render registration form, hiding the top WhatsApp input since user chose to continue
+  // Render registration without top WhatsApp input
   renderRegistrationForm(rawWhatsApp, true);
 
-  // Show the extra fields and prefill WhatsApp value in hidden input
-  const msgBox = document.getElementById("regMessage");
-  const whatsappInput = document.getElementById("regWhatsApp");
   const extraFields = document.getElementById("extraFields");
+  const msgBox = document.getElementById("regMessage");
+  const fullRegisterBtn = document.getElementById("fullRegister");
 
-  if (whatsappInput) {
-    whatsappInput.value = rawWhatsApp;
-    // keep it hidden, because hideTopInput=true
-    whatsappInput.style.display = "none";
-  }
+  // Show the extra fields
+  if (extraFields) extraFields.style.display = "block";
 
-  if (extraFields) {
-    extraFields.style.display = "block";
-  }
-
+  // Update message
   if (msgBox) {
     msgBox.style.fontSize = "26px";
     msgBox.style.color = "#ffffff";
     msgBox.textContent = "Please complete your registration.";
   }
 
+  // Attach click listener to Register button AFTER DOM exists
+  if (fullRegisterBtn) {
+    fullRegisterBtn.removeEventListener("click", handleFullRegistration); // prevent duplicates
+    fullRegisterBtn.addEventListener("click", handleFullRegistration);
+  }
+
   enableCopyProtection(null);
 }
+
 
 
   );
