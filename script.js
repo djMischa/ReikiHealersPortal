@@ -539,6 +539,17 @@ async function handleFullRegistration() {
   const existingWarning = document.getElementById("duplicate-warning");
   if (existingWarning) existingWarning.remove();
 
+  // Wrap original registration HTML for easy show/hide
+  let originalFormContainer = wrapper.querySelector("#original-registration-form");
+  if (!originalFormContainer) {
+    originalFormContainer = document.createElement("div");
+    originalFormContainer.id = "original-registration-form";
+    originalFormContainer.innerHTML = originalRegistrationHTML;
+    wrapper.appendChild(originalFormContainer);
+  }
+  // Hide original form while showing warning
+  originalFormContainer.style.display = "none";
+
   // Create warning container
   const warningDiv = document.createElement("div");
   warningDiv.id = "duplicate-warning";
@@ -602,15 +613,10 @@ async function handleFullRegistration() {
   continueText.textContent = "or continue with registration";
   warningDiv.appendChild(continueText);
 
-  // Insert warning above the registration form
+  // Insert warning at top of registration section
   wrapper.prepend(warningDiv);
 
-  // Append original registration form below the warning
-  const formDiv = document.createElement("div");
-  formDiv.innerHTML = originalRegistrationHTML;
-  wrapper.appendChild(formDiv);
-
-  // Handle resubmit button
+  // Handle resubmit button click
   reSubmitBtn.addEventListener("click", async () => {
     const correctedRaw = whatsappInput.value.trim();
     if (!correctedRaw) return;
@@ -619,7 +625,7 @@ async function handleFullRegistration() {
     const correctedWhatsapp = normalized || fallback || correctedRaw.replace(/\D/g, "");
 
     try {
-      // Fetch users to check corrected number
+      // Fetch users again to check corrected number
       const usersResp = await fetch(`${API_BASE}?type=users&apiKey=${API_KEY}`);
       const usersList = usersResp.ok ? await usersResp.json() : [];
 
@@ -628,7 +634,7 @@ async function handleFullRegistration() {
       );
 
       if (matchedUser) {
-        // Login user
+        // Log in the matched user
         currentUser = {
           firstName: matchedUser.firstName,
           lastName: matchedUser.lastName,
@@ -641,24 +647,31 @@ async function handleFullRegistration() {
 
         // Remove warning and hide registration section
         warningDiv.remove();
+        originalFormContainer.style.display = "none";
         wrapper.style.display = "none";
 
-        // Unlock cards
+        // Unlock cards as usual
         unlockCardsAfterRegistration();
       } else {
-        // Number not found — remove warning and allow continued registration
+        // Number not found — allow continued registration
         warningDiv.remove();
-        document.getElementById("regWhatsApp").value = correctedRaw;
-      }
 
+        // Restore WhatsApp input in original form
+        const regWhatsAppInput = document.getElementById("regWhatsApp");
+        if (regWhatsAppInput) regWhatsAppInput.value = correctedRaw;
+
+        // Show original registration form
+        originalFormContainer.style.display = "block";
+      }
     } catch (err) {
       console.error("Error checking WhatsApp:", err);
       alert("Error checking WhatsApp. Please try again.");
     }
   });
 
-  return; // stop current registration attempt until user interacts
+  return; // stop current registration attempt until user acts
 }
+
 
 
 
