@@ -327,6 +327,66 @@ function renderWelcomeMessage() {
 }
 
 // --------------------
+// Fuzzy phone number detection
+// --------------------
+function isSimilarWhatsApp(inputNumber, existingUsers) {
+  const inputDigits = inputNumber.replace(/\D/g, "");
+  for (const user of existingUsers) {
+    const userNumber = (user.normalizedWhatsapp || user.whatsapp || "").replace(/\D/g, "");
+    if (!userNumber) continue;
+
+    // Full match already checked elsewhere, skip
+    if (userNumber === inputDigits) continue;
+
+    // Simple digit similarity check: allow 1-2 digits difference
+    let diff = 0;
+    for (let i = 0; i < Math.min(userNumber.length, inputDigits.length); i++) {
+      if (userNumber[i] !== inputDigits[i]) diff++;
+    }
+    diff += Math.abs(userNumber.length - inputDigits.length); // count length difference
+
+    if (diff <= 2) return user; // found a similar number
+  }
+  return null;
+}
+
+
+
+
+
+function renderVerifyNumberUI(typedNumber, onSubmit, onContinue) {
+  const wrapper = document.getElementById("registration-section");
+  if (!wrapper) return;
+
+  wrapper.innerHTML = `
+    <div style="text-align:center; font-weight:bold; color:#ffffff; font-size:26px; margin-bottom:12px;">
+      ⚠ Please verify your number
+    </div>
+    <input id="verifyWhatsApp" type="tel" inputmode="numeric"
+           value="${typedNumber}"
+           style="width:100%; padding:12px; font-size:26px; text-align:center; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
+    <button id="verifySubmit" 
+            style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer; margin-bottom:12px;">
+      Submit
+    </button>
+    <div style="text-align:center; color:#ffffff; font-size:16px; cursor:pointer; text-decoration:underline;">
+      or continue with registration
+    </div>
+  `;
+
+  document.getElementById("verifySubmit").addEventListener("click", () => {
+    const corrected = document.getElementById("verifyWhatsApp").value.trim();
+    if (!corrected) return;
+    onSubmit(corrected);
+  });
+
+  wrapper.querySelector("div[style*='or continue']").addEventListener("click", onContinue);
+}
+
+
+
+
+// --------------------
 // Handle WhatsApp submit
 // --------------------
 async function handleWhatsAppSubmit() {
@@ -443,12 +503,46 @@ renderPasswordField("Enter your password", (pwd) => {
       }
 
     } else {
-      // Not found -> show register fields
-      document.getElementById("extraFields").style.display = "block";
-      msgBox.style.fontSize = "26px";
-      msgBox.style.color = "#ffffff";
-      msgBox.textContent = "Please complete your registration.";
-      enableCopyProtection(null);
+   //   // Not found -> show register fields
+   //   document.getElementById("extraFields").style.display = "block";
+   //   msgBox.style.fontSize = "26px";
+   //   msgBox.style.color = "#ffffff";
+   //   msgBox.textContent = "Please complete your registration.";
+   //   enableCopyProtection(null);
+// Not found -> check for similar numbers
+const similarUser = isSimilarWhatsApp(rawWhatsApp, normUsers);
+
+if (similarUser) {
+  renderVerifyNumberUI(rawWhatsApp, (correctedNumber) => {
+    // user corrected number, retry submit
+    document.getElementById("regWhatsApp").value = correctedNumber;
+    handleWhatsAppSubmit();
+  }, () => {
+    // user wants to continue with registration
+    renderRegistrationForm();
+    document.getElementById("regWhatsApp").value = rawWhatsApp;
+    document.getElementById("extraFields").style.display = "block";
+    msgBox.style.fontSize = "26px";
+    msgBox.style.color = "#ffffff";
+    msgBox.textContent = "Please complete your registration.";
+    enableCopyProtection(null);
+  });
+} else {
+  // No similar number, proceed to normal registration
+  renderRegistrationForm();
+  document.getElementById("regWhatsApp").value = rawWhatsApp;
+  document.getElementById("extraFields").style.display = "block";
+  msgBox.style.fontSize = "26px";
+  msgBox.style.color = "#ffffff";
+  msgBox.textContent = "Please complete your registration.";
+  enableCopyProtection(null);
+}
+
+
+
+
+
+      
     }
 
     whatsappInput.style.display = "none";
