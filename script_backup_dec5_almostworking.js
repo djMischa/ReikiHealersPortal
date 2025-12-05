@@ -220,13 +220,17 @@ function revealHealerNamesIfApproved() {
 // --------------------
 // Registration Form
 // --------------------
-function renderRegistrationForm() {
+function renderRegistrationForm(prefillNumber = "") {
   const wrapper = document.getElementById("registration-section");
   if (!wrapper) return;
 
   wrapper.innerHTML = `
     <div style="max-width:400px;margin:20px auto;text-align:center;">
+      <div id="regTitle" style="font-size:26px; font-weight:bold; color:#ffffff; margin-bottom:12px;">
+        Please complete your registration
+      </div>
       <input id="regWhatsApp" type="tel" inputmode="numeric" placeholder="Enter your WhatsApp number"
+             value="${prefillNumber}"
              style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
       <button id="whatsappSubmit" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
       <div id="regMessage" style="margin-top:10px; font-weight:bold;"></div>
@@ -239,9 +243,11 @@ function renderRegistrationForm() {
     </div>
   `;
 
+  // Attach listeners AFTER DOM is rendered
   document.getElementById("whatsappSubmit").addEventListener("click", handleWhatsAppSubmit);
   document.getElementById("fullRegister")?.addEventListener("click", handleFullRegistration);
 }
+
 
 // --------------------
 // PASSWORD HELPERS
@@ -517,21 +523,41 @@ renderPasswordField("Enter your password", (pwd) => {
 const similarUser = isSimilarWhatsApp(rawWhatsApp, normUsers);
 
 if (similarUser) {
-  // Show verify number UI
-  renderVerifyNumberUI(rawWhatsApp, 
+  // Show verify number UI and handle user actions.
+  renderVerifyNumberUI(rawWhatsApp,
+    // onCorrect: user edited the number and clicked Submit
     (correctedNumber) => {
-      // User corrected number, retry WhatsApp submit
-      document.getElementById("regWhatsApp").value = correctedNumber;
-      handleWhatsAppSubmit();
+      // Rebuild the normal registration UI prefilled with correctedNumber,
+      // then trigger the same submit flow so the corrected number is checked.
+      renderRegistrationForm(correctedNumber);
+
+      // Safety: small delay to ensure DOM listeners attached, then trigger submit.
+      setTimeout(() => {
+        const whatsappInputEl = document.getElementById("regWhatsApp");
+        const submitBtnEl = document.getElementById("whatsappSubmit");
+        if (whatsappInputEl) whatsappInputEl.value = correctedNumber;
+        if (submitBtnEl) {
+          // simulate a user click so the existing event listener runs
+          submitBtnEl.click();
+        } else {
+          // fallback: if the button is missing, call handler directly
+          handleWhatsAppSubmit();
+        }
+      }, 30);
     },
+
+    // onContinue: user wants to proceed with registration anyway
     () => {
-      // User chose to continue with registration
-      renderRegistrationForm();
+      renderRegistrationForm(rawWhatsApp);
+      // show the extra fields and message exactly as normal registration flow
+      const msgBox = document.getElementById("regMessage");
       document.getElementById("regWhatsApp").value = rawWhatsApp;
       document.getElementById("extraFields").style.display = "block";
-      msgBox.style.fontSize = "26px";
-      msgBox.style.color = "#ffffff";
-      msgBox.textContent = "Please complete your registration.";
+      if (msgBox) {
+        msgBox.style.fontSize = "26px";
+        msgBox.style.color = "#ffffff";
+        msgBox.textContent = "Please complete your registration.";
+      }
       enableCopyProtection(null);
     }
   );
@@ -545,6 +571,7 @@ if (similarUser) {
   msgBox.textContent = "Please complete your registration.";
   enableCopyProtection(null);
 }
+
 
     }
 
