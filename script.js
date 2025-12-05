@@ -546,34 +546,39 @@ async function handleFullRegistration() {
   const wrapper = document.getElementById("registration-section");
   if (!wrapper) return;
 
-  // Clear any previous warnings, but keep the original form
-  wrapper.innerHTML = ""; 
+  // Remove any previous warning messages but keep the form
+  let existingWarning = document.getElementById("duplicate-warning");
+  if (existingWarning) existingWarning.remove();
 
-  // WARNING MESSAGE
+  // Create warning container
   const warningDiv = document.createElement("div");
+  warningDiv.id = "duplicate-warning";
   warningDiv.style.textAlign = "center";
-  warningDiv.style.color = "#ffffff";
-  warningDiv.style.fontSize = "26px";
-  warningDiv.style.fontWeight = "bold";
   warningDiv.style.marginBottom = "12px";
-  warningDiv.textContent = "⚠ Possible duplicate detected!";
-  wrapper.appendChild(warningDiv);
 
-  // SUBTEXT
+  // Main warning
+  const mainWarning = document.createElement("div");
+  mainWarning.style.color = "#ffffff";
+  mainWarning.style.fontSize = "26px";
+  mainWarning.style.fontWeight = "bold";
+  mainWarning.style.marginBottom = "8px";
+  mainWarning.textContent = "⚠ Possible duplicate detected!";
+  warningDiv.appendChild(mainWarning);
+
+  // Subtext
   const subText = document.createElement("div");
-  subText.style.textAlign = "center";
   subText.style.color = "#ffffff";
   subText.style.fontSize = "18px";
   subText.style.marginBottom = "12px";
   subText.textContent = "Please verify your WhatsApp";
-  wrapper.appendChild(subText);
+  warningDiv.appendChild(subText);
 
-  // WHATSAPP FIELD
+  // WhatsApp input
   const whatsappInput = document.createElement("input");
   whatsappInput.id = "resubmitWhatsApp";
   whatsappInput.type = "tel";
   whatsappInput.inputMode = "numeric";
-  whatsappInput.value = rawWhatsApp; // previously entered number
+  whatsappInput.value = rawWhatsApp; // prefill with user input
   whatsappInput.style.width = "100%";
   whatsappInput.style.padding = "12px";
   whatsappInput.style.fontSize = "26px";
@@ -581,9 +586,9 @@ async function handleFullRegistration() {
   whatsappInput.style.marginBottom = "12px";
   whatsappInput.style.border = "2px solid #c59b5a";
   whatsappInput.style.borderRadius = "8px";
-  wrapper.appendChild(whatsappInput);
+  warningDiv.appendChild(whatsappInput);
 
-  // RESUBMIT BUTTON
+  // Resubmit button
   const reSubmitBtn = document.createElement("button");
   reSubmitBtn.style.width = "100%";
   reSubmitBtn.style.padding = "12px";
@@ -595,39 +600,39 @@ async function handleFullRegistration() {
   reSubmitBtn.style.cursor = "pointer";
   reSubmitBtn.style.marginBottom = "12px";
   reSubmitBtn.textContent = "Re-submit WhatsApp";
-  wrapper.appendChild(reSubmitBtn);
+  warningDiv.appendChild(reSubmitBtn);
 
-  // SMALL MESSAGE
+  // Continue message
   const continueText = document.createElement("div");
-  continueText.style.textAlign = "center";
   continueText.style.color = "#ffffff";
   continueText.style.fontSize = "18px";
   continueText.style.marginBottom = "20px";
+  continueText.style.textAlign = "center";
   continueText.textContent = "or continue with registration";
-  wrapper.appendChild(continueText);
+  warningDiv.appendChild(continueText);
 
-  // ORIGINAL FORM
-  const formDiv = document.createElement("div");
-  formDiv.innerHTML = originalRegistrationHTML;
-  wrapper.appendChild(formDiv);
+  // Insert the warning above the form
+  wrapper.prepend(warningDiv);
 
-  // HANDLE RESUBMIT BUTTON
+  // Resubmit button click handler
   reSubmitBtn.addEventListener("click", () => {
     const correctedWhatsApp = document.getElementById("resubmitWhatsApp").value.trim();
     if (!correctedWhatsApp) return;
 
-    // Update currentUser or whatever logic you use
+    // Update currentUser
+    currentUser = currentUser || {};
     currentUser.normalizedWhatsapp = cleanNumber(correctedWhatsApp);
 
-    // Remove warning and WhatsApp field
-    wrapper.innerHTML = originalRegistrationHTML;
+    // Remove the warning
+    warningDiv.remove();
 
-    // Optionally re-run any function to unlock cards or continue the normal flow
-    unlockCardsAfterRegistration(); // <--- replace with your actual function
+    // Continue normal registration flow (unlock cards, etc.)
+    unlockCardsAfterRegistration(); // replace with your actual function
   });
 
-  return; // stop the current registration attempt until user acts
+  return; // stop current registration until user acts
 }
+
 
 
 
