@@ -546,39 +546,38 @@ async function handleFullRegistration() {
   const wrapper = document.getElementById("registration-section");
   if (!wrapper) return;
 
-  // Remove any previous warning messages but keep the form
-  let existingWarning = document.getElementById("duplicate-warning");
-  if (existingWarning) existingWarning.remove();
+  // Clear previous content but keep the registration form HTML for later
+  wrapper.innerHTML = "";
 
-  // Create warning container
+  // Wrap everything in a div to reference later
+  const warningWrapper = document.createElement("div");
+  warningWrapper.id = "duplicate-warning";
+
+  // MAIN WARNING
   const warningDiv = document.createElement("div");
-  warningDiv.id = "duplicate-warning";
   warningDiv.style.textAlign = "center";
+  warningDiv.style.color = "#ffffff";
+  warningDiv.style.fontSize = "26px";
+  warningDiv.style.fontWeight = "bold";
   warningDiv.style.marginBottom = "12px";
+  warningDiv.textContent = "⚠ Possible duplicate detected!";
+  warningWrapper.appendChild(warningDiv);
 
-  // Main warning
-  const mainWarning = document.createElement("div");
-  mainWarning.style.color = "#ffffff";
-  mainWarning.style.fontSize = "26px";
-  mainWarning.style.fontWeight = "bold";
-  mainWarning.style.marginBottom = "8px";
-  mainWarning.textContent = "⚠ Possible duplicate detected!";
-  warningDiv.appendChild(mainWarning);
-
-  // Subtext
+  // SUBTEXT
   const subText = document.createElement("div");
+  subText.style.textAlign = "center";
   subText.style.color = "#ffffff";
   subText.style.fontSize = "18px";
   subText.style.marginBottom = "12px";
   subText.textContent = "Please verify your WhatsApp";
-  warningDiv.appendChild(subText);
+  warningWrapper.appendChild(subText);
 
-  // WhatsApp input
+  // WHATSAPP FIELD (centered text, pre-filled)
   const whatsappInput = document.createElement("input");
   whatsappInput.id = "resubmitWhatsApp";
   whatsappInput.type = "tel";
   whatsappInput.inputMode = "numeric";
-  whatsappInput.value = rawWhatsApp; // prefill with user input
+  whatsappInput.value = rawWhatsApp; // user-entered number
   whatsappInput.style.width = "100%";
   whatsappInput.style.padding = "12px";
   whatsappInput.style.fontSize = "26px";
@@ -586,9 +585,9 @@ async function handleFullRegistration() {
   whatsappInput.style.marginBottom = "12px";
   whatsappInput.style.border = "2px solid #c59b5a";
   whatsappInput.style.borderRadius = "8px";
-  warningDiv.appendChild(whatsappInput);
+  warningWrapper.appendChild(whatsappInput);
 
-  // Resubmit button
+  // RESUBMIT WHATSAPP BUTTON
   const reSubmitBtn = document.createElement("button");
   reSubmitBtn.style.width = "100%";
   reSubmitBtn.style.padding = "12px";
@@ -600,38 +599,67 @@ async function handleFullRegistration() {
   reSubmitBtn.style.cursor = "pointer";
   reSubmitBtn.style.marginBottom = "12px";
   reSubmitBtn.textContent = "Re-submit WhatsApp";
-  warningDiv.appendChild(reSubmitBtn);
+  warningWrapper.appendChild(reSubmitBtn);
 
-  // Continue message
+  // SMALL MESSAGE
   const continueText = document.createElement("div");
+  continueText.style.textAlign = "center";
   continueText.style.color = "#ffffff";
   continueText.style.fontSize = "18px";
   continueText.style.marginBottom = "20px";
-  continueText.style.textAlign = "center";
   continueText.textContent = "or continue with registration";
-  warningDiv.appendChild(continueText);
+  warningWrapper.appendChild(continueText);
 
-  // Insert the warning above the form
-  wrapper.prepend(warningDiv);
+  // ORIGINAL REGISTRATION FORM
+  const formDiv = document.createElement("div");
+  formDiv.innerHTML = originalRegistrationHTML;
+  warningWrapper.appendChild(formDiv);
 
-  // Resubmit button click handler
-  reSubmitBtn.addEventListener("click", () => {
+  wrapper.appendChild(warningWrapper);
+
+  // HANDLE RESUBMIT BUTTON
+  reSubmitBtn.addEventListener("click", async () => {
     const correctedWhatsApp = document.getElementById("resubmitWhatsApp").value.trim();
     if (!correctedWhatsApp) return;
 
-    // Update currentUser
-    currentUser = currentUser || {};
-    currentUser.normalizedWhatsapp = cleanNumber(correctedWhatsApp);
+    const normalized = cleanNumber(correctedWhatsApp);
 
-    // Remove the warning
-    warningDiv.remove();
+    try {
+      // Fetch existing users again
+      const usersResp = await fetch(`${API_BASE}?type=users&apiKey=${API_KEY}`);
+      const users = usersResp.ok ? await usersResp.json() : [];
 
-    // Continue normal registration flow (unlock cards, etc.)
-    unlockCardsAfterRegistration(); // replace with your actual function
+      // Check if corrected WhatsApp matches an existing user exactly
+      const matchingUser = users.find(u => u.normalizedWhatsapp === normalized);
+
+      if (matchingUser) {
+        // Log in the existing user
+        currentUser = matchingUser;
+        userRegistered = true;
+        sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+
+        // Remove warning and continue normal flow
+        wrapper.innerHTML = ""; // or unlockCardsAfterRegistration() depending on your logic
+        unlockCardsAfterRegistration();
+        return;
+      } else {
+        // Unique number: update the WhatsApp field in registration form
+        document.getElementById("regWhatsApp").value = correctedWhatsApp;
+
+        // Remove warning but leave form visible
+        wrapper.innerHTML = "";
+        wrapper.appendChild(formDiv);
+        return;
+      }
+    } catch (err) {
+      console.error("Resubmit WhatsApp failed:", err);
+      alert("Error checking WhatsApp. Please try again.");
+    }
   });
 
   return; // stop current registration until user acts
 }
+
 
 
 
