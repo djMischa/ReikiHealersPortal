@@ -535,6 +535,7 @@ async function handleFullRegistration() {
   const wrapper = document.getElementById("registration-section");
   if (!wrapper) return;
 
+  // Clear previous warning (but keep registration form stored)
   wrapper.innerHTML = `
     <div style="text-align:center; font-weight:bold; color:#ffffff; font-size:26px; margin-bottom:12px;">
       ⚠ Possible duplicate detected!
@@ -544,23 +545,65 @@ async function handleFullRegistration() {
     </div>
     <input id="resubmitWhatsApp" type="tel" inputmode="numeric"
            value="${rawWhatsApp}"
-           style="width:100%; padding:12px; font-size:26px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
+           style="width:100%; padding:12px; font-size:26px; text-align:center; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
     <button id="reSubmitWhatsApp" 
             style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer; margin-bottom:12px;">
       Re-Submit WhatsApp
     </button>
-    <div style="text-align:center; color:#ffffff; font-size:18px;">
+    <div style="text-align:center; color:#ffffff; font-size:18px; margin-bottom:12px;">
       or continue with registration
     </div>
   `;
 
-  // Click handler to reload page
-  document.getElementById("reSubmitWhatsApp").addEventListener("click", () => {
-    window.location.reload(); // reload to allow re-entering correct WhatsApp
+  // Append original registration form below
+  const formDiv = document.createElement("div");
+  formDiv.innerHTML = originalRegistrationHTML;
+  wrapper.appendChild(formDiv);
+
+  // Handle resubmit button
+  document.getElementById("reSubmitWhatsApp").addEventListener("click", async () => {
+    const correctedRaw = document.getElementById("resubmitWhatsApp").value.trim();
+    if (!correctedRaw) return;
+
+    const { normalized, fallback } = normalizeWhatsapp(correctedRaw);
+    const correctedWhatsapp = normalized || fallback || correctedRaw.replace(/\D/g, "");
+
+    try {
+      // Fetch users again to check corrected number
+      const usersResp = await fetch(`${API_BASE}?type=users&apiKey=${API_KEY}`);
+      const usersList = usersResp.ok ? await usersResp.json() : [];
+      const matchedUser = usersList.find(u => (u.normalizedWhatsapp || u.whatsapp || "").replace(/\D/g, "") === correctedWhatsapp);
+
+      if (matchedUser) {
+        // Login the user
+        currentUser = {
+          firstName: matchedUser.firstName,
+          lastName: matchedUser.lastName,
+          email: matchedUser.email,
+          whatsapp: correctedRaw,
+          normalizedWhatsapp: correctedWhatsapp,
+          regStat: matchedUser.regStat
+        };
+        sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+
+        // Hide registration overlay and unlock cards
+        wrapper.style.display = "none";
+        unlockCardsAfterRegistration(); // your existing function to unlock class toggles
+      } else {
+        // No match — allow user to continue registration with corrected number
+        document.getElementById("regWhatsApp").value = correctedRaw;
+        wrapper.querySelector("#resubmitWhatsApp").parentElement.remove(); // remove warning section
+      }
+
+    } catch (err) {
+      console.error("Error checking WhatsApp:", err);
+      alert("Error checking WhatsApp. Please try again.");
+    }
   });
 
-  return; // stop current registration attempt until user interacts
+  return; // stop current registration attempt until user acts
 }
+
 
 
 
