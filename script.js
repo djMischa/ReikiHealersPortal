@@ -354,34 +354,37 @@ function isSimilarWhatsApp(inputNumber, existingUsers) {
 
 
 
-function renderVerifyNumberUI(typedNumber, onSubmit, onContinue) {
+function renderVerifyNumberUI(number, onCorrect, onContinue) {
   const wrapper = document.getElementById("registration-section");
   if (!wrapper) return;
 
+  // Render warning + WhatsApp input + buttons
   wrapper.innerHTML = `
     <div style="text-align:center; font-weight:bold; color:#ffffff; font-size:26px; margin-bottom:12px;">
-      ⚠ Please verify your number
+      ⚠️ Please verify your number
     </div>
-    <input id="verifyWhatsApp" type="tel" inputmode="numeric"
-           value="${typedNumber}"
+    <input id="verifyWhatsApp" type="tel" value="${number}" 
            style="width:100%; padding:12px; font-size:26px; text-align:center; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
     <button id="verifySubmit" 
-            style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer; margin-bottom:12px;">
+            style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer; margin-bottom:8px;">
       Submit
     </button>
-    <div style="text-align:center; color:#ffffff; font-size:16px; cursor:pointer; text-decoration:underline;">
+    <div id="continueRegistration" 
+         style="text-align:center; color:#ffffff; font-size:16px; cursor:pointer; text-decoration:underline;">
       or continue with registration
     </div>
   `;
 
+  // Bind event listeners **after DOM elements exist**
   document.getElementById("verifySubmit").addEventListener("click", () => {
     const corrected = document.getElementById("verifyWhatsApp").value.trim();
-    if (!corrected) return;
-    onSubmit(corrected);
+    if (!corrected) return; // optional: you can show a message here if blank
+    onCorrect(corrected);
   });
 
-  wrapper.querySelector("div[style*='or continue']").addEventListener("click", onContinue);
+  document.getElementById("continueRegistration").addEventListener("click", onContinue);
 }
+
 
 
 
@@ -510,23 +513,28 @@ renderPasswordField("Enter your password", (pwd) => {
    //   msgBox.textContent = "Please complete your registration.";
    //   enableCopyProtection(null);
 // Not found -> check for similar numbers
+// Not found -> check for similar numbers
 const similarUser = isSimilarWhatsApp(rawWhatsApp, normUsers);
 
 if (similarUser) {
-  renderVerifyNumberUI(rawWhatsApp, (correctedNumber) => {
-    // user corrected number, retry submit
-    document.getElementById("regWhatsApp").value = correctedNumber;
-    handleWhatsAppSubmit();
-  }, () => {
-    // user wants to continue with registration
-    renderRegistrationForm();
-    document.getElementById("regWhatsApp").value = rawWhatsApp;
-    document.getElementById("extraFields").style.display = "block";
-    msgBox.style.fontSize = "26px";
-    msgBox.style.color = "#ffffff";
-    msgBox.textContent = "Please complete your registration.";
-    enableCopyProtection(null);
-  });
+  // Show verify number UI
+  renderVerifyNumberUI(rawWhatsApp, 
+    (correctedNumber) => {
+      // User corrected number, retry WhatsApp submit
+      document.getElementById("regWhatsApp").value = correctedNumber;
+      handleWhatsAppSubmit();
+    },
+    () => {
+      // User chose to continue with registration
+      renderRegistrationForm();
+      document.getElementById("regWhatsApp").value = rawWhatsApp;
+      document.getElementById("extraFields").style.display = "block";
+      msgBox.style.fontSize = "26px";
+      msgBox.style.color = "#ffffff";
+      msgBox.textContent = "Please complete your registration.";
+      enableCopyProtection(null);
+    }
+  );
 } else {
   // No similar number, proceed to normal registration
   renderRegistrationForm();
@@ -537,6 +545,7 @@ if (similarUser) {
   msgBox.textContent = "Please complete your registration.";
   enableCopyProtection(null);
 }
+
     }
 
     whatsappInput.style.display = "none";
