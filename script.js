@@ -537,13 +537,7 @@ if (similarUser) {
   msgBox.textContent = "Please complete your registration.";
   enableCopyProtection(null);
 }
-
-
-
-
-
-      
- //   }
+    }
 
     whatsappInput.style.display = "none";
     submitBtn.style.display = "none";
