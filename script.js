@@ -221,16 +221,17 @@ function revealHealerNamesIfApproved() {
 // Registration Form
 // --------------------
 function renderRegistrationForm(prefillNumber = "") {
-
   const wrapper = document.getElementById("registration-section");
   if (!wrapper) return;
 
   wrapper.innerHTML = `
     <div style="max-width:400px;margin:20px auto;text-align:center;">
+      <div id="regTitle" style="font-size:26px; font-weight:bold; color:#ffffff; margin-bottom:12px;">
+        Please complete your registration
+      </div>
       <input id="regWhatsApp" type="tel" inputmode="numeric" placeholder="Enter your WhatsApp number"
-       value="${prefillNumber}"
-       style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
-
+             value="${prefillNumber}"
+             style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
       <button id="whatsappSubmit" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
       <div id="regMessage" style="margin-top:10px; font-weight:bold;"></div>
       <div id="extraFields" style="margin-top:12px; display:none;">
@@ -242,9 +243,11 @@ function renderRegistrationForm(prefillNumber = "") {
     </div>
   `;
 
+  // Attach listeners AFTER DOM is rendered
   document.getElementById("whatsappSubmit").addEventListener("click", handleWhatsAppSubmit);
   document.getElementById("fullRegister")?.addEventListener("click", handleFullRegistration);
 }
+
 
 // --------------------
 // PASSWORD HELPERS
@@ -527,16 +530,15 @@ if (similarUser) {
       document.getElementById("regWhatsApp").value = correctedNumber;
       handleWhatsAppSubmit();
     },
-    () => {
-  // User chose to continue with registration
-  renderRegistrationForm(rawWhatsApp); // Prefill number
+   () => {
+  renderRegistrationForm(rawWhatsApp);
   const msgBox = document.getElementById("regMessage");
   msgBox.style.fontSize = "26px";
   msgBox.style.color = "#ffffff";
-  msgBox.textContent = "Please complete your registration.";
   document.getElementById("extraFields").style.display = "block";
   enableCopyProtection(null);
 }
+
 
   );
 } else {
