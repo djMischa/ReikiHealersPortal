@@ -548,19 +548,23 @@ if (similarUser) {
 
     // onContinue: user wants to proceed with registration anyway
     () => {
-  // Hide the WhatsApp login UI (fixes leftover field + button)
-  const whatsappInput = document.getElementById("regWhatsApp");
-  const submitBtn = document.getElementById("whatsappSubmit");
-  if (whatsappInput) whatsappInput.style.display = "none";
-  if (submitBtn) submitBtn.style.display = "none";
+  // Render registration form, hiding the top WhatsApp input since user chose to continue
+  renderRegistrationForm(rawWhatsApp, true);
 
-  renderRegistrationForm(rawWhatsApp);
-
-  // show the extra fields and message exactly as normal registration flow
+  // Show the extra fields and prefill WhatsApp value in hidden input
   const msgBox = document.getElementById("regMessage");
+  const whatsappInput = document.getElementById("regWhatsApp");
+  const extraFields = document.getElementById("extraFields");
 
-  document.getElementById("regWhatsApp").value = rawWhatsApp;
-  document.getElementById("extraFields").style.display = "block";
+  if (whatsappInput) {
+    whatsappInput.value = rawWhatsApp;
+    // keep it hidden, because hideTopInput=true
+    whatsappInput.style.display = "none";
+  }
+
+  if (extraFields) {
+    extraFields.style.display = "block";
+  }
 
   if (msgBox) {
     msgBox.style.fontSize = "26px";
@@ -570,6 +574,7 @@ if (similarUser) {
 
   enableCopyProtection(null);
 }
+
 
   );
 } else {
