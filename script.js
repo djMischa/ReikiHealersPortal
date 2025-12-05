@@ -536,31 +536,64 @@ async function handleFullRegistration() {
   if (!wrapper) return;
 
   wrapper.innerHTML = `
+    <!-- MAIN WARNING (same style as “PLEASE COMPLETE YOUR REGISTRATION”) -->
     <div style="text-align:center; font-weight:bold; color:#ffffff; font-size:26px; margin-bottom:12px;">
       ⚠ Possible duplicate detected!
     </div>
+
+    <!-- SUBTEXT SMALLER -->
     <div style="text-align:center; color:#ffffff; font-size:18px; margin-bottom:12px;">
       Please verify your WhatsApp
     </div>
+
+    <!-- WHATSAPP FIELD (centered text, pre-filled) -->
     <input id="resubmitWhatsApp" type="tel" inputmode="numeric"
            value="${rawWhatsApp}"
-           style="width:100%; padding:12px; font-size:26px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
-    <button id="reSubmitWhatsApp" 
-            style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer; margin-bottom:12px;">
+           style="
+             width:100%;
+             padding:12px;
+             font-size:26px;
+             text-align:center;
+             margin-bottom:12px;
+             border:2px solid #c59b5a;
+             border-radius:8px;
+             background:#ffffff;
+             color:#000000;
+           ">
+
+    <!-- BUTTON SAME AS REGISTER -->
+    <button id="reSubmitWhatsApp"
+            style="
+              width:100%;
+              padding:12px;
+              font-weight:bold;
+              background:#c59b5a;
+              color:#fff;
+              border:none;
+              border-radius:8px;
+              cursor:pointer;
+              margin-bottom:12px;
+            ">
       Re-Submit WhatsApp
     </button>
-    <div style="text-align:center; color:#ffffff; font-size:18px;">
+
+    <!-- SMALL MESSAGE -->
+    <div style="text-align:center; color:#ffffff; font-size:18px; margin-bottom:20px;">
       or continue with registration
     </div>
+
+    <!-- RESTORE ORIGINAL REGISTRATION FORM -->
+    ${originalRegistrationHTML}
   `;
 
-  // Click handler to reload page
+  // handle reload
   document.getElementById("reSubmitWhatsApp").addEventListener("click", () => {
-    window.location.reload(); // reload to allow re-entering correct WhatsApp
+    window.location.reload();
   });
 
-  return; // stop current registration attempt until user interacts
+  return; // stop this registration attempt
 }
+
 
 
 
