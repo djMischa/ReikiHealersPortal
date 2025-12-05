@@ -464,46 +464,7 @@ renderPasswordField("Enter your password", (pwd) => {
 }
 
 // --------------------
-// Fuzzy duplicate detection helpers
-// --------------------
-function levenshtein(a, b) {
-  if (!a || !b) return Math.max(a?.length || 0, b?.length || 0);
-  const matrix = Array.from({ length: b.length + 1 }, (_, i) => [i]);
-  for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
-
-  for (let i = 1; i <= b.length; i++) {
-    for (let j = 1; j <= a.length; j++) {
-      matrix[i][j] = b[i - 1] === a[j - 1]
-        ? matrix[i - 1][j - 1]
-        : Math.min(matrix[i - 1][j - 1] + 1, matrix[i][j - 1] + 1, matrix[i - 1][j] + 1);
-    }
-  }
-  return matrix[b.length][a.length];
-}
-
-function isPossibleDuplicate(input, existingUser) {
-  const fnInput = (input.firstName || "").toLowerCase();
-  const lnInput = (input.lastName || "").toLowerCase();
-  const emailInput = (input.email || "").toLowerCase();
-
-  const fnUser = (existingUser.firstName || "").toLowerCase();
-  const lnUser = (existingUser.lastName || "").toLowerCase();
-  const emailUser = (existingUser.email || "").toLowerCase();
-
-  const fnDistance = levenshtein(fnInput, fnUser);
-  const lnDistance = levenshtein(lnInput, lnUser);
-  const emailDistance = levenshtein(emailInput.split("@")[0], emailUser.split("@")[0]);
-
-  let score = 0;
-  if (fnDistance <= 2) score += 1;        // tolerate minor typo
-  if (lnDistance <= 1) score += 1;        // stricter for last name
-  if (emailDistance <= 2) score += 1;     // tolerate minor typo
-
-  return score >= 2; // 2+ fields matching = possible duplicate
-}
-
-// --------------------
-// Updated registration handler
+// Handle full registration
 // --------------------
 async function handleFullRegistration() {
   const firstName = document.getElementById("regFirstName").value.trim();
@@ -513,7 +474,6 @@ async function handleFullRegistration() {
   const { normalized, fallback } = normalizeWhatsapp(rawWhatsApp);
   const whatsapp = normalized || fallback || rawWhatsApp.replace(/\D/g, "");
   const msgBox = document.getElementById("regMessage");
-  const wrapper = document.getElementById("registration-section");
 
   if (!firstName || !lastName || !email) {
     msgBox.textContent = "Please complete all fields.";
@@ -522,138 +482,6 @@ async function handleFullRegistration() {
   }
 
   try {
-    // 1️⃣ Fetch users for duplicate check
-    const usersResp = await fetch(`${API_BASE}?type=users&apiKey=${API_KEY}`);
-    const users = usersResp.ok ? await usersResp.json() : [];
-    if (!Array.isArray(users)) throw new Error("Users API did not return array");
-
-    // 2️⃣ Check for possible duplicate
-    const inputData = { firstName, lastName, email };
-    const possibleDuplicate = users.find(u => isPossibleDuplicate(inputData, u));
-
-    if (possibleDuplicate) {
-      // Show duplicate warning
-      wrapper.innerHTML = "";
-
-      const warningDiv = document.createElement("div");
-      warningDiv.id = "duplicate-warning";
-
-      // ⚠ Possible duplicate detected!
-      const title = document.createElement("div");
-      title.style.textAlign = "center";
-      title.style.fontWeight = "bold";
-      title.style.color = "#ffffff";
-      title.style.fontSize = "26px";
-      title.style.marginBottom = "12px";
-      title.textContent = "⚠ Possible duplicate detected!";
-      warningDiv.appendChild(title);
-
-      // Please verify your WhatsApp
-      const subText = document.createElement("div");
-      subText.style.textAlign = "center";
-      subText.style.color = "#ffffff";
-      subText.style.fontSize = "18px";
-      subText.style.marginBottom = "12px";
-      subText.textContent = "Please verify your WhatsApp";
-      warningDiv.appendChild(subText);
-
-      // WhatsApp input (pre-filled)
-      const whatsappInput = document.createElement("input");
-      whatsappInput.id = "resubmitWhatsApp";
-      whatsappInput.type = "tel";
-      whatsappInput.inputMode = "numeric";
-      whatsappInput.value = rawWhatsApp;
-      whatsappInput.style.width = "100%";
-      whatsappInput.style.padding = "12px";
-      whatsappInput.style.fontSize = "26px";
-      whatsappInput.style.textAlign = "center";
-      whatsappInput.style.marginBottom = "12px";
-      whatsappInput.style.border = "2px solid #c59b5a";
-      whatsappInput.style.borderRadius = "8px";
-      warningDiv.appendChild(whatsappInput);
-
-      // Resubmit WhatsApp button
-      const reSubmitBtn = document.createElement("button");
-      reSubmitBtn.id = "reSubmitWhatsApp";
-      reSubmitBtn.style.width = "100%";
-      reSubmitBtn.style.padding = "12px";
-      reSubmitBtn.style.fontWeight = "bold";
-      reSubmitBtn.style.background = "#c59b5a";
-      reSubmitBtn.style.color = "#fff";
-      reSubmitBtn.style.border = "none";
-      reSubmitBtn.style.borderRadius = "8px";
-      reSubmitBtn.style.cursor = "pointer";
-      reSubmitBtn.style.marginBottom = "12px";
-      reSubmitBtn.textContent = "Re-submit WhatsApp";
-      warningDiv.appendChild(reSubmitBtn);
-
-      // Or continue with registration
-      const continueText = document.createElement("div");
-      continueText.style.textAlign = "center";
-      continueText.style.color = "#ffffff";
-      continueText.style.fontSize = "18px";
-      continueText.style.marginBottom = "12px";
-      continueText.textContent = "or continue with registration";
-      warningDiv.appendChild(continueText);
-
-      // Append warning
-      wrapper.appendChild(warningDiv);
-
-      // Append original registration form below the warning
-      const formDiv = document.createElement("div");
-      formDiv.innerHTML = originalRegistrationHTML;
-      wrapper.appendChild(formDiv);
-
-      // Handle resubmit button
-      reSubmitBtn.addEventListener("click", async () => {
-        const correctedRaw = whatsappInput.value.trim();
-        if (!correctedRaw) return;
-
-        const { normalized, fallback } = normalizeWhatsapp(correctedRaw);
-        const correctedWhatsapp = normalized || fallback || correctedRaw.replace(/\D/g, "");
-
-        try {
-          // Fetch users to check corrected number
-          const usersResp2 = await fetch(`${API_BASE}?type=users&apiKey=${API_KEY}`);
-          const usersList = usersResp2.ok ? await usersResp2.json() : [];
-
-          const matchedUser = usersList.find(u =>
-            (u.normalizedWhatsapp || u.whatsapp || "").replace(/\D/g, "") === correctedWhatsapp
-          );
-
-          if (matchedUser) {
-            // Login user
-            currentUser = {
-              firstName: matchedUser.firstName,
-              lastName: matchedUser.lastName,
-              email: matchedUser.email,
-              whatsapp: correctedRaw,
-              normalizedWhatsapp: correctedWhatsapp,
-              regStat: matchedUser.regStat
-            };
-            sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
-
-            // Hide registration section
-            wrapper.style.display = "none";
-
-            // Unlock cards
-            unlockCardsAfterRegistration();
-          } else {
-            // Number not found — user continues with registration
-            document.getElementById("regWhatsApp").value = correctedRaw;
-            warningDiv.remove();
-          }
-
-        } catch (err) {
-          console.error("Error checking WhatsApp:", err);
-          alert("Error checking WhatsApp. Please try again.");
-        }
-      });
-
-      return; // stop registration until user acts
-    }
-
-    // 3️⃣ No duplicate — proceed with registration
     const resText = await fetch(API_BASE, {
       method: "POST",
       body: new URLSearchParams({
@@ -678,6 +506,7 @@ async function handleFullRegistration() {
         normalizedWhatsapp: cleanNumber(whatsapp),
         regStat: false
       };
+
       userRegistered = true;
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
 
@@ -690,11 +519,13 @@ async function handleFullRegistration() {
       `;
 
       document.getElementById("extraFields").style.display = "none";
+
       document.querySelectorAll(".class-toggle").forEach(toggle => {
         toggle.checked = false;
         toggle.disabled = true;
         toggle.classList.add("locked");
       });
+
     } else {
       msgBox.textContent = `Error: ${result.message || "Unknown error"}`;
       msgBox.style.color = "red";
@@ -706,11 +537,6 @@ async function handleFullRegistration() {
     msgBox.style.color = "red";
   }
 }
-
-
-
-
-
 
 // --------------------
 // Format class time for display
