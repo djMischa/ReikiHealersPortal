@@ -220,21 +220,23 @@ function revealHealerNamesIfApproved() {
 // --------------------
 // Registration Form
 // --------------------
-function renderRegistrationForm(prefillNumber = "", hideTopInput = false) {
+function renderRegistrationForm(prefillNumber = "", hideWhatsAppField = false) {
   const wrapper = document.getElementById("registration-section");
   if (!wrapper) return;
 
   wrapper.innerHTML = `
     <div style="max-width:400px;margin:20px auto;text-align:center;">
-      ${!hideTopInput ? `<div id="regTitle" style="font-size:26px; font-weight:bold; color:#ffffff; margin-bottom:12px;">
+      <div id="regTitle" style="font-size:26px; font-weight:bold; color:#ffffff; margin-bottom:12px;">
         Please complete your registration
-      </div>` : ''}
-      ${!hideTopInput ? `<input id="regWhatsApp" type="tel" inputmode="numeric" placeholder="Enter your WhatsApp number"
-             value="${prefillNumber}"
-             style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">` : ''}
-      ${!hideTopInput ? `<button id="whatsappSubmit" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Submit</button>` : ''}
+      </div>
+      ${!hideWhatsAppField ? `
+        <input id="regWhatsApp" type="tel" inputmode="numeric" placeholder="Enter your WhatsApp number"
+               value="${prefillNumber}"
+               style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
+        <button id="whatsappSubmit" style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
+      ` : ""}
       <div id="regMessage" style="margin-top:10px; font-weight:bold;"></div>
-      <div id="extraFields" style="margin-top:12px; display:none;">
+      <div id="extraFields" style="margin-top:12px; display:${hideWhatsAppField ? 'block' : 'none'};">
         <input id="regFirstName" type="text" placeholder="First Name" style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
         <input id="regLastName" type="text" placeholder="Last Name" style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
         <input id="regEmail" type="email" placeholder="Email" style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
@@ -244,11 +246,12 @@ function renderRegistrationForm(prefillNumber = "", hideTopInput = false) {
   `;
 
   // Attach listeners AFTER DOM is rendered
-  if (!hideTopInput) {
-    document.getElementById("whatsappSubmit")?.addEventListener("click", handleWhatsAppSubmit);
+  if (!hideWhatsAppField) {
+    document.getElementById("whatsappSubmit").addEventListener("click", handleWhatsAppSubmit);
   }
   document.getElementById("fullRegister")?.addEventListener("click", handleFullRegistration);
 }
+
 
 
 
@@ -569,7 +572,7 @@ function continueRegistration(prefillNumber = "") {
 
   enableCopyProtection(null);
 }
-}
+
 
 
 
