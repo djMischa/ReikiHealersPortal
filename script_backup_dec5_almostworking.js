@@ -226,9 +226,6 @@ function renderRegistrationForm(prefillNumber = "") {
 
   wrapper.innerHTML = `
     <div style="max-width:400px;margin:20px auto;text-align:center;">
-      <div id="regTitle" style="font-size:26px; font-weight:bold; color:#ffffff; margin-bottom:12px;">
-        Please complete your registration
-      </div>
       <input id="regWhatsApp" type="tel" inputmode="numeric" placeholder="Enter your WhatsApp number"
              value="${prefillNumber}"
              style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
@@ -247,6 +244,7 @@ function renderRegistrationForm(prefillNumber = "") {
   document.getElementById("whatsappSubmit").addEventListener("click", handleWhatsAppSubmit);
   document.getElementById("fullRegister")?.addEventListener("click", handleFullRegistration);
 }
+
 
 
 // --------------------
@@ -360,11 +358,13 @@ function isSimilarWhatsApp(inputNumber, existingUsers) {
 
 
 
+// --------------------
+// Render Verify Number UI
+// --------------------
 function renderVerifyNumberUI(number, onCorrect, onContinue) {
   const wrapper = document.getElementById("registration-section");
   if (!wrapper) return;
 
-  // Render warning + WhatsApp input + buttons
   wrapper.innerHTML = `
     <div style="text-align:center; font-weight:bold; color:#ffffff; font-size:26px; margin-bottom:12px;">
       ⚠️ Please verify your number
@@ -381,22 +381,53 @@ function renderVerifyNumberUI(number, onCorrect, onContinue) {
     </div>
   `;
 
-  // Bind event listeners **after DOM elements exist**
+  // Corrected number submit
   document.getElementById("verifySubmit").addEventListener("click", () => {
     const corrected = document.getElementById("verifyWhatsApp").value.trim();
-    if (!corrected) return; // optional: you can show a message here if blank
-    onCorrect(corrected);
+    if (!corrected) return;
+    // Fully reset the container and re-render WhatsApp input
+    const wrapper = document.getElementById("registration-section");
+    if (!wrapper) return;
+    wrapper.innerHTML = "";
+    renderRegistrationForm(corrected);
+    document.getElementById("regWhatsApp").value = corrected;
+    document.getElementById("whatsappSubmit")?.addEventListener("click", handleWhatsAppSubmit);
   });
 
-  document.getElementById("continueRegistration").addEventListener("click", onContinue);
+  // Continue with registration
+  document.getElementById("continueRegistration").addEventListener("click", () => {
+    const wrapper = document.getElementById("registration-section");
+    if (!wrapper) return;
+
+    // Fully reset the container
+    wrapper.innerHTML = "";
+
+    // Show registration block
+    renderRegistrationForm(number);
+
+    // Show extra fields and message
+    const msgBox = document.getElementById("regMessage");
+    const extraFields = document.getElementById("extraFields");
+    const whatsappField = document.getElementById("regWhatsApp");
+
+    if (whatsappField) whatsappField.style.display = "none"; // hide the WhatsApp input
+    if (extraFields) extraFields.style.display = "block";
+
+    if (msgBox) {
+      msgBox.style.fontSize = "26px";
+      msgBox.style.color = "#ffffff";
+      msgBox.textContent = "Please complete your registration.";
+    }
+
+    // Attach full registration listener
+    document.getElementById("fullRegister")?.addEventListener("click", handleFullRegistration);
+
+    enableCopyProtection(null);
+  });
 }
 
-
-
-
-
 // --------------------
-// Handle WhatsApp submit
+// Handle WhatsApp Submit
 // --------------------
 async function handleWhatsAppSubmit() {
   const whatsappInput = document.getElementById("regWhatsApp");
@@ -422,12 +453,11 @@ async function handleWhatsAppSubmit() {
     if (!Array.isArray(users)) throw new Error('Users API did not return array');
 
     const normUsers = users.map(u => ({
-  ...u,
-  whatsapp: String(u.whatsapp || ''),
-  normalizedWhatsapp: cleanNumber(u.normalizedWhatsapp || u.whatsapp),
-  password: u.password !== undefined && u.password !== null ? String(u.password) : ""
-}));
-
+      ...u,
+      whatsapp: String(u.whatsapp || ''),
+      normalizedWhatsapp: cleanNumber(u.normalizedWhatsapp || u.whatsapp),
+      password: u.password !== undefined && u.password !== null ? String(u.password) : ""
+    }));
 
     const user = normUsers.find(u => {
       const uNorm = u.normalizedWhatsapp;
@@ -436,8 +466,7 @@ async function handleWhatsAppSubmit() {
     });
 
     if (user) {
-      user.normalizedWhatsapp = cleanNumber(user.normalizedWhatsapp || user.whatsapp || "");
-      currentUser = user;
+      currentUser = { ...user, normalizedWhatsapp: cleanNumber(user.normalizedWhatsapp || user.whatsapp || "") };
       userRegistered = true;
       sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
 
@@ -460,43 +489,35 @@ async function handleWhatsAppSubmit() {
               });
 
               if (!res.ok) throw new Error("Network error");
-
-              // fallback if server doesn't return proper JSON
               await res.json().catch(() => ({}));
 
               currentUser.password = pwd;
-              currentUser.regStat = true;  // mark as approved
+              currentUser.regStat = true;
               userRegistered = true;
               sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
 
               renderWelcomeMessage();
               renderClasses();
               showToast("Password saved successfully!");
-
             } catch (err) {
               console.error(err);
               showToast("Password may have been saved, but an error occurred.", true);
             }
           });
         } else {
-          // returning user
-renderPasswordField("Enter your password", (pwd) => {
-  if (pwd === currentUser.password) {
-    currentUser.regStat = true;
-    userRegistered = true;
-    sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
-
-    // ✅ Enable copy protection (or ADMIN bypass) AFTER user is set
-    enableCopyProtection();  // no argument — uses currentUser internally
-
-    renderWelcomeMessage();
-    renderClasses();
-    showToast("Welcome back!");
-  } else {
-    showToast("Incorrect password. Please try again.", true);
-  }
-});
-
+          renderPasswordField("Enter your password", (pwd) => {
+            if (pwd === currentUser.password) {
+              currentUser.regStat = true;
+              userRegistered = true;
+              sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+              enableCopyProtection();
+              renderWelcomeMessage();
+              renderClasses();
+              showToast("Welcome back!");
+            } else {
+              showToast("Incorrect password. Please try again.", true);
+            }
+          });
         }
       } else {
         msgBox.innerHTML = `
@@ -512,71 +533,55 @@ renderPasswordField("Enter your password", (pwd) => {
       }
 
     } else {
-   //   // Not found -> show register fields
-   //   document.getElementById("extraFields").style.display = "block";
-   //   msgBox.style.fontSize = "26px";
-   //   msgBox.style.color = "#ffffff";
-   //   msgBox.textContent = "Please complete your registration.";
-   //   enableCopyProtection(null);
-// Not found -> check for similar numbers
-// Not found -> check for similar numbers
-const similarUser = isSimilarWhatsApp(rawWhatsApp, normUsers);
+      // Not found -> check for similar numbers
+      const similarUser = isSimilarWhatsApp(rawWhatsApp, normUsers);
 
-if (similarUser) {
-  // Show verify number UI and handle user actions.
-  renderVerifyNumberUI(rawWhatsApp,
-    // onCorrect: user edited the number and clicked Submit
-    (correctedNumber) => {
-      // Rebuild the normal registration UI prefilled with correctedNumber,
-      // then trigger the same submit flow so the corrected number is checked.
-      renderRegistrationForm(correctedNumber);
-
-      // Safety: small delay to ensure DOM listeners attached, then trigger submit.
-      setTimeout(() => {
-        const whatsappInputEl = document.getElementById("regWhatsApp");
-        const submitBtnEl = document.getElementById("whatsappSubmit");
-        if (whatsappInputEl) whatsappInputEl.value = correctedNumber;
-        if (submitBtnEl) {
-          // simulate a user click so the existing event listener runs
-          submitBtnEl.click();
-        } else {
-          // fallback: if the button is missing, call handler directly
-          handleWhatsAppSubmit();
+      if (similarUser) {
+        renderVerifyNumberUI(rawWhatsApp, 
+          (correctedNumber) => {
+            // corrected number submit
+            const wrapper = document.getElementById("registration-section");
+            if (!wrapper) return;
+            wrapper.innerHTML = "";
+            renderRegistrationForm(correctedNumber);
+            document.getElementById("regWhatsApp").value = correctedNumber;
+            document.getElementById("whatsappSubmit")?.addEventListener("click", handleWhatsAppSubmit);
+          },
+          () => {
+            // continue with registration
+            const wrapper = document.getElementById("registration-section");
+            if (!wrapper) return;
+            wrapper.innerHTML = "";
+            renderRegistrationForm(rawWhatsApp);
+            const extraFields = document.getElementById("extraFields");
+            const msgBox = document.getElementById("regMessage");
+            if (extraFields) extraFields.style.display = "block";
+            const whatsappField = document.getElementById("regWhatsApp");
+            if (whatsappField) whatsappField.style.display = "none";
+            if (msgBox) {
+              msgBox.style.fontSize = "26px";
+              msgBox.style.color = "#ffffff";
+              msgBox.textContent = "Please complete your registration.";
+            }
+            document.getElementById("fullRegister")?.addEventListener("click", handleFullRegistration);
+            enableCopyProtection(null);
+          }
+        );
+      } else {
+        // Completely new user, normal registration
+        renderRegistrationForm(rawWhatsApp);
+        const extraFields = document.getElementById("extraFields");
+        const msgBox = document.getElementById("regMessage");
+        if (extraFields) extraFields.style.display = "block";
+        if (msgBox) {
+          msgBox.style.fontSize = "26px";
+          msgBox.style.color = "#ffffff";
+          msgBox.textContent = "Please complete your registration.";
         }
-      }, 30);
-    },
-
-    // onContinue: user wants to proceed with registration anyway
-    () => {
-      renderRegistrationForm(rawWhatsApp);
-      // show the extra fields and message exactly as normal registration flow
-      const msgBox = document.getElementById("regMessage");
-      document.getElementById("regWhatsApp").value = rawWhatsApp;
-      document.getElementById("extraFields").style.display = "block";
-      if (msgBox) {
-        msgBox.style.fontSize = "26px";
-        msgBox.style.color = "#ffffff";
-        msgBox.textContent = "Please complete your registration.";
+        document.getElementById("fullRegister")?.addEventListener("click", handleFullRegistration);
+        enableCopyProtection(null);
       }
-      enableCopyProtection(null);
     }
-  );
-} else {
-  // No similar number, proceed to normal registration
-  renderRegistrationForm();
-  document.getElementById("regWhatsApp").value = rawWhatsApp;
-  document.getElementById("extraFields").style.display = "block";
-  msgBox.style.fontSize = "26px";
-  msgBox.style.color = "#ffffff";
-  msgBox.textContent = "Please complete your registration.";
-  enableCopyProtection(null);
-}
-
-
-    }
-
-    whatsappInput.style.display = "none";
-    submitBtn.style.display = "none";
 
   } catch (err) {
     console.error("WhatsApp submit error:", err);
@@ -586,6 +591,8 @@ if (similarUser) {
     submitBtn.disabled = false;
   }
 }
+
+
 
 // --------------------
 // Handle full registration
