@@ -226,9 +226,6 @@ function renderRegistrationForm(prefillNumber = "") {
 
   wrapper.innerHTML = `
     <div style="max-width:400px;margin:20px auto;text-align:center;">
-      <div id="regTitle" style="font-size:26px; font-weight:bold; color:#ffffff; margin-bottom:12px;">
-        Please complete your registration
-      </div>
       <input id="regWhatsApp" type="tel" inputmode="numeric" placeholder="Enter your WhatsApp number"
              value="${prefillNumber}"
              style="width:100%; padding:12px; font-size:18px; margin-bottom:12px; border:2px solid #c59b5a; border-radius:8px;">
@@ -247,6 +244,7 @@ function renderRegistrationForm(prefillNumber = "") {
   document.getElementById("whatsappSubmit").addEventListener("click", handleWhatsAppSubmit);
   document.getElementById("fullRegister")?.addEventListener("click", handleFullRegistration);
 }
+
 
 
 // --------------------
