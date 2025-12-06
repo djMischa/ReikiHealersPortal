@@ -77,33 +77,6 @@ if ("serviceWorker" in navigator) {
 // --------------------
 // Helpers
 // --------------------
-
-// Helper: compute simple Hamming distance for same-length strings
-function hammingDistance(s1, s2) {
-  if (!s1 || !s2 || s1.length !== s2.length) return Infinity;
-  let dist = 0;
-  for (let i = 0; i < s1.length; i++) {
-    if (s1[i] !== s2[i]) dist++;
-  }
-  return dist;
-}
-
-// Helper: find similar number among existing users
-function findSimilarWhatsapp(normalizedInput, users) {
-  return users.find(u => {
-    const uNorm = u.normalizedWhatsapp || cleanNumber(u.whatsapp || "");
-    return uNorm.length === normalizedInput.length && hammingDistance(uNorm, normalizedInput) <= 1;
-  });
-}
-
-
-
-
-
-
-
-
-
 function normalizeWhatsapp(raw) {
   if (!raw) return { normalized: "", fallback: "" };
   let digits = String(raw).replace(/\D/g, "").replace(/^0+/, "");
@@ -356,22 +329,20 @@ function renderWelcomeMessage() {
 // --------------------
 // Handle WhatsApp submit
 // --------------------
-async function handleWhatsAppSubmit(inputNumber = null) {
-  const whatsappInput = document.getElementById("regWhatsApp") || document.getElementById("verifyWhatsApp");
-  const submitBtn = document.getElementById("whatsappSubmit") || document.getElementById("verifySubmit");
-  const msgBox = document.getElementById("regMessage") || document.createElement("div");
-  const rawWhatsApp = inputNumber || (whatsappInput ? whatsappInput.value.trim() : "");
+async function handleWhatsAppSubmit() {
+  const whatsappInput = document.getElementById("regWhatsApp");
+  const submitBtn = document.getElementById("whatsappSubmit");
+  const msgBox = document.getElementById("regMessage");
+  const rawWhatsApp = whatsappInput.value.trim();
 
   if (!rawWhatsApp) {
-    if (msgBox) { 
-      msgBox.textContent = "Please enter your WhatsApp number."; 
-      msgBox.style.color = "red"; 
-    }
+    msgBox.textContent = "Please enter your WhatsApp number.";
+    msgBox.style.color = "red";
     return;
   }
 
-  if (whatsappInput) whatsappInput.disabled = true;
-  if (submitBtn) submitBtn.disabled = true;
+  whatsappInput.disabled = true;
+  submitBtn.disabled = true;
 
   try {
     const { normalized, fallback } = normalizeWhatsapp(rawWhatsApp);
@@ -382,33 +353,20 @@ async function handleWhatsAppSubmit(inputNumber = null) {
     if (!Array.isArray(users)) throw new Error('Users API did not return array');
 
     const normUsers = users.map(u => ({
-      ...u,
-      whatsapp: String(u.whatsapp || ''),
-      normalizedWhatsapp: cleanNumber(u.normalizedWhatsapp || u.whatsapp),
-      password: u.password !== undefined && u.password !== null ? String(u.password) : ""
-    }));
+  ...u,
+  whatsapp: String(u.whatsapp || ''),
+  normalizedWhatsapp: cleanNumber(u.normalizedWhatsapp || u.whatsapp),
+  password: u.password !== undefined && u.password !== null ? String(u.password) : ""
+}));
 
-    // Try to find exact match first
-    let user = normUsers.find(u => {
+
+    const user = normUsers.find(u => {
       const uNorm = u.normalizedWhatsapp;
       const uRaw = cleanNumber(u.whatsapp);
       return (uNorm === normalized || uRaw === normalized || uRaw === fallback);
     });
 
-    // Check for similar number if no exact match
-    let similarUser = null;
-    if (!user) {
-      similarUser = findSimilarWhatsapp(normalized, normUsers);
-    }
-
-    // Show "⚠️ Please verify your number" flow for similar numbers
-    if (!user && similarUser) {
-      showSimilarNumberFlow(rawWhatsApp);
-      return;
-    }
-
     if (user) {
-      // ✅ Existing user logic
       user.normalizedWhatsapp = cleanNumber(user.normalizedWhatsapp || user.whatsapp || "");
       currentUser = user;
       userRegistered = true;
@@ -417,6 +375,7 @@ async function handleWhatsAppSubmit(inputNumber = null) {
       const regApproved = (user.regStat === true || String(user.regStat).toLowerCase() === "true");
 
       if (regApproved) {
+        // PASSWORD LOGIC
         if (!user.password || user.password === "") {
           renderPasswordField("Please create a password", async (pwd) => {
             if (!pwd) return;
@@ -430,38 +389,45 @@ async function handleWhatsAppSubmit(inputNumber = null) {
                   apiKey: API_KEY
                 })
               });
+
               if (!res.ok) throw new Error("Network error");
+
+              // fallback if server doesn't return proper JSON
               await res.json().catch(() => ({}));
 
               currentUser.password = pwd;
-              currentUser.regStat = true;
+              currentUser.regStat = true;  // mark as approved
               userRegistered = true;
               sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
 
               renderWelcomeMessage();
               renderClasses();
               showToast("Password saved successfully!");
+
             } catch (err) {
               console.error(err);
               showToast("Password may have been saved, but an error occurred.", true);
             }
           });
         } else {
-          renderPasswordField("Enter your password", (pwd) => {
-            if (pwd === currentUser.password) {
-              currentUser.regStat = true;
-              userRegistered = true;
-              sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+          // returning user
+renderPasswordField("Enter your password", (pwd) => {
+  if (pwd === currentUser.password) {
+    currentUser.regStat = true;
+    userRegistered = true;
+    sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
 
-              enableCopyProtection();
+    // ✅ Enable copy protection (or ADMIN bypass) AFTER user is set
+    enableCopyProtection();  // no argument — uses currentUser internally
 
-              renderWelcomeMessage();
-              renderClasses();
-              showToast("Welcome back!");
-            } else {
-              showToast("Incorrect password. Please try again.", true);
-            }
-          });
+    renderWelcomeMessage();
+    renderClasses();
+    showToast("Welcome back!");
+  } else {
+    showToast("Incorrect password. Please try again.", true);
+  }
+});
+
         }
       } else {
         msgBox.innerHTML = `
@@ -477,70 +443,25 @@ async function handleWhatsAppSubmit(inputNumber = null) {
       }
 
     } else {
-      // ✅ New user registration flow
-      renderRegistrationForm();
-      document.getElementById("regWhatsApp").value = rawWhatsApp;
+      // Not found -> show register fields
       document.getElementById("extraFields").style.display = "block";
-      document.getElementById("regMessage").textContent = "PLEASE COMPLETE YOUR REGISTRATION";
+      msgBox.style.fontSize = "26px";
+      msgBox.style.color = "#ffffff";
+      msgBox.textContent = "Please complete your registration.";
+      enableCopyProtection(null);
     }
 
-    if (whatsappInput) whatsappInput.style.display = "none";
-    if (submitBtn) submitBtn.style.display = "none";
+    whatsappInput.style.display = "none";
+    submitBtn.style.display = "none";
 
   } catch (err) {
     console.error("WhatsApp submit error:", err);
     msgBox.textContent = "Error contacting server.";
     msgBox.style.color = "red";
-    if (whatsappInput) whatsappInput.disabled = false;
-    if (submitBtn) submitBtn.disabled = false;
+    whatsappInput.disabled = false;
+    submitBtn.disabled = false;
   }
 }
-
-// --------------------
-// Show similar number flow
-// --------------------
-function showSimilarNumberFlow(userNumber) {
-  const wrapper = document.getElementById("registration-section");
-  if (!wrapper) return;
-
-  wrapper.innerHTML = `
-    <div id="regMessage" style="text-align:center; font-size:26px; font-weight:bold; color:#ffffff;">
-      ⚠️ Please verify your number
-    </div>
-    <input id="verifyWhatsApp" type="tel" value="${userNumber}" 
-      style="width:100%; padding:12px; font-size:18px; margin-top:12px; border:2px solid #c59b5a; border-radius:8px;">
-    <button id="verifySubmit" 
-      style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; margin-top:10px; cursor:pointer;">
-      Submit
-    </button>
-    <div style="text-align:center; font-size:16px; margin-top:6px;">
-      <a href="#" id="continueRegistration" style="color:#FFD700; text-decoration:underline; cursor:pointer;">
-        or continue with registration
-      </a>
-    </div>
-  `;
-
-  // Corrected number submit
-  document.getElementById("verifySubmit").addEventListener("click", () => {
-    const newNumber = document.getElementById("verifyWhatsApp").value.trim();
-    if (!newNumber) return;
-    handleWhatsAppSubmit(newNumber);
-  });
-
-  // Continue with registration
-  document.getElementById("continueRegistration").addEventListener("click", (e) => {
-    e.preventDefault();
-    renderRegistrationForm();
-    document.getElementById("regWhatsApp").value = userNumber;
-    document.getElementById("extraFields").style.display = "block";
-    document.getElementById("regMessage").textContent = "PLEASE COMPLETE YOUR REGISTRATION";
-  });
-}
-
-
-
-
-
 
 // --------------------
 // Handle full registration
@@ -1059,4 +980,5 @@ function ensureFooterImage() {
 // https://script.google.com/macros/s/AKfycbzKcSu-vP9nlk4h15EZjthBa5rFDXdOeURUR3qpVFgHqSvfUMN2UD0LA0V1iPSXJsUj/exec
 
 
+// https://script.google.com/macros/s/AKfycbzKcSu-vP9nlk4h15EZjthBa5rFDXdOeURUR3qpVFgHqSvfUMN2UD0LA0V1iPSXJsUj/exec
 // https://script.google.com/macros/s/AKfycbzKcSu-vP9nlk4h15EZjthBa5rFDXdOeURUR3qpVFgHqSvfUMN2UD0LA0V1iPSXJsUj/exec
