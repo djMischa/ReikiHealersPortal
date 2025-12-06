@@ -569,7 +569,7 @@ function continueRegistration(prefillNumber = "") {
 
   enableCopyProtection(null);
 }
-
+}
 
 
 
