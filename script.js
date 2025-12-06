@@ -77,6 +77,33 @@ if ("serviceWorker" in navigator) {
 // --------------------
 // Helpers
 // --------------------
+
+// Helper: compute simple Hamming distance for same-length strings
+function hammingDistance(s1, s2) {
+  if (!s1 || !s2 || s1.length !== s2.length) return Infinity;
+  let dist = 0;
+  for (let i = 0; i < s1.length; i++) {
+    if (s1[i] !== s2[i]) dist++;
+  }
+  return dist;
+}
+
+// Helper: find similar number among existing users
+function findSimilarWhatsapp(normalizedInput, users) {
+  return users.find(u => {
+    const uNorm = u.normalizedWhatsapp || cleanNumber(u.whatsapp || "");
+    return uNorm.length === normalizedInput.length && hammingDistance(uNorm, normalizedInput) <= 1;
+  });
+}
+
+
+
+
+
+
+
+
+
 function normalizeWhatsapp(raw) {
   if (!raw) return { normalized: "", fallback: "" };
   let digits = String(raw).replace(/\D/g, "").replace(/^0+/, "");
@@ -360,11 +387,24 @@ async function handleWhatsAppSubmit() {
 }));
 
 
-    const user = normUsers.find(u => {
-      const uNorm = u.normalizedWhatsapp;
-      const uRaw = cleanNumber(u.whatsapp);
-      return (uNorm === normalized || uRaw === normalized || uRaw === fallback);
-    });
+   let user = normUsers.find(u => {
+  const uNorm = u.normalizedWhatsapp;
+  const uRaw = cleanNumber(u.whatsapp);
+  return (uNorm === normalized || uRaw === normalized || uRaw === fallback);
+});
+
+// Check for similar number if no exact match
+let similarUser = null;
+if (!user) {
+  similarUser = findSimilarWhatsapp(normalized, normUsers);
+}
+
+if (!user && similarUser) {
+  // Show "⚠️ Please verify your number" flow
+  showSimilarNumberFlow(rawWhatsApp); // we'll define this function next
+  return;
+}
+
 
     if (user) {
       user.normalizedWhatsapp = cleanNumber(user.normalizedWhatsapp || user.whatsapp || "");
@@ -462,6 +502,49 @@ renderPasswordField("Enter your password", (pwd) => {
     submitBtn.disabled = false;
   }
 }
+
+function showSimilarNumberFlow(userNumber) {
+  const wrapper = document.getElementById("registration-section");
+  if (!wrapper) return;
+
+  wrapper.innerHTML = `
+    <div style="text-align:center; font-size:26px; font-weight:bold; color:#ffffff;">
+      ⚠️ Please verify your number
+    </div>
+    <input id="verifyWhatsApp" type="tel" value="${userNumber}" 
+      style="width:100%; padding:12px; font-size:18px; margin-top:12px; border:2px solid #c59b5a; border-radius:8px;">
+    <button id="verifySubmit" 
+      style="width:100%; padding:12px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; margin-top:10px; cursor:pointer;">
+      Submit
+    </button>
+    <div style="text-align:center; font-size:16px; margin-top:6px;">
+      <a href="#" id="continueRegistration" style="color:#FFD700; text-decoration:underline; cursor:pointer;">
+        or continue with registration
+      </a>
+    </div>
+  `;
+
+  // Handle submit of corrected number
+  document.getElementById("verifySubmit").addEventListener("click", () => {
+    const newNumber = document.getElementById("verifyWhatsApp").value.trim();
+    if (!newNumber) return;
+    // call your normal handleWhatsAppSubmit logic with this number
+    document.getElementById("regWhatsApp").value = newNumber; // populate hidden input
+    handleWhatsAppSubmit();
+  });
+
+  // Handle "continue with registration" link
+  document.getElementById("continueRegistration").addEventListener("click", (e) => {
+    e.preventDefault();
+    renderRegistrationForm(); // normal registration block
+    document.getElementById("regWhatsApp").value = userNumber; // pre-fill WhatsApp
+    document.getElementById("extraFields").style.display = "block"; // show full registration
+  });
+}
+
+
+
+
 
 // --------------------
 // Handle full registration
