@@ -551,24 +551,26 @@ if (similarUser) {
 
     // onContinue: user wants to proceed with registration anyway
     () => {
-  // Render registration without top WhatsApp input
-  renderRegistrationForm(rawWhatsApp, true);
+  // Hide WhatsApp input + submit
+  const whatsappInput = document.getElementById("regWhatsApp");
+  const submitBtn = document.getElementById("whatsappSubmit");
+  if (whatsappInput) whatsappInput.style.display = "none";
+  if (submitBtn) submitBtn.style.display = "none";
 
+  // Show extra fields
   const extraFields = document.getElementById("extraFields");
-  const msgBox = document.getElementById("regMessage");
-  const fullRegisterBtn = document.getElementById("fullRegister");
-
-  // Show the extra fields
   if (extraFields) extraFields.style.display = "block";
 
-  // Update message
+  // Show message
+  const msgBox = document.getElementById("regMessage");
   if (msgBox) {
     msgBox.style.fontSize = "26px";
     msgBox.style.color = "#ffffff";
     msgBox.textContent = "Please complete your registration.";
   }
 
-  // Attach click listener to Register button AFTER DOM exists
+  // Attach listener to Register button
+  const fullRegisterBtn = document.getElementById("fullRegister");
   if (fullRegisterBtn) {
     fullRegisterBtn.removeEventListener("click", handleFullRegistration); // prevent duplicates
     fullRegisterBtn.addEventListener("click", handleFullRegistration);
@@ -576,6 +578,7 @@ if (similarUser) {
 
   enableCopyProtection(null);
 }
+
 
 
 
