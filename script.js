@@ -1,25 +1,27 @@
-// ---------- config ----------
-const API_BASE = "";
-const API_KEY = ""; // replace with your secret
-const ADMIN_WHATSAPP = "1925196419"; // admin WhatsApp
+// ========================
+// SECTION 1/3
+// CONFIG + COPY PROTECTION + HELPERS + GLOBALS + INIT + REGISTRATION FORM
+// ========================
+
+// ------------------------
+// CONFIG
+// ------------------------
+const API_PROXY = "https://reikihealers.chiroyoga.ca/api-proxy.php";
+const ADMIN_WHATSAPP = "1925196419";
 const ADMIN_WHATSAPP_NORM = cleanNumber(ADMIN_WHATSAPP);
 
-// Default: block copy/paste for everyone
+// ------------------------
+// COPY / PASTE PROTECTION
+// ------------------------
 document.addEventListener("DOMContentLoaded", () => {
   document.body.classList.add("copy-protect");
 });
 
-// Keep track of listeners
 let copyBlockListeners = [];
 
 function enableCopyProtection(userNumber = null) {
-  // Use currentUser if userNumber not provided
   const normalized = cleanNumber(userNumber || (currentUser ? currentUser.normalizedWhatsapp : ""));
-  console.log("DEBUG — checking admin bypass:", { userNumber, normalized, ADMIN_WHATSAPP_NORM });
-
-  // ADMIN BYPASS
   if (normalized && normalized === ADMIN_WHATSAPP_NORM) {
-    console.log("DEBUG — ADMIN detected, disabling copy protection");
     disableAllCopyProtectionJS();
     document.body.classList.remove("copy-protect");
     document.body.classList.add("copy-allowed");
@@ -49,8 +51,6 @@ function enableCopyProtection(userNumber = null) {
   document.body.style.userSelect = "none";
 }
 
-
-
 function disableAllCopyProtectionJS() {
   for (const { event, handler } of copyBlockListeners) {
     document.removeEventListener(event, handler);
@@ -61,22 +61,24 @@ function disableAllCopyProtectionJS() {
   document.body.style.userSelect = "";
 }
 
-// --------------------
+// ------------------------
+// GLOBAL VARIABLES
+// ------------------------
 let classesData = [];
 let registrationsData = [];
 let currentUser = null;
 let userRegistered = false;
 
-// Service Worker cleanup
+// Service worker cleanup
 if ("serviceWorker" in navigator) {
   navigator.serviceWorker.getRegistrations().then(regs => {
     for (let reg of regs) reg.unregister();
   });
 }
 
-// --------------------
-// Helpers
-// --------------------
+// ------------------------
+// HELPERS
+// ------------------------
 function normalizeWhatsapp(raw) {
   if (!raw) return { normalized: "", fallback: "" };
   let digits = String(raw).replace(/\D/g, "").replace(/^0+/, "");
@@ -126,52 +128,25 @@ function showToast(msg, isError = false) {
   setTimeout(() => { box.style.opacity = "0"; }, 3000);
 }
 
-// --------------------
-// Initialization
-// --------------------
-async function init() {
-  try {
-    const cached = sessionStorage.getItem("rc_currentUser");
-    if (cached && cached !== "null" && cached !== "") {
-      currentUser = JSON.parse(cached);
-      if (currentUser) {
-        currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp || currentUser.whatsapp || "");
-        userRegistered = true;
+// ------------------------
+// SECURE API CALL
+// ------------------------
+async function apiCall(action, data = {}) {
+  const resp = await fetch(API_PROXY, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ action, data })
+  });
 
-        // ✅ Check admin copy/paste bypass on cached user
-        if (currentUser.normalizedWhatsapp === ADMIN_WHATSAPP_NORM) {
-          disableAllCopyProtectionJS();
-          document.body.classList.remove("copy-protect");
-          document.body.classList.add("copy-allowed");
-        } else {
-          enableCopyProtection(currentUser.normalizedWhatsapp);
-        }
-      }
-    } else {
-      enableCopyProtection(null);
-    }
-  } catch (e) { enableCopyProtection(null); }
-
-  try {
-    const [classesResp, regsResp] = await Promise.all([
-      fetch(`${API_BASE}?type=classes&apiKey=${API_KEY}`),
-      fetch(`${API_BASE}?type=registrations&apiKey=${API_KEY}`)
-    ]);
-
-    const classesJson = await classesResp.json();
-    const regsJson = await regsResp.json();
-
-    classesData = Array.isArray(classesJson) ? classesJson : [];
-    registrationsData = Array.isArray(regsJson) ? regsJson : [];
-
-    normalizeFetchedData();
-    renderClasses();
-  } catch (err) {
-    console.error('Initialization failed:', err);
-    showToast('Error loading data. Try reloading.', true);
-  }
+  if (!resp.ok) throw new Error(`Network error ${resp.status}`);
+  const json = await resp.json();
+  if (!json.success) throw new Error(json.error || "Unknown API error");
+  return json.data;
 }
 
+// ------------------------
+// DATA NORMALIZATION
+// ------------------------
 function normalizeFetchedData() {
   registrationsData = registrationsData.map(r => ({
     ...r,
@@ -189,13 +164,11 @@ function normalizeFetchedData() {
   if (currentUser) {
     currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp || currentUser.whatsapp || '');
   }
+
   ensureFooterImage();
   revealHealerNamesIfApproved();
 }
 
-// --------------------
-// revealHealerNamesIfApproved fix
-// --------------------
 function revealHealerNamesIfApproved() {
   if (!currentUser) return;
   const isApproved = currentUser.regStat === true || String(currentUser.regStat).toLowerCase() === "true";
@@ -211,15 +184,50 @@ function revealHealerNamesIfApproved() {
   });
 }
 
-// --------------------
-// The rest of your script continues unchanged
-// Include registration form rendering, password field, class rendering, etc.
-// Make sure anywhere currentUser is set, you also call enableCopyProtection() or admin bypass as above
+// ------------------------
+// INITIALIZATION
+// ------------------------
+async function init() {
+  try {
+    const cached = sessionStorage.getItem("rc_currentUser");
+    if (cached && cached !== "null" && cached !== "") {
+      currentUser = JSON.parse(cached);
+      if (currentUser) {
+        currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp || currentUser.whatsapp || "");
+        userRegistered = true;
+        if (currentUser.normalizedWhatsapp === ADMIN_WHATSAPP_NORM) {
+          disableAllCopyProtectionJS();
+          document.body.classList.remove("copy-protect");
+          document.body.classList.add("copy-allowed");
+        } else {
+          enableCopyProtection(currentUser.normalizedWhatsapp);
+        }
+      }
+    } else {
+      enableCopyProtection(null);
+    }
+  } catch (e) { enableCopyProtection(null); }
 
+  try {
+    const [classesDataResp, registrationsDataResp] = await Promise.all([
+      apiCall("readClasses"),
+      apiCall("readRegistrations")
+    ]);
 
-// --------------------
-// Registration Form
-// --------------------
+    classesData = Array.isArray(classesDataResp) ? classesDataResp : [];
+    registrationsData = Array.isArray(registrationsDataResp) ? registrationsDataResp : [];
+
+    normalizeFetchedData();
+    renderClasses();
+  } catch (err) {
+    console.error('Initialization failed:', err);
+    showToast('Error loading data. Try reloading.', true);
+  }
+}
+
+// ------------------------
+// REGISTRATION FORM
+// ------------------------
 function renderRegistrationForm() {
   const wrapper = document.getElementById("registration-section");
   if (!wrapper) return;
@@ -243,41 +251,28 @@ function renderRegistrationForm() {
   document.getElementById("fullRegister")?.addEventListener("click", handleFullRegistration);
 }
 
-// --------------------
-// PASSWORD HELPERS
-// --------------------
+
+
+// ========================
+// SECTION 2/3
+// PASSWORD, WHATSAPP SUBMIT, FULL REGISTRATION, HELPER LOGIC
+// ========================
+
+// ------------------------
+// PASSWORD FIELD RENDERING
+// ------------------------
 function renderPasswordField(placeholderText, onSubmit) {
   const wrapper = document.getElementById("registration-section");
   if (!wrapper) return;
 
   wrapper.innerHTML = `
     <div class="pwd-wrapper" style="position:relative; max-width:400px; margin:20px auto; height:48px;">
-      <!-- hidden username for iOS password manager -->
       <input type="hidden" name="username" value="${currentUser?.whatsapp || currentUser?.normalizedWhatsapp || ''}">
-      
       <input id="pwdField" type="password" placeholder="${placeholderText}"
              autocomplete="${currentUser && currentUser.password ? 'current-password' : 'new-password'}"
-             style="
-               width:100%;
-               height:100%;
-               font-size:18px;
-               padding:12px 44px 12px 12px; /* right padding increased to make room for monkey */
-               border:2px solid #c59b5a;
-               border-radius:8px;
-               box-sizing:border-box;
-               line-height:1.2;
-             ">
+             style="width:100%; height:100%; font-size:18px; padding:12px 44px 12px 12px; border:2px solid #c59b5a; border-radius:8px; box-sizing:border-box; line-height:1.2;">
       <span id="togglePwd" 
-            style="
-              position:absolute;
-              right:30px; /* move slightly left from edge */
-              top:60%;
-              transform:translateY(-50%);
-              cursor:pointer;
-              font-size:20px;
-              color:#c59b5a;
-              user-select:none;
-            ">🙈</span>
+            style="position:absolute; right:30px; top:60%; transform:translateY(-50%); cursor:pointer; font-size:20px; color:#c59b5a; user-select:none;">🙈</span>
     </div>
     <button id="pwdSubmit" 
             style="width:100%; padding:12px; margin-top:10px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
@@ -290,10 +285,10 @@ function renderPasswordField(placeholderText, onSubmit) {
   toggle.addEventListener("click", () => {
     if (pwdField.type === "password") {
       pwdField.type = "text";
-      toggle.textContent = "🙊"; // password visible
+      toggle.textContent = "🙊";
     } else {
       pwdField.type = "password";
-      toggle.textContent = "🙈"; // password hidden
+      toggle.textContent = "🙈";
     }
   });
 
@@ -303,13 +298,9 @@ function renderPasswordField(placeholderText, onSubmit) {
   });
 }
 
-
-
-
-
-
-
-
+// ------------------------
+// WELCOME MESSAGE
+// ------------------------
 function renderWelcomeMessage() {
   const wrapper = document.getElementById("registration-section");
   if (!wrapper || !currentUser) return;
@@ -326,9 +317,9 @@ function renderWelcomeMessage() {
   renderClasses();
 }
 
-// --------------------
-// Handle WhatsApp submit
-// --------------------
+// ------------------------
+// HANDLE WHATSAPP SUBMIT
+// ------------------------
 async function handleWhatsAppSubmit() {
   const whatsappInput = document.getElementById("regWhatsApp");
   const submitBtn = document.getElementById("whatsappSubmit");
@@ -347,18 +338,14 @@ async function handleWhatsAppSubmit() {
   try {
     const { normalized, fallback } = normalizeWhatsapp(rawWhatsApp);
 
-    const usersResponse = await fetch(`${API_BASE}?type=users&apiKey=${API_KEY}`);
-    const users = usersResponse.ok ? await usersResponse.json() : [];
-
-    if (!Array.isArray(users)) throw new Error('Users API did not return array');
+    const users = await apiCall("readUsers");
 
     const normUsers = users.map(u => ({
-  ...u,
-  whatsapp: String(u.whatsapp || ''),
-  normalizedWhatsapp: cleanNumber(u.normalizedWhatsapp || u.whatsapp),
-  password: u.password !== undefined && u.password !== null ? String(u.password) : ""
-}));
-
+      ...u,
+      whatsapp: String(u.whatsapp || ''),
+      normalizedWhatsapp: cleanNumber(u.normalizedWhatsapp || u.whatsapp),
+      password: u.password !== undefined && u.password !== null ? String(u.password) : ""
+    }));
 
     const user = normUsers.find(u => {
       const uNorm = u.normalizedWhatsapp;
@@ -375,59 +362,37 @@ async function handleWhatsAppSubmit() {
       const regApproved = (user.regStat === true || String(user.regStat).toLowerCase() === "true");
 
       if (regApproved) {
-        // PASSWORD LOGIC
         if (!user.password || user.password === "") {
           renderPasswordField("Please create a password", async (pwd) => {
             if (!pwd) return;
             try {
-              const res = await fetch(API_BASE, {
-                method: "POST",
-                body: new URLSearchParams({
-                  action: "setPassword",
-                  normalizedWhatsapp: currentUser.normalizedWhatsapp,
-                  password: pwd,
-                  apiKey: API_KEY
-                })
-              });
-
-              if (!res.ok) throw new Error("Network error");
-
-              // fallback if server doesn't return proper JSON
-              await res.json().catch(() => ({}));
-
+              await apiCall("setPassword", { normalizedWhatsapp: currentUser.normalizedWhatsapp, password: pwd });
               currentUser.password = pwd;
-              currentUser.regStat = true;  // mark as approved
+              currentUser.regStat = true;
               userRegistered = true;
               sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
 
               renderWelcomeMessage();
-              renderClasses();
               showToast("Password saved successfully!");
-
             } catch (err) {
               console.error(err);
               showToast("Password may have been saved, but an error occurred.", true);
             }
           });
         } else {
-          // returning user
-renderPasswordField("Enter your password", (pwd) => {
-  if (pwd === currentUser.password) {
-    currentUser.regStat = true;
-    userRegistered = true;
-    sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
+          renderPasswordField("Enter your password", (pwd) => {
+            if (pwd === currentUser.password) {
+              currentUser.regStat = true;
+              userRegistered = true;
+              sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
 
-    // ✅ Enable copy protection (or ADMIN bypass) AFTER user is set
-    enableCopyProtection();  // no argument — uses currentUser internally
-
-    renderWelcomeMessage();
-    renderClasses();
-    showToast("Welcome back!");
-  } else {
-    showToast("Incorrect password. Please try again.", true);
-  }
-});
-
+              enableCopyProtection();
+              renderWelcomeMessage();
+              showToast("Welcome back!");
+            } else {
+              showToast("Incorrect password. Please try again.", true);
+            }
+          });
         }
       } else {
         msgBox.innerHTML = `
@@ -443,7 +408,6 @@ renderPasswordField("Enter your password", (pwd) => {
       }
 
     } else {
-      // Not found -> show register fields
       document.getElementById("extraFields").style.display = "block";
       msgBox.style.fontSize = "26px";
       msgBox.style.color = "#ffffff";
@@ -463,9 +427,9 @@ renderPasswordField("Enter your password", (pwd) => {
   }
 }
 
-// --------------------
-// Handle full registration
-// --------------------
+// ------------------------
+// HANDLE FULL REGISTRATION
+// ------------------------
 async function handleFullRegistration() {
   const firstName = document.getElementById("regFirstName").value.trim();
   const lastName = document.getElementById("regLastName").value.trim();
@@ -482,20 +446,7 @@ async function handleFullRegistration() {
   }
 
   try {
-    const resText = await fetch(API_BASE, {
-      method: "POST",
-      body: new URLSearchParams({
-        action: "createUser",
-        firstName,
-        lastName,
-        email,
-        whatsapp,
-        normalizedWhatsapp: whatsapp,
-        apiKey: API_KEY
-      })
-    }).then(r => r.text());
-
-    const result = JSON.parse(resText);
+    const result = await apiCall("createUser", { firstName, lastName, email, whatsapp, normalizedWhatsapp: whatsapp });
 
     if (result.success) {
       currentUser = {
@@ -519,7 +470,6 @@ async function handleFullRegistration() {
       `;
 
       document.getElementById("extraFields").style.display = "none";
-
       document.querySelectorAll(".class-toggle").forEach(toggle => {
         toggle.checked = false;
         toggle.disabled = true;
@@ -538,17 +488,40 @@ async function handleFullRegistration() {
   }
 }
 
-// --------------------
-// Format class time for display
-// --------------------
+// ------------------------
+// HELPER: FORMAT CLASS TIME
+// ------------------------
 function formatClassTime(dateStr, timeStr) {
   return `${dateStr || ""} @ ${timeStr || ""}`;
 }
 
+// ------------------------
+// HELPER: IS REGISTRATION FOR CLASS
+// ------------------------
+function isRegistrationForClass(reg, cls) {
+  if (!reg || !cls) return false;
+  const regClassId = String(reg.classId || '');
+  if (regClassId === String(cls.id)) return true;
+  const maybeDate = new Date(regClassId);
+  if (!Number.isNaN(maybeDate.getTime())) {
+    const converted = formatClassIdFromDate(maybeDate);
+    if (converted && converted === String(cls.id)) return true;
+  }
+  return false;
+}
 
-// --------------------
-// Render Classes
-// --------------------
+
+
+
+
+// ========================
+// SECTION 3/3
+// CLASS RENDERING, TOGGLE BOOKING, FOOTER, PARALLAX, AUTO-LOGOUT
+// ========================
+
+// ------------------------
+// RENDER CLASSES
+// ------------------------
 function renderClasses() {
   const container = document.getElementById("classes");
   if (!container) return;
@@ -564,7 +537,7 @@ function renderClasses() {
     const div = document.createElement("div");
     div.className = "class-container";
 
-    // Build canonical participants list from registrationsData
+    // Participants
     const participants = registrationsData
       .filter(r => isRegistrationForClass(r, cls))
       .filter(r => r.status === "confirmed")
@@ -584,163 +557,104 @@ function renderClasses() {
     const dateElem = document.createElement("div");
     dateElem.className = "class-date";
     dateElem.textContent = formatClassTime(cls.date, cls.time);
-
     div.appendChild(locElem);
     div.appendChild(dateElem);
 
     // Participants list
     const ul = document.createElement("ul");
-
-    
-  /*  participants.forEach(p => {
-      const li = document.createElement("li");
-      li.textContent = p.fullName;
-      ul.appendChild(li);
-    }); */
-
     participants.forEach(p => {
-  const li = document.createElement("li");
+      const li = document.createElement("li");
+      const nameSpan = document.createElement("span");
+      nameSpan.className = "healer-name";
 
-  // create a span for the healer name so we can blur/reveal it
-  const nameSpan = document.createElement("span");
-  nameSpan.className = "healer-name";
+      const isApproved = (currentUser && (currentUser.regStat === true || String(currentUser.regStat).toLowerCase() === "true"));
+      if (!isApproved) nameSpan.classList.add("locked");
+      else nameSpan.classList.add("revealed");
 
-  // Determine if the name should be locked:
-  // - if no userRegistered (guest) -> lock
-  // - if userRegistered but currentUser.regStat explicitly false -> lock
-  // - else reveal
-  const isApproved = (currentUser && (currentUser.regStat === true || String(currentUser.regStat).toLowerCase() === "true"));
+      if (currentUser && p.normalizedWhatsapp === currentUser.normalizedWhatsapp) {
+        nameSpan.style.color = "#c59b5a";
+        nameSpan.style.fontWeight = "900";
+      }
 
-  if (!isApproved) {
-    nameSpan.classList.add("locked");
-  } else {
-    nameSpan.classList.add("revealed");
-  }
-
-  // ✅ Highlight current user in gold
-  if (currentUser && p.normalizedWhatsapp === currentUser.normalizedWhatsapp) {
-    // nameSpan.style.color = "#FFD700"; // gold color
-    nameSpan.style.color = "#c59b5a"; // gold color
-    nameSpan.style.fontWeight = "900"; // optional: make bold
-  }    
-
-
-      
-  nameSpan.textContent = p.fullName || "";
-  li.appendChild(nameSpan);
-  ul.appendChild(li);
-});
-
-
-
-    
+      nameSpan.textContent = p.fullName || "";
+      li.appendChild(nameSpan);
+      ul.appendChild(li);
+    });
     div.appendChild(ul);
 
     // Standby list
-if (standbyParticipants.length) {
-  const standbyTitle = document.createElement("div");
-  standbyTitle.textContent = "ON STANDBY";
-  standbyTitle.style.marginTop = "10px";
-  standbyTitle.style.fontWeight = "bold";
-  standbyTitle.style.fontSize = "18px";
-  standbyTitle.style.color = "#c59b5a";
+    if (standbyParticipants.length) {
+      const standbyTitle = document.createElement("div");
+      standbyTitle.textContent = "ON STANDBY";
+      standbyTitle.style.marginTop = "10px";
+      standbyTitle.style.fontWeight = "bold";
+      standbyTitle.style.fontSize = "18px";
+      standbyTitle.style.color = "#c59b5a";
 
-  const standbyUl = document.createElement("ul");
+      const standbyUl = document.createElement("ul");
+      standbyParticipants.forEach(p => {
+        const li = document.createElement("li");
+        const span = document.createElement("span");
+        span.className = "healer-name";
 
-  standbyParticipants.forEach(p => {
-    const li = document.createElement("li");
-    const span = document.createElement("span");
-    span.className = "healer-name";
+        const isApproved = (currentUser && (currentUser.regStat === true || String(currentUser.regStat).toLowerCase() === "true"));
+        if (!isApproved) span.classList.add("locked");
+        else span.classList.add("revealed");
 
-    const isApproved = (currentUser && (currentUser.regStat === true || String(currentUser.regStat).toLowerCase() === "true"));
+        if (currentUser && p.normalizedWhatsapp === currentUser.normalizedWhatsapp) {
+          span.style.color = "#c59b5a";
+          span.style.fontWeight = "900";
+        }
 
-    if (!isApproved) {
-      span.classList.add("locked");
-    } else {
-      span.classList.add("revealed");
+        span.textContent = p.fullName || "";
+        li.appendChild(span);
+        standbyUl.appendChild(li);
+      });
+
+      div.appendChild(standbyTitle);
+      div.appendChild(standbyUl);
     }
-
-    // ✅ Highlight current user in gold
-  if (currentUser && p.normalizedWhatsapp === currentUser.normalizedWhatsapp) {
-    // span.style.color = "#FFD700"; // gold color
-    span.style.color = "#c59b5a"; // gold color
-    span.style.fontWeight = "900"; // optional: make bold
-  }    
-
-
-    
-    span.textContent = p.fullName || "";
-    li.appendChild(span);
-    standbyUl.appendChild(li);
-  });
-
-  div.appendChild(standbyTitle);
-  div.appendChild(standbyUl);
-}
-
 
     // Remaining / toggle
     const remaining = (Number(cls.capacity) || 0) - participants.length;
     const wrapper = document.createElement("div");
     wrapper.className = "spaces-toggle-wrapper";
 
-   // const remainText = document.createElement("span");
-   // remainText.textContent = remaining > 0 ? `→ ${remaining} spaces remaining` : "CLASS FULL – JOIN STANDBY";
-
     const remainText = document.createElement("span");
-    remainText.textContent = remaining > 0 
-    ? `→ ${remaining} space${remaining === 1 ? '' : 's'} remaining` 
-    : "CLASS FULL – JOIN STANDBY";
+    remainText.textContent = remaining > 0 ? `→ ${remaining} space${remaining === 1 ? '' : 's'} remaining` : "CLASS FULL – JOIN STANDBY";
 
-
-
-
-
-    
     const toggle = document.createElement("div");
     toggle.className = "lux-toggle";
     toggle.dataset.classId = cls.id;
 
-    // Disable until registered
     if (!userRegistered) {
       toggle.style.pointerEvents = "none";
       toggle.title = "Please sign in to book";
-    } else {
-      toggle.style.pointerEvents = "auto";
-    }
+    } else toggle.style.pointerEvents = "auto";
 
-    // Highlight if currentUser already enrolled (use normalized matching)
     if (currentUser && currentUser.normalizedWhatsapp) {
       const isEnrolled = registrationsData.some(r => {
         if (!isRegistrationForClass(r, cls)) return false;
         const rNorm = cleanNumber(r.normalizedWhatsapp || r.whatsapp || "");
-        const rRaw = cleanNumber(r.whatsapp || "");
-        return (rNorm && rNorm === currentUser.normalizedWhatsapp) || (rRaw && (rRaw === currentUser.normalizedWhatsapp));
+        return rNorm === currentUser.normalizedWhatsapp;
       });
       if (isEnrolled) {
         toggle.classList.add("active");
-        toggle.style.border = "2px solid #ffd78c"; // gold border
-      } else {
-        toggle.classList.remove("active");
-        toggle.style.border = "";
-      }
+        toggle.style.border = "2px solid #ffd78c";
+      } else toggle.classList.remove("active");
     }
 
-    // Click handler: optimistic UI + server write + revert on failure
+    // Toggle click handler
     toggle.addEventListener("click", async () => {
       if (!userRegistered) return;
-
       const isActive = toggle.classList.contains("active");
-      // Prevent double-clicks
       if (toggle.dataset.inflight === "1") return;
       toggle.dataset.inflight = "1";
 
-      // Optimistic UI change
       toggle.classList.toggle("active");
       if (!isActive) toggle.style.border = "2px solid #ffd78c";
       else toggle.style.border = "";
 
-      // Update local registrationsData optimistically
       if (!isActive) {
         registrationsData.push({
           classId: cls.id,
@@ -752,46 +666,23 @@ if (standbyParticipants.length) {
         });
       } else {
         registrationsData = registrationsData.filter(r =>
-          !(isRegistrationForClass(r, cls) && ((cleanNumber(r.normalizedWhatsapp) && cleanNumber(r.normalizedWhatsapp) === currentUser.normalizedWhatsapp) || (cleanNumber(r.whatsapp) && cleanNumber(r.whatsapp) === currentUser.normalizedWhatsapp)))
+          !(isRegistrationForClass(r, cls) && cleanNumber(r.normalizedWhatsapp || r.whatsapp || "") === currentUser.normalizedWhatsapp)
         );
       }
 
-      // Send to server and handle response
       try {
         const resp = await submitSingleClass(cls.id, !isActive ? (remaining > 0 ? "confirmed" : "standby") : "remove");
-        // Expect server to return updated registrations for this class or a success flag
-        if (resp && resp.success) {
-          // If server returned authoritative registrations, replace those entries in registrationsData
-          if (Array.isArray(resp.updatedRegistrations)) {
-            // remove local entries for this class, then push server's authoritative ones
-            registrationsData = registrationsData.filter(r => !isRegistrationForClass(r, cls));
-            // ensure normalizedWhatsapp exists on each
-            resp.updatedRegistrations.forEach(r => {
-              registrationsData.push({
-                ...r,
-                normalizedWhatsapp: cleanNumber(r.normalizedWhatsapp || r.whatsapp || "")
-              });
-            });
-          }
-          // Re-render the classes to update counts and lists
-          renderClasses();
-        } else {
-          throw new Error(resp && resp.message ? resp.message : "Server rejected update");
+        if (resp && resp.success && Array.isArray(resp.updatedRegistrations)) {
+          registrationsData = registrationsData.filter(r => !isRegistrationForClass(r, cls));
+          resp.updatedRegistrations.forEach(r => {
+            registrationsData.push({ ...r, normalizedWhatsapp: cleanNumber(r.normalizedWhatsapp || r.whatsapp || "") });
+          });
         }
+        renderClasses();
       } catch (err) {
         console.error("Booking update failed:", err);
         showToast("Booking update failed — please try again.", true);
-        // Revert optimistic change
-        if (!isActive) {
-          // we tried to add; remove added entries
-          registrationsData = registrationsData.filter(r => !(isRegistrationForClass(r, cls) && cleanNumber(r.normalizedWhatsapp) === currentUser.normalizedWhatsapp));
-          toggle.classList.remove("active");
-          toggle.style.border = "";
-        } else {
-          // we tried to remove; re-add entry (can't rebuild full object here, force re-render to reflect server)
-          const reloadRegs = await fetch(`${API_BASE}?type=registrations`).then(r => r.json());
-          registrationsData = Array.isArray(reloadRegs) ? reloadRegs.map(rr => ({ ...rr, normalizedWhatsapp: cleanNumber(rr.normalizedWhatsapp || rr.whatsapp || '') })) : [];
-        }
+        if (!isActive) registrationsData = registrationsData.filter(r => !(isRegistrationForClass(r, cls) && cleanNumber(r.normalizedWhatsapp) === currentUser.normalizedWhatsapp));
         renderClasses();
       } finally {
         toggle.dataset.inflight = "0";
@@ -801,50 +692,23 @@ if (standbyParticipants.length) {
     wrapper.appendChild(remainText);
     wrapper.appendChild(toggle);
     div.appendChild(wrapper);
-
     container.appendChild(div);
 
-    // Fade-in
     setTimeout(() => {
       div.style.opacity = "1";
       div.style.transform = "translateY(0)";
     }, i * 150);
-    });
+  });
 
-  // ✅ REVEAL HEALER NAMES AFTER ALL HTML HAS BEEN RENDERED
   revealHealerNamesIfApproved();
-
-    // after rendering classes
   ensureFooterImage();
-
-
-
-
-  
 }
 
-
-// helper: determine whether a registration row belongs to a given class object
-function isRegistrationForClass(reg, cls) {
-  if (!reg || !cls) return false;
-  const regClassId = String(reg.classId || '');
-  if (regClassId === String(cls.id)) return true;
-  // if regClassId parses as a date, try to convert to classId format
-  const maybeDate = new Date(regClassId);
-  if (!Number.isNaN(maybeDate.getTime())) {
-    const converted = formatClassIdFromDate(maybeDate);
-    if (converted && converted === String(cls.id)) return true;
-  }
-  return false;
-}
-
-// --------------------
-// Submit single class (server)
-// returns parsed JSON or throws
-// --------------------
+// ------------------------
+// SUBMIT SINGLE CLASS
+// ------------------------
 async function submitSingleClass(classId, status) {
   if (!currentUser) throw new Error("No current user");
-
   const payload = {
     action: "updateRegistration",
     classId,
@@ -852,35 +716,55 @@ async function submitSingleClass(classId, status) {
     email: currentUser.email || "",
     fullName: `${currentUser.firstName || ""} ${currentUser.lastName || ""}`.trim(),
     whatsapp: currentUser.whatsapp || currentUser.normalizedWhatsapp || "",
-    normalizedWhatsapp: currentUser.normalizedWhatsapp || normalizeWhatsapp(currentUser.whatsapp || "").normalized,
-    timestamp: new Date().toISOString(),
-    apiKey: API_KEY  // ✅ add this line
+    normalizedWhatsapp: currentUser.normalizedWhatsapp,
+    timestamp: new Date().toISOString()
   };
-
-  const resp = await fetch(API_BASE, {
-    method: "POST",
-    body: new URLSearchParams(payload),
-    apiKey: API_KEY
-  });
-
-  if (!resp.ok) throw new Error("Network error");
-  const json = await resp.json();
-  return json;
+  const resp = await apiCall("updateRegistration", payload);
+  return resp;
 }
 
-document.addEventListener("DOMContentLoaded", () => {
-  renderRegistrationForm();   // ✅ shows WHATSAPP FIELD IMMEDIATELY
-  init();                     // ✅ classes load after in background
-});
+// ------------------------
+// FOOTER IMAGE
+// ------------------------
+function ensureFooterImage() {
+  const old = document.querySelector(".footer-image-wrapper");
+  if (old) old.remove();
 
+  const container = document.getElementById("classes") || document.body;
+  const wrapper = document.createElement("div");
+  wrapper.className = "footer-image-wrapper";
+  Object.assign(wrapper.style, { width: "100%", display: "flex", justifyContent: "center", alignItems: "center", overflow: "hidden", padding: "0px 0px", boxSizing: "border-box", marginTop: "-20px" });
 
+  const img = document.createElement("img");
+  img.src = "https://chiroyoga.ca/wp-content/uploads/2025/11/seed-2.jpg";
+  img.alt = "Seed of Life — Gold";
+  img.className = "seed-of-life-footer";
+  Object.assign(img.style, { display: "block", width: "100%", maxWidth: "420px", height: "auto", objectFit: "contain", margin: "0 auto" });
 
-// Auto-logout when tab or browser is closed
-window.addEventListener("beforeunload", () => {
-  sessionStorage.removeItem("rc_currentUser");
-});
+  wrapper.appendChild(img);
+  if (container && container.parentNode) container.parentNode.insertBefore(wrapper, container.nextSibling);
+  else document.body.appendChild(wrapper);
 
-// Luxury Spa Parallax Effect
+  function adjustFooterSizing() {
+    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
+    if (vw >= 1100) { img.style.width = "30%"; img.style.maxWidth = "760px"; }
+    else if (vw >= 768) { img.style.width = "40%"; img.style.maxWidth = "720px"; }
+    else { img.style.width = "100%"; img.style.maxWidth = "420px"; }
+    wrapper.style.width = "100%";
+    wrapper.style.overflow = "hidden";
+  }
+
+  adjustFooterSizing();
+  let resizeTimer = null;
+  window.addEventListener("resize", () => {
+    if (resizeTimer) clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(adjustFooterSizing, 120);
+  }, { passive: true });
+}
+
+// ------------------------
+// PARALLAX EFFECT
+// ------------------------
 window.addEventListener('scroll', () => {
   const banner = document.querySelector('.hero-banner');
   if (!banner) return;
@@ -888,88 +772,10 @@ window.addEventListener('scroll', () => {
   banner.style.setProperty('--parallax-offset', offset + 'px');
 });
 
+// ------------------------
+// AUTO-LOGOUT ON TAB CLOSE
+// ------------------------
+window.addEventListener("beforeunload", () => {
+  sessionStorage.removeItem("rc_currentUser");
+});
 
-// --------------------
-// Footer seed image (JS-inserted responsive)
-// --------------------
-function ensureFooterImage() {
-  // remove any old instance
-  const old = document.querySelector(".footer-image-wrapper");
-  if (old) old.remove();
-
-  const container = document.getElementById("classes") || document.body;
-  // wrapper sits right after the class cards container
-  const wrapper = document.createElement("div");
-  wrapper.className = "footer-image-wrapper";
-  // inline styles on wrapper to avoid CSS conflicts
-  Object.assign(wrapper.style, {
-    width: "100%",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    overflow: "hidden",
-    padding: "0px 0px",      // breathing room
-    boxSizing: "border-box",
-    marginTop: "-20px"
-  });
-
-  const img = document.createElement("img");
-  img.src = "https://chiroyoga.ca/wp-content/uploads/2025/11/seed-2.jpg";
-  img.alt = "Seed of Life — Gold";
-  img.className = "seed-of-life-footer";
-
-  // base styles (mobile-first)
-  Object.assign(img.style, {
-    display: "block",
-    width: "100%",         // mobile default
-    maxWidth: "420px",     // prevents oversized image on phones
-    height: "auto",
-    objectFit: "contain",
-    margin: "0 auto"
-  });
-
-  wrapper.appendChild(img);
-
-  // append after classes container so it appears after last class card
-  if (container && container.parentNode) {
-    // insert after container
-    container.parentNode.insertBefore(wrapper, container.nextSibling);
-  } else {
-    document.body.appendChild(wrapper);
-  }
-
-  // adjust sizing for desktop vs mobile on load and resize
-  function adjustFooterSizing() {
-    const vw = Math.max(document.documentElement.clientWidth || 0, window.innerWidth || 0);
-
-    if (vw >= 1100) {
-      // Desktop: center and shrink to ~30% visual
-      img.style.width = "30%";
-      img.style.maxWidth = "760px";
-    } else if (vw >= 768) {
-      // Tablet / small desktop
-      img.style.width = "40%";
-      img.style.maxWidth = "720px";
-    } else {
-      // Mobile
-      img.style.width = "100%";
-      img.style.maxWidth = "420px";
-    }
-
-    // ensure wrapper doesn't cause horizontal overflow
-    wrapper.style.width = "100%";
-    wrapper.style.overflow = "hidden";
-  }
-
-  // run initially
-  adjustFooterSizing();
-
-  // debounce resize
-  let resizeTimer = null;
-  window.addEventListener("resize", () => {
-    if (resizeTimer) clearTimeout(resizeTimer);
-    resizeTimer = setTimeout(() => {
-      adjustFooterSizing();
-    }, 120);
-  }, { passive: true });
-}
