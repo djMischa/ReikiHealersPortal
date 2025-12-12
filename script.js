@@ -1,6 +1,7 @@
 // ---------- config ----------
 const API_BASE = "";
-const API_KEY = ""; // replace with your secret
+const API_KEY = ""; 
+// replace with your secret
 const ADMIN_WHATSAPP = "1925196419"; // admin WhatsApp
 const ADMIN_WHATSAPP_NORM = cleanNumber(ADMIN_WHATSAPP);
 
@@ -15,11 +16,11 @@ let copyBlockListeners = [];
 function enableCopyProtection(userNumber = null) {
   // Use currentUser if userNumber not provided
   const normalized = cleanNumber(userNumber || (currentUser ? currentUser.normalizedWhatsapp : ""));
-  console.log("DEBUG — checking admin bypass:", { userNumber, normalized, ADMIN_WHATSAPP_NORM });
+  console.log("DEBUG â€” checking admin bypass:", { userNumber, normalized, ADMIN_WHATSAPP_NORM });
 
   // ADMIN BYPASS
   if (normalized && normalized === ADMIN_WHATSAPP_NORM) {
-    console.log("DEBUG — ADMIN detected, disabling copy protection");
+    console.log("DEBUG â€” ADMIN detected, disabling copy protection");
     disableAllCopyProtectionJS();
     document.body.classList.remove("copy-protect");
     document.body.classList.add("copy-allowed");
@@ -138,7 +139,7 @@ async function init() {
         currentUser.normalizedWhatsapp = cleanNumber(currentUser.normalizedWhatsapp || currentUser.whatsapp || "");
         userRegistered = true;
 
-        // ✅ Check admin copy/paste bypass on cached user
+        // âœ… Check admin copy/paste bypass on cached user
         if (currentUser.normalizedWhatsapp === ADMIN_WHATSAPP_NORM) {
           disableAllCopyProtectionJS();
           document.body.classList.remove("copy-protect");
@@ -277,7 +278,7 @@ function renderPasswordField(placeholderText, onSubmit) {
               font-size:20px;
               color:#c59b5a;
               user-select:none;
-            ">🙈</span>
+            ">ðŸ™ˆ</span>
     </div>
     <button id="pwdSubmit" 
             style="width:100%; padding:12px; margin-top:10px; font-weight:bold; background:#c59b5a; color:#fff; border:none; border-radius:8px; cursor:pointer;">Submit</button>
@@ -290,10 +291,10 @@ function renderPasswordField(placeholderText, onSubmit) {
   toggle.addEventListener("click", () => {
     if (pwdField.type === "password") {
       pwdField.type = "text";
-      toggle.textContent = "🙊"; // password visible
+      toggle.textContent = "ðŸ™Š"; // password visible
     } else {
       pwdField.type = "password";
-      toggle.textContent = "🙈"; // password hidden
+      toggle.textContent = "ðŸ™ˆ"; // password hidden
     }
   });
 
@@ -316,7 +317,7 @@ function renderWelcomeMessage() {
 
   wrapper.innerHTML = `
     <div style="text-align:center;font-size:30px;color:#c59b5a;">
-      ✦ WELCOME ${currentUser.firstName.toUpperCase()} ✦
+      âœ¦ WELCOME ${currentUser.firstName.toUpperCase()} âœ¦
     </div>
     <div style="font-size:18px;color:#ffffff;">
       PLEASE SELECT THE HEALING SESSIONS YOU FEEL CALLED TO SHARE YOUR REIKI PRESENCE WITH
@@ -417,8 +418,8 @@ renderPasswordField("Enter your password", (pwd) => {
     userRegistered = true;
     sessionStorage.setItem("rc_currentUser", JSON.stringify(currentUser));
 
-    // ✅ Enable copy protection (or ADMIN bypass) AFTER user is set
-    enableCopyProtection();  // no argument — uses currentUser internally
+    // âœ… Enable copy protection (or ADMIN bypass) AFTER user is set
+    enableCopyProtection();  // no argument â€” uses currentUser internally
 
     renderWelcomeMessage();
     renderClasses();
@@ -432,7 +433,7 @@ renderPasswordField("Enter your password", (pwd) => {
       } else {
         msgBox.innerHTML = `
           <div style="text-align:center;font-size:28px;color:#c59b5a;">
-            ✦ WELCOME ${user.firstName.toUpperCase()} ✦
+            âœ¦ WELCOME ${user.firstName.toUpperCase()} âœ¦
           </div>
           <div style="font-size:17px;color:#7FFF00;">
             SORRY! WE ARE HAVING DIFFICULTIES LOGGING YOU IN AT THE MOMENT, ADMIN HAS BEEN NOTIFIED
@@ -580,7 +581,7 @@ function renderClasses() {
     // Location & date
     const locElem = document.createElement("div");
     locElem.className = "class-location";
-    locElem.textContent = `${cls.location} – ${participants.length} healer${participants.length !== 1 ? "s" : ""}`;
+    locElem.textContent = `${cls.location} â€“ ${participants.length} healer${participants.length !== 1 ? "s" : ""}`;
     const dateElem = document.createElement("div");
     dateElem.className = "class-date";
     dateElem.textContent = formatClassTime(cls.date, cls.time);
@@ -617,7 +618,7 @@ function renderClasses() {
     nameSpan.classList.add("revealed");
   }
 
-  // ✅ Highlight current user in gold
+  // âœ… Highlight current user in gold
   if (currentUser && p.normalizedWhatsapp === currentUser.normalizedWhatsapp) {
     // nameSpan.style.color = "#FFD700"; // gold color
     nameSpan.style.color = "#c59b5a"; // gold color
@@ -660,7 +661,7 @@ if (standbyParticipants.length) {
       span.classList.add("revealed");
     }
 
-    // ✅ Highlight current user in gold
+    // âœ… Highlight current user in gold
   if (currentUser && p.normalizedWhatsapp === currentUser.normalizedWhatsapp) {
     // span.style.color = "#FFD700"; // gold color
     span.style.color = "#c59b5a"; // gold color
@@ -685,12 +686,12 @@ if (standbyParticipants.length) {
     wrapper.className = "spaces-toggle-wrapper";
 
    // const remainText = document.createElement("span");
-   // remainText.textContent = remaining > 0 ? `→ ${remaining} spaces remaining` : "CLASS FULL – JOIN STANDBY";
+   // remainText.textContent = remaining > 0 ? `â†’ ${remaining} spaces remaining` : "CLASS FULL â€“ JOIN STANDBY";
 
     const remainText = document.createElement("span");
     remainText.textContent = remaining > 0 
-    ? `→ ${remaining} space${remaining === 1 ? '' : 's'} remaining` 
-    : "CLASS FULL – JOIN STANDBY";
+    ? `â†’ ${remaining} space${remaining === 1 ? '' : 's'} remaining` 
+    : "CLASS FULL â€“ JOIN STANDBY";
 
 
 
@@ -780,7 +781,7 @@ if (standbyParticipants.length) {
         }
       } catch (err) {
         console.error("Booking update failed:", err);
-        showToast("Booking update failed — please try again.", true);
+        showToast("Booking update failed â€” please try again.", true);
         // Revert optimistic change
         if (!isActive) {
           // we tried to add; remove added entries
@@ -811,7 +812,7 @@ if (standbyParticipants.length) {
     }, i * 150);
     });
 
-  // ✅ REVEAL HEALER NAMES AFTER ALL HTML HAS BEEN RENDERED
+  // âœ… REVEAL HEALER NAMES AFTER ALL HTML HAS BEEN RENDERED
   revealHealerNamesIfApproved();
 
     // after rendering classes
@@ -854,7 +855,7 @@ async function submitSingleClass(classId, status) {
     whatsapp: currentUser.whatsapp || currentUser.normalizedWhatsapp || "",
     normalizedWhatsapp: currentUser.normalizedWhatsapp || normalizeWhatsapp(currentUser.whatsapp || "").normalized,
     timestamp: new Date().toISOString(),
-    apiKey: API_KEY  // ✅ add this line
+    apiKey: API_KEY  // âœ… add this line
   };
 
   const resp = await fetch(API_BASE, {
@@ -869,8 +870,8 @@ async function submitSingleClass(classId, status) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
-  renderRegistrationForm();   // ✅ shows WHATSAPP FIELD IMMEDIATELY
-  init();                     // ✅ classes load after in background
+  renderRegistrationForm();   // âœ… shows WHATSAPP FIELD IMMEDIATELY
+  init();                     // âœ… classes load after in background
 });
 
 
@@ -915,7 +916,7 @@ function ensureFooterImage() {
 
   const img = document.createElement("img");
   img.src = "https://chiroyoga.ca/wp-content/uploads/2025/11/seed-2.jpg";
-  img.alt = "Seed of Life — Gold";
+  img.alt = "Seed of Life â€” Gold";
   img.className = "seed-of-life-footer";
 
   // base styles (mobile-first)
@@ -973,5 +974,6 @@ function ensureFooterImage() {
     }, 120);
   }, { passive: true });
 }
+
 
 
